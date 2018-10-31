@@ -4,20 +4,21 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const socketio = require('socket.io');
 const show_tsc = require('./api/tsc/show_tsc');
-const tms_regis1 = require('./tms_api/tms_registstep_1');
+const regis_1 = require('./tms_api/tms_registstep_1');
 
 
 
 
-////Body parser 1
+////Body parser 
 app.use(morgan('dev'));
 app.use('/upload',express.static('upload'));
+//app.use('/',express.static('regis_1'));
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
 
 
 app.use('/show_tsc',show_tsc);
-app.use('/',tms_regis1);
+app.use('/',regis_1);
 app.get('/',(req,res)=>{
     res.render('index');
 })
