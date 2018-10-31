@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const socketio = require('socket.io');
 const show_tsc = require('./api/tsc/show_tsc');
-const regis_1 = require('./tms_api/tms_registstep_1');
+const regis_1 = require('./tms_App/tms_registstep_1');
 
 
 
