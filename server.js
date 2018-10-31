@@ -5,6 +5,8 @@ const port = process.env.PORT||3400;
 
 const server = http.createServer(app);
 
-server.listen(port);
+server.listen(port,()=>{
+    console.log("Server is ready,PORT use "+port)
+});
 
 //test dev
