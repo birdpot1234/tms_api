@@ -9,7 +9,7 @@ const tms_regis1 = require('./tms_api/tms_registstep_1');
 
 
 
-////Body parser 
+////Body parser 1
 app.use(morgan('dev'));
 app.use('/upload',express.static('upload'));
 app.use(bodyParser.urlencoded({extended:false}));
