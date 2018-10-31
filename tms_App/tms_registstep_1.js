@@ -1,15 +1,12 @@
 const express = require('express');
 
 const router = express.Router();
-// const Nexmo    = require('nexmo');
-// const SendOtp = require('sendotp');
-// const sendOtp = new SendOtp('AuthKey');
+
 var moment = require("moment");
 var datetime = require('node-datetime');
-//var con = require('../../connect');
+
 var con = require('../connect_sql');
-//var diff = require('datetime-diff');
-//var f_genOTP = require('../function/genOTP');
+
 
 var respons ='';
 var responstatus ='';
@@ -19,10 +16,6 @@ exports.genOTP =function(){
     genotp();
   
   }
-//   const nexmo = new Nexmo({
-//     apiKey:'1d3bdf1b',
-//     apiSecret:'9lN92Kf3HsEhO7Uk'
-// });
 
   router.post('/tms/api/regis_1', function(req, res) { 
     let tms_doc = req.body.tms_doc;
@@ -63,38 +56,63 @@ exports.genOTP =function(){
        }
        
        else{
-     //   var OTP= f_genOTP.data.getotp();
-      //  var check = true;
+            
+        let sInserTMS_Box = await InserTMS_Box(tms_doc,invoice,3);
+        if(responstatus==200){
+            let b = await delay(); 
+            let sUpdateTMS_Box =  await updateTMS_Box(tms_doc,invoice);
+            if(responstatus==500)
+            {
+                res.status(500).json({
+                    result: respons,
+                    status:500,
+                    detail:'Update false'
+               });
+            }
+            else{
+                res.status(200).json({
+                    result: arr,
+                    status:200,
+                    detail:'Update success'
+               });
+            }
+        }else{
+            res.status(500).json({
+                result: respons,
+                status:500,
+                detail:'Insert false'
+           });
+        }
+           
         
        }
+   
+    //    let b = await delay(); 
 
-       let sCheck = await selectforCheck(email,arr[0].phon);
-       let b = await delay(); 
-
-           if(check)
-           {
-            let sCheck = await selectforCheck(email,arr[0].phon);
-            let b = await delay(); 
-            if(re_count[0].count==0){//insert only
-                let ins = await insert(OTP,arr[0].phon,email);
-                 let wait = await delay(); 
-                 let send = await sendSMS(arr[0].phon,OTP);
-            }
+        //    if(check)
+        //    {
+        //     let sCheck = await selectforCheck(email,arr[0].phon);
+        //     let b = await delay(); 
+        //     if(re_count[0].count==0){//insert only
+        //         let ins = await insert(OTP,arr[0].phon,email);
+        //          let wait = await delay(); 
+        //          let send = await sendSMS(arr[0].phon,OTP);
+        //     }
             
-            else{//delete and insert 
-                console.log(arr[0].phon);
-                let delt = await del(arr[0].phon);
-                let b = await delay(); 
-                let ins = await insert(OTP,arr[0].phon,email);
-                let wait = await delay(); 
-              let send = await sendSMS(arr[0].phon,OTP);
-            }
-            res.status(200).json({
-                result: OTP,
-                status:200
-           });
+        //     else{//delete and insert 
+        //         console.log(arr[0].phon);
+        //         let delt = await del(arr[0].phon);
+        //         let b = await delay(); 
+        //         let ins = await insert(OTP,arr[0].phon,email);
+        //         let wait = await delay(); 
+        //       let send = await sendSMS(arr[0].phon,OTP);
+        //     }
+        //     res.status(200).json({
+        //         result: OTP,
+        //         status:200
+        //    });
 
-           }
+        //    }
 
      
    } 
@@ -173,61 +191,195 @@ async function selectEmail(tms_doc,inv){
       
   })
 }
-// async function selectforCheck(email,phon){
-//     var sql = require("mssql");
-//     var config = {
-//       user: 'WebProduction',
-//       password: 'dplusProduction',
-//       server: '192.168.3.21',
-//       database: 'DataRedar_Report',
-//       requestTimeout: 300000,
-//       pool: {
-//           idleTimeoutMillis: 300000,
-//           max: 100
-//       },
-   
-//   };
-//   sql.connect(config, function (err) { 
-//       if (err) {
-//           console.log(err+"connect db not found");
-//           response.status(500).json({
-//               statuserr: 0
-//           });
-//       }
-//       else{
-//         const pool1 = new sql.ConnectionPool(config, err => {
-//           var result_count = "SELECT COUNT(id) AS count FROM     dbo.OTP_insert  WHERE  (email LIKE '"+email+"') AND  (phon LIKE '"+phon+"');";
-//           console.log(result_count);
-//           pool1.request().query(result_count, (err, recordsets) => {
+async function InserTMS_Box(tms_doc,inv,numBox){
+
+  
+  var sql = require("mssql");
+  var queryString = "INSERT INTO [dbo].[ConfirmBill](INVOICEID,SO,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,Remark,[Status],QTYbox,DELIVERYNAME,CreateDate,Counting,NumBox) "+
+              "select invoice,so,tms_document,customer_code,customer_name,address_shipment,sales_code,sales_name,store_zone,'TEST DEALER',1,box_amount,customer_name,delivery_date,3,'"+numBox+"' FROM [dbo].[TMS_Interface] where invoice = '"+inv+"' AND tms_document ='"+tms_doc+"'"
+  sql.connect(con.condb1(), function(err) {
+
+      if (err) {
+          console.log(err+"connect db not found");
+          response.status(500).json({
+              statuserr: 0
+          });
+      }
+      else{
+        const pool1 = new sql.ConnectionPool(con.condb1(), err => {
+          var result_query = queryString;
+          console.log(result_query);
+          pool1.request().query(result_query, (err, recordsets) => {
           
            
           
   
-//             if (err) {
-//                 console.log("error select data" + err);
+            if (err) {
+                console.log("error select data" + err);
       
-//              respons = err.name;
-//              responstatus =500;
+             respons = err.name;
+             responstatus =500;
    
                
-//               }
-//               else {
-               
-//                  var result = '';
-//                  result = recordsets['recordsets'];
-            
-//                  re_count = result[0];
-//                  console.log(re_count);
+              }
+              else {
+                var result = '';
+                result = recordsets['recordsets'];
+                result_hold = result[0];
+                arr =result_hold;
+                responstatus =200;
+              
              
-//              }
-//              sql.close()
-//         });
-//         }); 
+             }
+             sql.close()
+        });
+        }); 
      
-//       }
+      }
       
-//   })
-// }
+  })
+}
+async function updateTMS_Box(tms_doc,inv,numBox){
+
+  
+    var sql = require("mssql");
+    var queryString = "update [dbo].[TMS_Box_Amount]  SET [status] =1 where tms_document ='"+tms_doc+"' AND invoice = '"+inv+"' "
+    sql.connect(con.condb1(), function(err) {
+  
+        if (err) {
+            console.log(err+"connect db not found");
+            response.status(500).json({
+                statuserr: 0
+            });
+        }
+        else{
+          const pool1 = new sql.ConnectionPool(con.condb1(), err => {
+            var result_query = queryString;
+            console.log(result_query);
+            pool1.request().query(result_query, (err, recordsets) => {
+            
+             
+              if (err) {
+                  console.log("error select data" + err);
+        
+               respons = err.name;
+               responstatus =500;
+     
+                 
+                }
+                else {
+                  var result = '';
+                  result = recordsets['recordsets'];
+                  result_hold = result[0];
+                  arr =result_hold;
+                  responstatus =200;
+                 // console.log(re_count);
+               
+               }
+               sql.close()
+          });
+          }); 
+       
+        }
+        
+    })
+  }
+  async function updateTMS_Box(tms_doc,inv,numBox){
+
+  
+    var sql = require("mssql");
+    var queryString = "update [dbo].[TMS_Box_Amount]  SET [status] =1 where tms_document ='"+tms_doc+"' AND invoice = '"+inv+"' "
+    sql.connect(con.condb1(), function(err) {
+  
+        if (err) {
+            console.log(err+"connect db not found");
+            response.status(500).json({
+                statuserr: 0
+            });
+        }
+        else{
+          const pool1 = new sql.ConnectionPool(con.condb1(), err => {
+            var result_query = queryString;
+            console.log(result_query);
+            pool1.request().query(result_query, (err, recordsets) => {
+            
+             
+              if (err) {
+                  console.log("error select data" + err);
+        
+               respons = err.name;
+               responstatus =500;
+     
+                 
+                }
+                else {
+                  var result = '';
+                  result = recordsets['recordsets'];
+                  result_hold = result[0];
+                  arr =result_hold;
+                  responstatus =200;
+                 // console.log(re_count);
+               
+               }
+               sql.close()
+          });
+          }); 
+       
+        }
+        
+    })
+  }async function checkTMS_Box_Fully(tms_doc,inv,numBox){
+
+  
+    var sql = require("mssql");
+    var queryString = "IF(SELECT count([status]) from TMS_Box_Amount where tms_document ='TMS1810-00006' AND invoice = 'INB1809-01736' AND [status] =0)>1 "+
+                       " BEGIN "+
+                       " select * from TMS_Box_Amount "+
+                       " END "+
+                       " ELSE "+
+                       " BEGIN "+
+                       " UPDATE TMS_Interface set [status] = 1 where tms_document='TMS1810-00006' AND invoice = 'INB1809-01736'  AND [status] <> 1 "+
+                       "END "
+    sql.connect(con.condb1(), function(err) {
+  
+        if (err) {
+            console.log(err+"connect db not found");
+            response.status(500).json({
+                statuserr: 0
+            });
+        }
+        else{
+          const pool1 = new sql.ConnectionPool(con.condb1(), err => {
+            var result_query = queryString;
+            console.log(result_query);
+            pool1.request().query(result_query, (err, recordsets) => {
+            
+             
+              if (err) {
+                  console.log("error select data" + err);
+        
+               respons = err.name;
+               responstatus =500;
+     
+                 
+                }
+                else {
+                  var result = '';
+                  result = recordsets['recordsets'];
+                  result_hold = result[0];
+                  arr =result_hold;
+                  responstatus =200;
+                 // console.log(re_count);
+               
+               }
+               sql.close()
+          });
+          }); 
+       
+        }
+        
+    })
+  }
 // async function del(phon){
 
 //     var sql = require("mssql");
