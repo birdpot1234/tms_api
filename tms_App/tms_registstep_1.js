@@ -12,10 +12,7 @@ var respons ='';
 var responstatus ='';
 var arr ={};
 var re_count ={};
-exports.genOTP =function(){
-    genotp();
-  
-  }
+
 
   router.post('/tms/api/regis_1', function(req, res) { 
     let tms_doc = req.body.tms_doc;
@@ -26,7 +23,7 @@ exports.genOTP =function(){
        let sCheck_TMSBox =  checkTMS_Box(tms_doc,invoice,box); 
        let b = await delay(); 
      
-      // console.log(respons);
+    
        if(responstatus==500)
        {
         res.status(500).json({
@@ -59,8 +56,9 @@ exports.genOTP =function(){
        else{
             
         let sInserTMS_Box = await InserTMS_Box(tms_doc,invoice,box);
+        let b = await delay(); 
         if(responstatus==200){
-            let b = await delay(); 
+        
             let sUpdateTMS_Box =  await updateTMS_Box(tms_doc,invoice,box);
             if(responstatus==500)
             {
@@ -123,11 +121,8 @@ exports.genOTP =function(){
 
 
 async function checkTMS_Box(tms_doc,inv,NumBox){
-    console.log("tms:",tms_doc)
-  
-    var sql = require("mssql");
-
-  sql.connect(con.condb1(), function(err) {
+   var sql = require("mssql");
+   sql.connect(con.condb1(), function(err) {
 
       if (err) {
           console.log(err+"connect db not found");
@@ -154,7 +149,6 @@ async function checkTMS_Box(tms_doc,inv,NumBox){
                  var result = '';
                  result = recordsets['recordsets'];
                  result_hold = result[0];
-                 console.log(result_hold);
                  if (result_hold == "") {
               
                  respons = 'TMS is colect';
@@ -196,8 +190,14 @@ async function InserTMS_Box(tms_doc,inv,numBox){
 
   
   var sql = require("mssql");
-  var queryString = "INSERT INTO [dbo].[ConfirmBill](INVOICEID,SO,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,Remark,[Status],QTYbox,DELIVERYNAME,CreateDate,Counting,NumBox) "+
-              "select invoice,so,tms_document,customer_code,customer_name,address_shipment,sales_code,sales_name,store_zone,'TEST DEALER',1,box_amount,customer_name,delivery_date,3,'"+numBox+"' FROM [dbo].[TMS_Interface] where invoice = '"+inv+"' AND tms_document ='"+tms_doc+"'"
+  var queryString = "IF(SELECT count(INVOICEID) FROM ConfirmBillDetail WHERE INVOICEID = '"+inv+"')<1 "+
+                    " BEGIN "+
+                    " INSERT INTO [dbo].[ConfirmBillDetail](INVOICEID,ItemID,ItemName,Qty,Amount,PriceOfUnit) "+
+                    " SELECT INVOICEID,ITEMID, ItemName, QTY,TotalAmount,TotalAmount/QTY FROM DPLV_SCSO_InvoiceAndPreL2  "+
+                    " WHERE  INVOICEID = '"+inv+"' "+
+                    " END "+
+                    "INSERT INTO [dbo].[ConfirmBill](INVOICEID,SO,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,Remark,[Status],QTYbox,DELIVERYNAME,CreateDate,Counting,NumBox) "+
+                    "select invoice,so,tms_document,customer_code,customer_name,address_shipment,sales_code,sales_name,store_zone,'TEST DEALER',1,box_amount,customer_name,delivery_date,3,'"+numBox+"' FROM [dbo].[TMS_Interface] where invoice = '"+inv+"' AND tms_document ='"+tms_doc+"'"
   sql.connect(con.condb1(), function(err) {
 
       if (err) {
@@ -209,7 +209,7 @@ async function InserTMS_Box(tms_doc,inv,numBox){
       else{
         const pool1 = new sql.ConnectionPool(con.condb1(), err => {
           var result_query = queryString;
-          console.log(result_query);
+          //console.log(result_query);
           pool1.request().query(result_query, (err, recordsets) => {
           
            
@@ -296,147 +296,7 @@ async function InserTMS_Box(tms_doc,inv,numBox){
         
     })
   }
-// async function del(phon){
 
-//     var sql = require("mssql");
-//     var config = {
-//       user: 'WebProduction',
-//       password: 'dplusProduction',
-//       server: '192.168.3.21',
-//       database: 'DataRedar_Report',
-//       requestTimeout: 300000,
-//       pool: {
-//           idleTimeoutMillis: 300000,
-//           max: 100
-//       },
-   
-//   };
-//   sql.close();
-//      sql.connect(config, function (err) { 
-//         if (err) {
-//             console.log(err+"connect db not found");
-//             response.status(500).json({
-//                 statuserr: 0
-//             });
-//         }
-//         else{
-//             const pool1 = new sql.ConnectionPool(config, err => {
-//                 var insert = "DELETE FROM [dbo].[OTP_insert] WHERE  phon LIKE '"+phon+"';"
-//                 console.log(insert);
-//                  pool1.request().query(insert, (err, recordsets) => {
-        
-         
-        
-
-//                     if (err) {
-//                       console.log(err);
-                    
-         
-                     
-//                     }
-//                     else{
-//                         console.log('del success');
-//                         //return  'insert success';
-
-//                     }
-//                     sql.close();
-//                 })
-
-//             })
-       
-//         }
-        
-//     })
-    
-// }
-// function insert(OTP,phon,email){
-   
-//     var sql = require("mssql");
-//     var config = {
-//       user: 'WebProduction',
-//       password: 'dplusProduction',
-//       server: '192.168.3.21',
-//       database: 'DataRedar_Report',
-//       requestTimeout: 300000,
-//       pool: {
-//           idleTimeoutMillis: 300000,
-//           max: 100
-//       },
-   
-//   };
-  
-//      sql.connect(config, function (err) { 
-//         if (err) {
-//             console.log(err+"connect db not found");
-//             response.status(500).json({
-//                 statuserr: 0
-//             });
-//         }
-//         else{
-//             const pool1 = new sql.ConnectionPool(config, err => {
-//                 var insert = "INSERT INTO [dbo].[OTP_insert]([email],[phon],[OTP],[datetime])VALUES('"+email+"','"+phon+"','"+OTP+"',getdate())";
-//                  pool1.request().query(insert, (err, recordsets) => {
-        
-         
-        
-
-//                     if (err) {
-//                       console.log(err);
-                  
-         
-                     
-//                     }
-//                     else{
-//                         console.log('succ');
-                      
-
-//                     }
-//                     sql.close();
-//                 })
-
-//             })
-       
-//         }
-        
-//     })
-
- 
-    
-// }
-
-// function sendSMS(phon,OTP){
-//     const from = 'DPLUS';
-
-//     const text = "DPLUS verify code:"+OTP+".Valid for 5 minutes";
-//     phon66=phon.substring(1)
-//     phon66= "66"+phon66;
-//     const to = phon66;6555555555556
-//     console.log(phon66);
-//     // nexmo.message.sendSMS(
-//       //   '66948645005',number,OTP,{type:'unicode'},
-//     //     (err,responsData)=>{
-//     //         if(err)
-//     //         {
-//     //             console.log(err);
-//     //         }
-//     //         else
-//     //         {
-//     //             console.dir(responsData);
-//     //         }
-//     //     }
-//     // );
-    
-//     nexmo.message.sendSms(from, to, text, (error, response) => {
-//         if(error) {
-//           throw error;
-//         } else if(response.messages[0].status != '0') {
-//           console.error(response);
-//           throw 'Nexmo returned back a non-zero status';
-//         } else {
-//           console.log(response);
-//         }
-//       });
-// }
 function delay() { 
     return new Promise((resolve, reject) => { 
          setTimeout(()=>{ 
