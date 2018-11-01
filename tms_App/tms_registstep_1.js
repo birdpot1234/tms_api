@@ -20,9 +20,10 @@ exports.genOTP =function(){
   router.post('/tms/api/regis_1', function(req, res) { 
     let tms_doc = req.body.tms_doc;
     let invoice = req.body.invoice;
+    let box     = req.body.box;
     
      async function main(){ 
-       let sEmail =  selectEmail(tms_doc,invoice); 
+       let sCheck_TMSBox =  checkTMS_Box(tms_doc,invoice,box); 
        let b = await delay(); 
      
       // console.log(respons);
@@ -57,10 +58,10 @@ exports.genOTP =function(){
        
        else{
             
-        let sInserTMS_Box = await InserTMS_Box(tms_doc,invoice,3);
+        let sInserTMS_Box = await InserTMS_Box(tms_doc,invoice,box);
         if(responstatus==200){
             let b = await delay(); 
-            let sUpdateTMS_Box =  await updateTMS_Box(tms_doc,invoice);
+            let sUpdateTMS_Box =  await updateTMS_Box(tms_doc,invoice,box);
             if(responstatus==500)
             {
                 res.status(500).json({
@@ -121,7 +122,7 @@ exports.genOTP =function(){
    }); 
 
 
-async function selectEmail(tms_doc,inv){
+async function checkTMS_Box(tms_doc,inv,NumBox){
     console.log("tms:",tms_doc)
   
     var sql = require("mssql");
@@ -136,7 +137,7 @@ async function selectEmail(tms_doc,inv){
       }
       else{
           const pool1 = new sql.ConnectionPool(con.condb1(), err => {
-          var result_tms = "SELECT * from TMS_Interface where tms_document LIKE '"+tms_doc+"' AND invoice LIKE '"+inv+"';";
+          var result_tms = "SELECT * from TMS_Box_Amount where tms_document LIKE '"+tms_doc+"' AND invoice LIKE '"+inv+"' AND box = '"+NumBox+"';";
           console.log(result_tms);
           pool1.request().query(result_tms, (err, recordsets) => {
           
@@ -163,7 +164,7 @@ async function selectEmail(tms_doc,inv){
                  else if(result_hold.length >1)
                  {
                
-                 respons = 'email length > 1 please check data:'+email;
+                 respons = 'TMS_BOX length > 1 please check data:'+tms_doc;
                  responstatus =202;
                  }
                  else if(result_hold[0].status!=0)
@@ -239,56 +240,20 @@ async function InserTMS_Box(tms_doc,inv,numBox){
       
   })
 }
-async function updateTMS_Box(tms_doc,inv,numBox){
 
-  
-    var sql = require("mssql");
-    var queryString = "update [dbo].[TMS_Box_Amount]  SET [status] =1 where tms_document ='"+tms_doc+"' AND invoice = '"+inv+"' "
-    sql.connect(con.condb1(), function(err) {
-  
-        if (err) {
-            console.log(err+"connect db not found");
-            response.status(500).json({
-                statuserr: 0
-            });
-        }
-        else{
-          const pool1 = new sql.ConnectionPool(con.condb1(), err => {
-            var result_query = queryString;
-            console.log(result_query);
-            pool1.request().query(result_query, (err, recordsets) => {
-            
-             
-              if (err) {
-                  console.log("error select data" + err);
-        
-               respons = err.name;
-               responstatus =500;
-     
-                 
-                }
-                else {
-                  var result = '';
-                  result = recordsets['recordsets'];
-                  result_hold = result[0];
-                  arr =result_hold;
-                  responstatus =200;
-                 // console.log(re_count);
-               
-               }
-               sql.close()
-          });
-          }); 
-       
-        }
-        
-    })
-  }
   async function updateTMS_Box(tms_doc,inv,numBox){
 
   
     var sql = require("mssql");
-    var queryString = "update [dbo].[TMS_Box_Amount]  SET [status] =1 where tms_document ='"+tms_doc+"' AND invoice = '"+inv+"' "
+      var queryString = "update [dbo].[TMS_Box_Amount]  SET [status] =1 where tms_document ='" + tms_doc + "' AND invoice = '" + inv + "' AND box = '"+numBox+"' "+
+                        "  IF(SELECT count([status]) from TMS_Box_Amount where tms_document ='"+tms_doc+"' AND invoice = '"+inv+"' AND [status] =0)>=1 " +
+                        " BEGIN " +
+                        " select * from TMS_Box_Amount " +
+                        " END " +
+                        " ELSE " +
+                        " BEGIN " +
+                        " UPDATE TMS_Interface set [status] = 1 where tms_document='"+tms_doc+"' AND invoice = '"+inv+"'  AND [status] = 0 " +
+                        "END"
     sql.connect(con.condb1(), function(err) {
   
         if (err) {
@@ -305,7 +270,7 @@ async function updateTMS_Box(tms_doc,inv,numBox){
             
              
               if (err) {
-                  console.log("error select data" + err);
+              console.log("error select data" + err);
         
                respons = err.name;
                responstatus =500;
@@ -319,57 +284,8 @@ async function updateTMS_Box(tms_doc,inv,numBox){
                   arr =result_hold;
                   responstatus =200;
                  // console.log(re_count);
-               
-               }
-               sql.close()
-          });
-          }); 
-       
-        }
-        
-    })
-  }async function checkTMS_Box_Fully(tms_doc,inv,numBox){
 
-  
-    var sql = require("mssql");
-    var queryString = "IF(SELECT count([status]) from TMS_Box_Amount where tms_document ='TMS1810-00006' AND invoice = 'INB1809-01736' AND [status] =0)>1 "+
-                       " BEGIN "+
-                       " select * from TMS_Box_Amount "+
-                       " END "+
-                       " ELSE "+
-                       " BEGIN "+
-                       " UPDATE TMS_Interface set [status] = 1 where tms_document='TMS1810-00006' AND invoice = 'INB1809-01736'  AND [status] <> 1 "+
-                       "END "
-    sql.connect(con.condb1(), function(err) {
-  
-        if (err) {
-            console.log(err+"connect db not found");
-            response.status(500).json({
-                statuserr: 0
-            });
-        }
-        else{
-          const pool1 = new sql.ConnectionPool(con.condb1(), err => {
-            var result_query = queryString;
-            console.log(result_query);
-            pool1.request().query(result_query, (err, recordsets) => {
-            
-             
-              if (err) {
-                  console.log("error select data" + err);
-        
-               respons = err.name;
-               responstatus =500;
-     
-                 
-                }
-                else {
-                  var result = '';
-                  result = recordsets['recordsets'];
-                  result_hold = result[0];
-                  arr =result_hold;
-                  responstatus =200;
-                 // console.log(re_count);
+
                
                }
                sql.close()
