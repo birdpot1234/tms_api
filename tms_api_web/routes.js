@@ -9,8 +9,8 @@ router.get("/login/:id&:pass", (req, resp) => {
         resp.json(res_data)
     })
 })
-router.post("/special-circles/",(req,resp)=>{
-    TMS_Special_Circles.model.create_tsc_one((res_data)=>{
+router.post("/special-circles/add-task/",(req,resp)=>{
+    TMS_Special_Circles.model.create_tsc_one(req.body[0],(res_data)=>{
         resp.json(res_data)
     })
 })
