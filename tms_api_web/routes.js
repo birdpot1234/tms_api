@@ -9,10 +9,20 @@ router.get("/login/:id&:pass", (req, resp) => {
         resp.json(res_data)
     })
 })
-router.post("/special-circles/",(req,resp)=>{
-    TMS_Special_Circles.model.create_tsc_one((res_data)=>{
-        resp.json(res_data)
-    })
+router.post('/special-circles',function(req,resp){
+    let tms_doc = req.body.tms_doc;
+    let invoice = req.body.invoice;
+
+    async function main(){ 
+        resp.status(500).json({
+            result: tms_doc,
+            status:500
+       });
+       
+    }
+    main()
+
+
 })
 
 module.exports = router

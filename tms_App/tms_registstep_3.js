@@ -14,7 +14,7 @@ var arr ={};
 var re_count ={};
 
 
-  router.post('/tms/api/regis_1', function(req, res) { 
+  router.post('/tms/api/regis_3', function(req, res) { 
     let tms_doc = req.body.tms_doc;
     let invoice = req.body.invoice;
     let box     = req.body.box;
@@ -161,9 +161,9 @@ async function checkTMS_Box(tms_doc,inv,NumBox){
                  respons = 'TMS_BOX length > 1 please check data:'+tms_doc;
                  responstatus =202;
                  }
-                 else if(result_hold[0].status!=0)
+                 else if(result_hold[0].status!=2)
                  {
-                    respons = 'TMS :'+tms_doc+' is pass'+result_hold[0].status ;
+                    respons = result_hold[0].status>=2?'TMS :'+tms_doc+' is pass'+result_hold[0].status:'TMS :'+tms_doc+' is less'+result_hold[0].status ;
                     responstatus =203;
                  }
                  else
@@ -186,18 +186,15 @@ async function checkTMS_Box(tms_doc,inv,NumBox){
       
   })
 }
-async function InserTMS_Box(tms_doc,inv,numBox){
+async function InserTMS_Box(tms_doc,inv,numBox,car_type,staff1,staff2,trip,Mess){
 
   
   var sql = require("mssql");
-  var queryString = "IF(SELECT count(INVOICEID) FROM ConfirmBillDetail WHERE INVOICEID = '"+inv+"')<1 "+
-                    " BEGIN "+
-                    " INSERT INTO [dbo].[ConfirmBillDetail](INVOICEID,ItemID,ItemName,Qty,Amount,PriceOfUnit) "+
-                    " SELECT INVOICEID,ITEMID, ItemName, QTY,TotalAmount,TotalAmount/QTY FROM DPLV_SCSO_InvoiceAndPreL2  "+
-                    " WHERE  INVOICEID = '"+inv+"' "+
-                    " END "+
-                    "INSERT INTO [dbo].[ConfirmBill](INVOICEID,SO,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,Remark,[Status],QTYbox,DELIVERYNAME,CreateDate,Counting,NumBox) "+
-                    "select invoice,so,tms_document,customer_code,customer_name,address_shipment,sales_code,sales_name,store_zone,'TEST DEALER',1,box_amount,customer_name,delivery_date,3,'"+numBox+"' FROM [dbo].[TMS_Interface] where invoice = '"+inv+"' AND tms_document ='"+tms_doc+"'"
+  var queryString = "INSERT INTO BillToApp(INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name "+
+    ",StoreZone,[Status],MessengerID,MessengerName,Trip,DELIVERYNAME,[datetime],TelCustomer,StatusRework,car_type "+
+    ",shipment_staff_1,shipment_staff_2,QtyBox,NumBox) "+
+    " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,3,'"+Mess+"','','"+trip+"',DELIVERYNAME,getdate(),'','','"+car_type+"','"+staff1+"','"+staff2+"',QTYbox,'"+numBox+"' FROM ConfirmBill "+
+    " WHERE INVOICEID = '' AND DocumentSet ='' AND NumBox =''"
   sql.connect(con.condb1(), function(err) {
 
       if (err) {
