@@ -12,7 +12,7 @@ var respons ='';
 var responstatus ='';
 var arr ={};
 var re_count ={};
-
+var sql = require("mssql");
 
   router.post('/tms/api/regis_2', function(req, res) { 
     let tms_doc = req.body.tms_doc;
@@ -121,7 +121,8 @@ var re_count ={};
 
 
 async function checkTMS_Box(tms_doc,inv,NumBox){
-   var sql = require("mssql");
+ 
+   sql.close()
    sql.connect(con.condb1(), function(err) {
 
       if (err) {
@@ -187,8 +188,8 @@ async function checkTMS_Box(tms_doc,inv,NumBox){
 
   async function updateTMS_Box(tms_doc,inv,numBox){
     let setStep = 2
-  
-    var sql = require("mssql");
+   
+    sql.close()
       var queryString = "update [dbo].[TMS_Box_Amount]  SET [status] ="+setStep+" where tms_document ='" + tms_doc + "' AND invoice = '" + inv + "' AND box = '"+numBox+"' "+
                         "  IF(SELECT count([status]) from TMS_Box_Amount where tms_document ='"+tms_doc+"' AND invoice = '"+inv+"' AND [status] =1)>=1 " +
                         " BEGIN " +

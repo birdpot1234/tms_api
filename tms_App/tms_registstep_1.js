@@ -12,7 +12,7 @@ var respons ='';
 var responstatus ='';
 var arr ={};
 var re_count ={};
-
+var sql = require("mssql");
 
   router.post('/tms/api/regis_1', function(req, res) { 
     let tms_doc = req.body.tms_doc;
@@ -54,11 +54,12 @@ var re_count ={};
        }
        
        else{
-            
+     
+        //let b = await delay(); 
         let sInserTMS_Box = await InserTMS_Box(tms_doc,invoice,box);
         let b = await delay(); 
         if(responstatus==200){
-        
+      
             let sUpdateTMS_Box =  await updateTMS_Box(tms_doc,invoice,box);
             if(responstatus==500)
             {
@@ -86,34 +87,7 @@ var re_count ={};
         
        }
    
-    //    let b = await delay(); 
-
-        //    if(check)
-        //    {
-        //     let sCheck = await selectforCheck(email,arr[0].phon);
-        //     let b = await delay(); 
-        //     if(re_count[0].count==0){//insert only
-        //         let ins = await insert(OTP,arr[0].phon,email);
-        //          let wait = await delay(); 
-        //          let send = await sendSMS(arr[0].phon,OTP);
-        //     }
-            
-        //     else{//delete and insert 
-        //         console.log(arr[0].phon);
-        //         let delt = await del(arr[0].phon);
-        //         let b = await delay(); 
-        //         let ins = await insert(OTP,arr[0].phon,email);
-        //         let wait = await delay(); 
-        //       let send = await sendSMS(arr[0].phon,OTP);
-        //     }
-        //     res.status(200).json({
-        //         result: OTP,
-        //         status:200
-        //    });
-
-        //    }
-
-     
+   
    } 
    main(); 
     
@@ -121,7 +95,8 @@ var re_count ={};
 
 
 async function checkTMS_Box(tms_doc,inv,NumBox){
-   var sql = require("mssql");
+   //var sql = require("mssql");
+   sql.close()
    sql.connect(con.condb1(), function(err) {
 
       if (err) {
@@ -187,9 +162,11 @@ async function checkTMS_Box(tms_doc,inv,NumBox){
   })
 }
 async function InserTMS_Box(tms_doc,inv,numBox){
-
   
-  var sql = require("mssql");
+    
+  
+  
+  sql.close()
   var queryString = "IF(SELECT count(INVOICEID) FROM ConfirmBillDetail WHERE INVOICEID = '"+inv+"')<1 "+
                     " BEGIN "+
                     " INSERT INTO [dbo].[ConfirmBillDetail](INVOICEID,ItemID,ItemName,Qty,Amount,PriceOfUnit) "+
@@ -198,7 +175,8 @@ async function InserTMS_Box(tms_doc,inv,numBox){
                     " END "+
                     "INSERT INTO [dbo].[ConfirmBill](INVOICEID,SO,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,Remark,[Status],QTYbox,DELIVERYNAME,CreateDate,Counting,NumBox) "+
                     "select invoice,so,tms_document,customer_code,customer_name,address_shipment,sales_code,sales_name,store_zone,'TEST DEALER',1,box_amount,customer_name,delivery_date,3,'"+numBox+"' FROM [dbo].[TMS_Interface] where invoice = '"+inv+"' AND tms_document ='"+tms_doc+"'"
-  sql.connect(con.condb1(), function(err) {
+console.log(queryString) 
+ sql.connect(con.condb1(), function(err) {
 
       if (err) {
           console.log(err+"connect db not found");
@@ -244,7 +222,8 @@ async function InserTMS_Box(tms_doc,inv,numBox){
   async function updateTMS_Box(tms_doc,inv,numBox){
 
     let setStep =1 
-    var sql = require("mssql");
+    sql.close()
+    //var sql = require("mssql");
       var queryString = "update [dbo].[TMS_Box_Amount]  SET [status] ='"+setStep+"' where tms_document ='" + tms_doc + "' AND invoice = '" + inv + "' AND box = '"+numBox+"' "+
                         "  IF(SELECT count([status]) from TMS_Box_Amount where tms_document ='"+tms_doc+"' AND invoice = '"+inv+"' AND [status] =0)>=1 " +
                         " BEGIN " +
@@ -263,7 +242,7 @@ async function InserTMS_Box(tms_doc,inv,numBox){
             });
         }
         else{
-          const pool1 = new sql.ConnectionPool(con.condb1(), err => {
+             const pool1 = new sql.ConnectionPool(con.condb1(), err => {
             var result_query = queryString;
             console.log(result_query);
             pool1.request().query(result_query, (err, recordsets) => {
@@ -291,10 +270,13 @@ async function InserTMS_Box(tms_doc,inv,numBox){
                sql.close()
           });
           }); 
-       
+      
         }
         
     })
+    
+
+
   }
 
 function delay() { 
