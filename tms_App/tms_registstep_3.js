@@ -14,11 +14,15 @@ var arr ={};
 var re_count ={};
 var sql = require("mssql");
 
-  router.post('/tms/api/regis_1', function(req, res) { 
+  router.post('/tms/api/regis_3', function(req, res) { 
     let tms_doc = req.body.tms_doc;
     let invoice = req.body.invoice;
     let box     = req.body.box;
-    
+    let car_type = req.body.car_type;
+    let staff1   = req.body.staff1;
+    let staff2   = req.body.staff2;
+    let trip     = req.body.trip;
+    let Mess     = req.body.Mess;
      async function main(){ 
        let sCheck_TMSBox =  checkTMS_Box(tms_doc,invoice,box); 
        let b = await delay(); 
@@ -54,12 +58,11 @@ var sql = require("mssql");
        }
        
        else{
-     
-        //let b = await delay(); 
-        let sInserTMS_Box = await InserTMS_Box(tms_doc,invoice,box);
+            
+        let sInserTMS_Box = await InserTMS_Box(tms_doc,invoice,box,car_type,staff1,staff2,trip,Mess);
         let b = await delay(); 
         if(responstatus==200){
-      
+        
             let sUpdateTMS_Box =  await updateTMS_Box(tms_doc,invoice,box);
             if(responstatus==500)
             {
@@ -76,7 +79,15 @@ var sql = require("mssql");
                     detail:'Update success'
                });
             }
-        }else{
+        }else if(responstatus==204){
+            console.log('status 204')
+            res.status(500).json({
+                result: respons,
+                status:500,
+                detail:'Invoice duplicate at billtoapp'
+           });
+        }
+        else{
             res.status(500).json({
                 result: respons,
                 status:500,
@@ -86,8 +97,7 @@ var sql = require("mssql");
            
         
        }
-   
-   
+ 
    } 
    main(); 
     
@@ -95,7 +105,7 @@ var sql = require("mssql");
 
 
 async function checkTMS_Box(tms_doc,inv,NumBox){
-   //var sql = require("mssql");
+  
    sql.close()
    sql.connect(con.condb1(), function(err) {
 
@@ -136,9 +146,9 @@ async function checkTMS_Box(tms_doc,inv,NumBox){
                  respons = 'TMS_BOX length > 1 please check data:'+tms_doc;
                  responstatus =202;
                  }
-                 else if(result_hold[0].status!=0)
+                 else if(result_hold[0].status!=2)
                  {
-                    respons = 'TMS :'+tms_doc+' is pass'+result_hold[0].status ;
+                    respons = result_hold[0].status>=2?'TMS :'+tms_doc+' is pass'+result_hold[0].status:'TMS :'+tms_doc+' is less'+result_hold[0].status ;
                     responstatus =203;
                  }
                  else
@@ -161,22 +171,26 @@ async function checkTMS_Box(tms_doc,inv,NumBox){
       
   })
 }
-async function InserTMS_Box(tms_doc,inv,numBox){
+
+async function InserTMS_Box(tms_doc,inv,numBox,car_type,staff1,staff2,trip,Mess){
+  // Check if Invoice have in BillToApp will not insert to BillToApp
   
+sql.close()
+  var queryString = "IF(SELECT COUNT(INVOICEID) from BillToApp WHERE INVOICEID = '"+inv+"' AND NumBox = '"+numBox+"')=(0)"+
+  "BEGIN "+
+  " INSERT INTO BillToApp(INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name "+
+    ",StoreZone,[Status],MessengerID,MessengerName,Trip,DELIVERYNAME,[datetime],TelCustomer,StatusRework,car_type "+
+    ",shipment_staff_1,shipment_staff_2,QtyBox,NumBox) "+
+    " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,3,'"+Mess+"','','"+trip+"',DELIVERYNAME,getdate(),'','','"+car_type+"','"+staff1+"','"+staff2+"',QTYbox,'"+numBox+"' FROM ConfirmBill "+
+    " WHERE INVOICEID = '"+inv+"' AND DocumentSet ='"+tms_doc+"' AND NumBox ='"+numBox+"' END"+
+    " ELSE "+
+    " BEGIN "+
+    "SELECT TOP(1)* FROM BillToApp WHERE  INVOICEID = '"+inv+"' AND NumBox = '"+numBox+"'" +
+    " END"
+
     
-  
-  
-  sql.close()
-  var queryString = "IF(SELECT count(INVOICEID) FROM ConfirmBillDetail WHERE INVOICEID = '"+inv+"')<1 "+
-                    " BEGIN "+
-                    " INSERT INTO [dbo].[ConfirmBillDetail](INVOICEID,ItemID,ItemName,Qty,Amount,PriceOfUnit) "+
-                    " SELECT INVOICEID,ITEMID, ItemName, QTY,TotalAmount,TotalAmount/QTY FROM DPLV_SCSO_InvoiceAndPreL2  "+
-                    " WHERE  INVOICEID = '"+inv+"' "+
-                    " END "+
-                    "INSERT INTO [dbo].[ConfirmBill](INVOICEID,SO,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,Remark,[Status],QTYbox,DELIVERYNAME,CreateDate,Counting,NumBox) "+
-                    "select invoice,so,tms_document,customer_code,customer_name,address_shipment,sales_code,sales_name,store_zone,'TEST DEALER',1,box_amount,customer_name,delivery_date,3,'"+numBox+"' FROM [dbo].[TMS_Interface] where invoice = '"+inv+"' AND tms_document ='"+tms_doc+"'"
-console.log(queryString) 
- sql.connect(con.condb1(), function(err) {
+console.log(queryString)
+  sql.connect(con.condb1(), function(err) {
 
       if (err) {
           console.log(err+"connect db not found");
@@ -202,12 +216,15 @@ console.log(queryString)
                
               }
               else {
+            
                 var result = '';
                 result = recordsets['recordsets'];
+                console.log(result.length)
                 result_hold = result[0];
-                arr =result_hold;
-                responstatus =200;
               
+                arr =result_hold;
+                responstatus =result.length>0?204:200;
+           
              
              }
              sql.close()
@@ -220,18 +237,19 @@ console.log(queryString)
 }
 
   async function updateTMS_Box(tms_doc,inv,numBox){
-
-    let setStep =1 
+    // Update stattus from 2 to 3 at TMS_BOX  take bacode
+    //Check TMS_Box_Amount fully Then update TMS_Interface set status 2 to 3  
+    let setStep =3
     sql.close()
-    //var sql = require("mssql");
+ //   var sql = require("mssql");
       var queryString = "update [dbo].[TMS_Box_Amount]  SET [status] ='"+setStep+"' where tms_document ='" + tms_doc + "' AND invoice = '" + inv + "' AND box = '"+numBox+"' "+
-                        "  IF(SELECT count([status]) from TMS_Box_Amount where tms_document ='"+tms_doc+"' AND invoice = '"+inv+"' AND [status] =0)>=1 " +
+                        "  IF(SELECT count([status]) from TMS_Box_Amount where tms_document ='"+tms_doc+"' AND invoice = '"+inv+"' AND [status] =2)>=1 " +
                         " BEGIN " +
                         " select top(1) * from TMS_Box_Amount " +
                         " END " +
                         " ELSE " +
                         " BEGIN " +
-                        " UPDATE TMS_Interface set [status] = 1 where tms_document='"+tms_doc+"' AND invoice = '"+inv+"'  AND [status] = 0 " +
+                        " UPDATE TMS_Interface set [status] = 3 where tms_document='"+tms_doc+"' AND invoice = '"+inv+"'  AND [status] = 2 " +
                         "END"
     sql.connect(con.condb1(), function(err) {
   
@@ -242,7 +260,7 @@ console.log(queryString)
             });
         }
         else{
-             const pool1 = new sql.ConnectionPool(con.condb1(), err => {
+          const pool1 = new sql.ConnectionPool(con.condb1(), err => {
             var result_query = queryString;
             console.log(result_query);
             pool1.request().query(result_query, (err, recordsets) => {
@@ -264,19 +282,14 @@ console.log(queryString)
                   responstatus =200;
                  // console.log(re_count);
 
-
-               
                }
                sql.close()
           });
           }); 
-      
+       
         }
         
     })
-    
-
-
   }
 
 function delay() { 
