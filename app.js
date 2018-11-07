@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const socketio = require('socket.io');
 const show_tsc = require('./api/tsc/show_tsc');
 const regis_1 = require('./tms_App/tms_registstep_1');
-<<<<<<< HEAD
 const regis_2 = require('./tms_App/tms_registstep_2');
 const regis_3 = require('./tms_App/tms_registstep_3');
 
@@ -16,8 +15,6 @@ const web_api=require("./tms_api_web/routes")
 
 //-------Modify by SamuraiiHot 2018-10-31
 
-=======
->>>>>>> 10874e86bc3d93c2269e87c807ddfbad22e1be9d
 
 ////Body parser 
 app.use(morgan('dev'));
