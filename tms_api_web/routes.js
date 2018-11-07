@@ -9,7 +9,6 @@ router.get("/login/:id&:pass", (req, resp) => {
         resp.json(res_data)
     })
 })
-<<<<<<< HEAD
 router.post('/special-circles',function(req,resp){
     let tms_doc = req.body.tms_doc;
     let invoice = req.body.invoice;
@@ -24,12 +23,6 @@ router.post('/special-circles',function(req,resp){
     main()
 
 
-=======
-router.post("/special-circles/add-task/",(req,resp)=>{
-    TMS_Special_Circles.model.create_tsc_one(req.body[0],(res_data)=>{
-        resp.json(res_data)
-    })
->>>>>>> 10874e86bc3d93c2269e87c807ddfbad22e1be9d
 })
 
 module.exports = router
