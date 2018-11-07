@@ -1,7 +1,7 @@
 const moment = require('moment')
 const log = require('log-to-file');
 
-const save_log = (res_data, type, tbl_name, input_data) => {  
+const save_log = (res_data, type, tbl_name, input_data) => {
     //-----Parameter 
     //-----1. res_data = ข้อมูลตอบกลับหลังทำงานเสร็จ เช่น ข้อมูลที่ดึงได้จากระบบ
     //-----2. type = ประเภทของการทำงาน เช่น Insert, Select, Update
@@ -14,13 +14,19 @@ const save_log = (res_data, type, tbl_name, input_data) => {
             log(lognow + " :: " + type + " " + tbl_name + " :: " + JSON.stringify(input_data[index]), "log-server.txt")
         });
     } else {
-        const lognow = moment().format("YYYY-MM-DD H:m:s")
-        log(lognow + " :: " + type + " " + tbl_name + " :: " + JSON.stringify(input_data[0]), "log-server.txt")
+        console.log(input_data.length);
+        if (Array.isArray(input_data)) {
+            const lognow = moment().format("YYYY-MM-DD H:m:s")
+            log(lognow + " :: " + type + " " + tbl_name + " :: " + JSON.stringify(input_data[0]), "log-server.txt")
+        } else {
+            const lognow = moment().format("YYYY-MM-DD H:m:s")
+            log(lognow + " :: " + type + " " + tbl_name + " :: " + JSON.stringify(input_data), "log-server.txt")
+        }
     }
 }
 
-const Gen_Document5digit = (char_doc, last_doc,callback) => {
-    let new_doc="",document=""
+const Gen_Document5digit = (char_doc, last_doc, callback) => {
+    let new_doc = "", document = ""
     let docYear = moment().format("YY")
     let docMonth = moment().format("MM")
     if (last_doc != "") {
@@ -47,5 +53,5 @@ const Gen_Document5digit = (char_doc, last_doc,callback) => {
 
 module.exports = {
     save_log: save_log,
-    Gen_Document5digit:Gen_Document5digit
+    Gen_Document5digit: Gen_Document5digit
 }

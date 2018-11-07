@@ -5,7 +5,6 @@ const model = {
     find_by_id_pass(id, pass, callback) {
         sql.close()
         const pool = new sql.ConnectionPool(dbConnectDplusSystem)
-        console.log(pool)
         pool.connect(err => {
             if (err) throw err;
             var req = new sql.Request(pool)
