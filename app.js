@@ -24,12 +24,12 @@ app.use(bodyParser.urlencoded({ extended:true,limit:1024*1024*20,type:'applicati
 app.use(bodyParser.json({limit:1024*1024*2000, type:'application/json'}));
 
 //-------Modify by SamuraiiHot 2018-10-31
-const cors=require('cors')
+//const cors=require('cors')
 app.use(cors())
-const web_api=require("./tms_api_web/routes")
-app.use("/web-api",web_api)
-const app_api=require("./tms_App/routes")
-app.use("/app-api",app_api)
+// const web_api=require("./tms_api_web/routes")
+ app.use("/web-api",web_api)
+//const app_api=require("./tms_App/routes")
+//app.use("/app-api",app_api)
 //-------Modify by SamuraiiHot 2018-10-31
 
 app.use('/show_tsc',show_tsc);
