@@ -4,7 +4,7 @@ const Messenger = require("./Messenger")
 // const TMS_Special_Circles =require("./TMS_Special_Circles")
 
 router.get("/login/:token", (req, resp) => {
-    var id = req.params.token
+    var token = req.params.token
     Messenger.model.find_by_token(token, (res_data) => {
         resp.json(res_data)
     })

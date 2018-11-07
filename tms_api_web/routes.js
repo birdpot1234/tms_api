@@ -4,6 +4,7 @@ const DPLT_ADDP_DplusSystem_User = require("./DPLT_ADDP_DplusSystem_User")
 const TMS_Special_Circles =require("./TMS_Special_Circles")
 
 router.get("/login/:id&:pass", (req, resp) => {
+    console.log("login");
     var id = req.params.id, pass = req.params.pass
     DPLT_ADDP_DplusSystem_User.model.find_by_id_pass(id, pass, (res_data) => {
         resp.json(res_data)

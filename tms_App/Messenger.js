@@ -9,7 +9,7 @@ const model = {
         pool.connect(err => {
             if (err) {
                 save_log("Connection is close", "find_no_admin", "Messenger", "No connection")
-                callback({status:false,message:"Connection is close"})
+                callback({ status: false, message: "Connection is close" })
             }
             var req = new sql.Request(pool)
 
@@ -19,12 +19,17 @@ const model = {
 
             req.query(sql_query).then((result) => {
                 pool.close()
-                save_log(result, "find_by_token", "Messenger", token)
-                callback(result)
+                if(result.recordset.length>0){
+                    save_log(result, "find_by_token", "Messenger", token)
+                    callback({ status: true, resp: result.recordset })
+                }else{
+                    save_log("None Data", "find_by_token", "Messenger", token)
+                    callback({ status: false, message: "None Data" })
+                }
             }).catch((err) => {
                 pool.close()
-                save_log(result, "find_by_token", "Messenger", token)
-                callback({status:false,message:"Error SQL query"})
+                save_log(err, "find_by_token", "Messenger", token)
+                callback({ status: false, message: "Error SQL query" })
             });
         })
     },
@@ -34,7 +39,7 @@ const model = {
         pool.connect(err => {
             if (err) {
                 save_log("Connection is close", "find_no_admin", "Messenger", "No connection")
-                callback({status:false,message:"Connection is close"})
+                callback({ status: false, message: "Connection is close" })
             }
             var req = new sql.Request(pool)
 
@@ -43,12 +48,12 @@ const model = {
             WHERE        (Level NOT LIKE 'admin') AND (Activate=1)"
             req.query(sql_query).then((result) => {
                 pool.close()
-                save_log(result, "find_by_token", "Messenger", "ดึงข้อมูล Messenger")
+                save_log(result, "find_no_admin", "Messenger", "ดึงข้อมูล Messenger")
                 callback(result)
             }).catch((err) => {
                 pool.close()
-                save_log("ดึงข้อมูล Messenger", "find_by_token", "Messenger", "ดึงข้อมูล Messenger")
-                callback({status:false,message:"Error SQL query"})
+                save_log("ดึงข้อมูล Messenger", "find_no_admin", "Messenger", "ดึงข้อมูล Messenger")
+                callback({ status: false, message: "Error SQL query" })
             });
         })
     }
