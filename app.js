@@ -7,9 +7,8 @@ const show_tsc = require('./api/tsc/show_tsc');
 const regis_1 = require('./tms_App/tms_registstep_1');
 const regis_2 = require('./tms_App/tms_registstep_2');
 const regis_3 = require('./tms_App/tms_registstep_3');
-
-
-
+const info    = require('./kerry_api/info');
+const update_status = require('./kerry_api/update_status');
 
 ////Body parser 
 app.use(morgan('dev'));
@@ -32,6 +31,8 @@ app.use('/',regis_1);
 app.use('/',regis_2);
 app.use('/',regis_3);
 app.use("/",web_api)
+app.use("/",info);
+app.use("/",update_status);
 app.get('/',(req,res)=>{
     res.render('index');
 })
