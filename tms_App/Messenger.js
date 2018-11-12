@@ -1,5 +1,5 @@
 var { dbConnectData_TransportApp } = require('../connect_sql')
-const { save_log } = require("../service")
+const { save_log,server_response } = require("../service")
 var sql = require('mssql')
 
 const model = {
@@ -9,7 +9,7 @@ const model = {
         pool.connect(err => {
             if (err) {
                 save_log("Connection is close", "find_no_admin", "Messenger", "No connection")
-                callback({ status: false, message: "Connection is close" })
+                callback(server_response(500,"Connection is close",""))
             }
             var req = new sql.Request(pool)
 
@@ -21,15 +21,15 @@ const model = {
                 pool.close()
                 if(result.recordset.length>0){
                     save_log(result, "find_by_token", "Messenger", token)
-                    callback({ status: true, resp: result.recordset })
+                    callback(server_response(200,"Success",result.recordset))
                 }else{
                     save_log("None Data", "find_by_token", "Messenger", token)
-                    callback({ status: false, message: "None Data" })
+                    callback(server_response(204,"None Data",result.recordset))
                 }
             }).catch((err) => {
                 pool.close()
                 save_log(err, "find_by_token", "Messenger", token)
-                callback({ status: false, message: "Error SQL query" })
+                callback(server_response(501,"Error query SQL",err))
             });
         })
     },
@@ -39,7 +39,7 @@ const model = {
         pool.connect(err => {
             if (err) {
                 save_log("Connection is close", "find_no_admin", "Messenger", "No connection")
-                callback({ status: false, message: "Connection is close" })
+                callback(server_response(500,"Connection is close",""))
             }
             var req = new sql.Request(pool)
 
@@ -49,11 +49,11 @@ const model = {
             req.query(sql_query).then((result) => {
                 pool.close()
                 save_log(result, "find_no_admin", "Messenger", "ดึงข้อมูล Messenger")
-                callback(result)
+                callback(server_response(200,"Success",result.recordset))
             }).catch((err) => {
                 pool.close()
                 save_log("ดึงข้อมูล Messenger", "find_no_admin", "Messenger", "ดึงข้อมูล Messenger")
-                callback({ status: false, message: "Error SQL query" })
+                callback(server_response(501,"Error query SQL",err))
             });
         })
     }
