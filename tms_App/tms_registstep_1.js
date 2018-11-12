@@ -15,10 +15,13 @@ var re_count ={};
 var sql = require("mssql");
 
   router.post('/tms/api/regis_1', function(req, res) { 
-    let tms_doc = req.body.tms_doc;
-    let invoice = req.body.invoice;
-    let box     = req.body.box;
+   
+    let tms_doc = req.body.status.tms_doc;
+    let invoice = req.body.status.invoice;
+    let box     = req.body.status.box;
     
+
+   
      async function main(){ 
        let sCheck_TMSBox =  checkTMS_Box(tms_doc,invoice,box); 
        let b = await delay(); 
@@ -71,9 +74,14 @@ var sql = require("mssql");
             }
             else{
                 res.status(200).json({
-                    result: arr,
-                    status:200,
-                    detail:'Update success'
+                 
+                            result: arr,
+                            status:200,
+                            detail:'Update success'
+                        
+                      
+                    
+                 
                });
             }
         }else{
