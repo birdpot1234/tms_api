@@ -1,5 +1,5 @@
 var { dbConnectData_TransportApp } = require('../connect_sql')
-const { Gen_Document5digit, save_log } = require("../service")
+const { Gen_Document5digit, save_log,server_response } = require("../service")
 const moment = require('moment')
 var sql = require('mssql')
 
@@ -77,11 +77,11 @@ const model = {
             pool.connect(err => {
                 if (err) {
                     save_log("Connection is close","create_tsc_one","TMS_Special_Circles","No connection")
-                    throw err
+                    callback(server_response(500,"Connection is close",""))
                 }
                 const transaction = new sql.Transaction(pool)
                 transaction.begin(err => {
-                    if (err) throw err;
+                    if (err) callback(server_response(500,"Connection is close",""));
                     let rolledBack = false
                     transaction.on("rollback", aborted => {
                         rolledBack = true
@@ -167,17 +167,18 @@ const model = {
                         if (err) {
                             if (!rolledBack) {
                                 transaction.rollback(err => {
-                                    if (err) throw err;
+                                    if (err) callback(server_response(501,"Error query SQL",err));
                                     pool.close()
                                     save_log(result,"create_tsc_one","TMS_Special_Circles",data)
+                                    callback(server_response(501,"Error query SQL",err))
                                 })
                             }
                         } else {
                             transaction.commit(err => {
                                 pool.close()
-                                if (err) throw err;
+                                if (err) callback(server_response(501,"Error query SQL",err));
                                 save_log(result,"create_tsc_one","TMS_Special_Circles",data)
-                                callback(result)
+                                callback(server_response(200,"Success",result.recordset))
                             })
                         }
                     })
