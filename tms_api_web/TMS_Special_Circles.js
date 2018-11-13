@@ -124,7 +124,7 @@ const model = {
                      ,[customerName]\
                      ,[Zone]\
                      ,[address_shipment] \
-                     ,[detail_cn]\
+                     ,[detail_cn])\
                      VALUES \
                      ( '"+ tsc_document +"'\
                      ,'"+create_date+"'\
@@ -169,6 +169,7 @@ const model = {
                                 transaction.rollback(err => {
                                     if (err) callback(server_response(501,"Error query SQL",err));
                                     pool.close()
+                                    console.log("sql_query",sql_query)
                                     save_log(result,"create_tsc_one","TMS_Special_Circles",data)
                                     callback(server_response(501,"Error query SQL",err))
                                 })
