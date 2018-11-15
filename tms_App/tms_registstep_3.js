@@ -23,6 +23,7 @@ var sql = require("mssql");
     let staff2   = req.body.staff2;
     let trip     = req.body.trip;
     let Mess     = req.body.Mess;
+    let Zone     = req.body.Zone;
      async function main(){ 
        let sCheck_TMSBox =  checkTMS_Box(tms_doc,invoice,box); 
        let b = await delay(); 
@@ -172,7 +173,7 @@ async function checkTMS_Box(tms_doc,inv,NumBox){
   })
 }
 
-async function InserTMS_Box(tms_doc,inv,numBox,car_type,staff1,staff2,trip,Mess){
+async function InserTMS_Box(tms_doc,inv,numBox,car_type,staff1,staff2,trip,Mess,Zone){
   // Check if Invoice have in BillToApp will not insert to BillToApp
   
 sql.close()
@@ -181,7 +182,7 @@ sql.close()
   " INSERT INTO BillToApp(INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name "+
     ",StoreZone,[Status],MessengerID,MessengerName,Trip,DELIVERYNAME,[datetime],TelCustomer,StatusRework,car_type "+
     ",shipment_staff_1,shipment_staff_2,QtyBox,NumBox) "+
-    " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,3,'"+Mess+"','','"+trip+"',DELIVERYNAME,getdate(),'','','"+car_type+"','"+staff1+"','"+staff2+"',QTYbox,'"+numBox+"' FROM ConfirmBill "+
+    " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,'"+Zone+"',3,'"+Mess+"','','"+trip+"',DELIVERYNAME,getdate(),'','','"+car_type+"','"+staff1+"','"+staff2+"',QTYbox,'"+numBox+"' FROM ConfirmBill "+
     " WHERE INVOICEID = '"+inv+"' AND DocumentSet ='"+tms_doc+"' AND NumBox ='"+numBox+"' END"+
     " ELSE "+
     " BEGIN "+
