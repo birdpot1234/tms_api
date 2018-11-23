@@ -16,9 +16,9 @@ var sql = require("mssql");
 
   router.post('/tms/api/regis_1', function(req, res) { 
    
-    let tms_doc = req.body.status.tms_doc;
-    let invoice = req.body.status.invoice;
-    let box     = req.body.status.box;
+    let tms_doc = req.body.tms_doc;
+    let invoice = req.body.invoice;
+    let box     = req.body.box;
     
 
    
