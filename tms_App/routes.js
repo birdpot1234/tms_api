@@ -15,6 +15,12 @@ router.get("/get-messenger/",(req,resp)=>{
         resp.json(res_data)
     })
 })
+router.get("/tsc/check-status/:tsc_document",(req,resp)=>{
+    var tsc_document = req.params.tsc_document
+    TMS_Special_Circles.model.check_status(tsc_document,(res_data)=>{
+        resp.json(res_data)
+    })
+})
 router.put("/tsc/update-status/",(req,resp)=>{
     TMS_Special_Circles.model.update_status(req.body[0],(res_data)=>{
         resp.json(res_data)

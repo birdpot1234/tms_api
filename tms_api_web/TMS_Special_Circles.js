@@ -4,7 +4,32 @@ const moment = require('moment')
 var sql = require('mssql')
 //11//
 const model = {
+    check_status(tsc_document, callback) {
+        sql.close()
+        const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
+        pool.connect(err => {
+            var req = new sql.Request(pool)
+
+            var sql_query = "SELECT        tsc_document, status \
+            FROM            dbo.TMS_Special_Circles \
+            WHERE        (status = 0) AND (tsc_document = '"+ tsc_document + "')"
+
+            req.query(sql_query).then((result) => {
+                pool.close()
+                if (result.recordset.length > 0) {
+                    save_log(result, "check_status", "TMS_Special_Circles", result)
+                    callback(server_response(204, "Status not 0", result.recordset))
+                } else {
+                    save_log(result, "check_status", "TMS_Special_Circles", result)
+                    callback(server_response(200, "Success", result.recordset))
+                }
+            }).catch((err) => {
+                if (err) throw err;
+            });
+        })
+    },
     update_status(data, callback) {
+        //--------------Status = 3
         let { status, tsc_document, invoice, car_type, staff1, staff2, staff3, zone, trip, messenger_code, messenger_name } = data
         sql.close()
         const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
@@ -245,28 +270,32 @@ const model = {
             })
         })
     },
-    find_by_id_pass(id, pass, callback) {
-        // sql.close()
-        // const pool = new sql.ConnectionPool(dbConnectDplusSystem)
-        // pool.connect(err => {
-        //     if (err) throw err;
-        //     var req = new sql.Request(pool)
-        //     req.input("in_id", sql.VarChar, id)
-        //     req.input("in_pass", sql.VarChar, pass)
+    find_between_date(date_start, date_end, callback) {
+        sql.close()
+        const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
+        pool.connect(err => {
+            var req = new sql.Request(pool)
 
-        //     var sql_query = "SELECT   ID_User, Username, Password, Email, DepartmentNo, Last_Login, Name, NickName, Salecode, Level_User, Boss, Sup, Sup_dep, Tel_No, Tel_Dplus, Blocked, Remark, Position_No, ConfirmData, HcmUserId, \
-        //     isChangePass, Sub_Dept, Create_Date \
-        //     FROM            DPLT_ADDP_DplusSystem_User \
-        //     WHERE(ID_User = @in_id) AND(Password = @in_pass)"
+            var sql_query = "SELECT        id, tsc_document, create_date, user_request_code, user_request_name, user_request_department, user_request_tel, receive_from, CONVERT(varchar(10), receive_date, 120) AS receive_date, receive_time_first \
+            ,receive_time_end, send_to, send_date, send_time_first, send_time_end, send_tel, task_group, task_group_document, task_group_amount, task_group_quantity, task_group_pic, comment, work_type, status, messenger_code \
+            ,messenger_name, car_type, shipment_staff_1, shipment_staff_2, shipment_staff_3, messenger_comment, task_detail, status_finish, customerID, customerName, Zone, address_shipment, detail_cn, status_clear \
+            ,time_update \
+            FROM            dbo.TMS_Special_Circles \
+            WHERE        (CONVERT(varchar(10), receive_date, 120) BETWEEN '"+ date_start + "' AND '" + date_end + "')"
 
-        //     req.query(sql_query).then((result) => {
-        //         pool.close()
-        //         callback(result)
-        //     }).catch((err) => {
-        //         if (err) throw err;
-        //     });
-
-        // })
+            req.query(sql_query).then((result) => {
+                pool.close()
+                if (result.recordset.length > 0) {
+                    save_log(result.recordset, "find_between_date", "TMS_Special_Circles", result.recordset)
+                    callback(server_response(200, "Success", result.recordset))
+                } else {
+                    save_log(result.recordset, "find_between_date", "TMS_Special_Circles", result.recordset)
+                    callback(server_response(500, "Error", result.recordset))
+                }
+            }).catch((err) => {
+                if (err) throw err;
+            });
+        })
     }
 }
 
