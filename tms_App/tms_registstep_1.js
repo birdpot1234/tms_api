@@ -15,6 +15,7 @@ var re_count ={};
 var sql = require("mssql");
 
   router.post('/tms/api/regis_1', function(req, res) { 
+      console.log(req);
    
     let tms_doc = req.body.tms_doc;
     let invoice = req.body.invoice;
@@ -104,6 +105,7 @@ var sql = require("mssql");
 
 async function checkTMS_Box(tms_doc,inv,NumBox){
    //var sql = require("mssql");
+   console.log("checkTMS_Box",tms_doc,inv,NumBox)
    sql.close()
    sql.connect(con.condb1(), function(err) {
 
