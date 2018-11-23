@@ -2,7 +2,7 @@ var { dbConnectData_TransportApp } = require('../connect_sql')
 const { Gen_Document5digit, save_log, server_response } = require("../service")
 const moment = require('moment')
 var sql = require('mssql')
-
+//11//
 const model = {
     update_status(data, callback) {
         let { status, tsc_document, invoice, car_type, staff1, staff2, staff3, zone, trip, messenger_code, messenger_name } = data
@@ -92,6 +92,7 @@ const model = {
     create_tsc_one(data, callback) {
         this.gen_tsc_document((res_data) => {
             //------กำหนดค่าให้กับตัวแปรตามฟิลด์
+
             var tsc_document = res_data
             var create_date = moment().format("YYYY-MM-DD H:m:s")
             var user_request_code = data.user_request_code
