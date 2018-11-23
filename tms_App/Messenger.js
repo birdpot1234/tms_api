@@ -45,7 +45,7 @@ const model = {
 
             var sql_query = "SELECT IDMess, MessNO, MessName \
             FROM            Messenger\
-            WHERE        (Level NOT LIKE 'admin') AND (Activate=1)"
+            WHERE        ([Level] NOT LIKE 'admin' OR [Level] IS NULL) AND (Activate = 1)"
             req.query(sql_query).then((result) => {
                 pool.close()
                 save_log(result, "find_no_admin", "Messenger", "ดึงข้อมูล Messenger")
