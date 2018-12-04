@@ -30,26 +30,18 @@ const model = {
     },
     update_status(data, callback) {
         //--------------Status = 3
-        let { status, tsc_document, invoice, car_type, staff1, staff2, staff3, zone, trip, messenger_code, messenger_name } = data
+        let status, tsc_document, invoice, car_type, staff1, staff2, staff3, zone, trip, messenger_code, messenger_name
+        let sql_where_in=""
+        data.forEach((val, i) => {
+            status = 3, invoice = val.invoice, car_type = val.car_type, staff1 = val.staff1, staff2 = val.staff2, staff3 = val.staff3, zone = val.zone, trip = val.trip, messenger_code = val.Mess, messenger_name = val.Mess_name
+            tsc_document = val.tms_doc
+            sql_where_in += "'" + tsc_document + "',"
+        });
         sql.close()
         const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
         pool.connect(err => {
-            if (err) {
-                save_log("Connection is close", "update_status", "TMS_Special_Circles", "No connection")
-                callback(server_response(500, "Connection is close", ""))
-            }
-            const transaction = new sql.Transaction(pool)
-            transaction.begin(err => {
-                if (err) {
-                    save_log("Connection is close", "update_status", "TMS_Special_Circles", "No connection")
-                    callback(server_response(500, "Connection is close", ""))
-                }
-                let rolledBack = false
-                transaction.on("rollback", aborted => {
-                    rolledBack = true
-                })
-                var req = new sql.Request(transaction)
-                var sql_query = "UPDATE TMS_Special_Circles SET \
+            var req = new sql.Request(pool)
+            var sql_query = "UPDATE TMS_Special_Circles SET \
                 status="+ status + ",\
                 messenger_code='"+ messenger_code + "',\
                 messenger_name='"+ messenger_name + "',\
@@ -59,30 +51,21 @@ const model = {
                 shipment_staff_3='"+ staff3 + "',\
                 trip='"+ trip + "',\
                 Zone='"+ zone + "' \
-                WHERE (tsc_document LIKE '"+ tsc_document + "')"
-                req.query(sql_query, (err, result) => {
-                    if (err) {
-                        if (!rolledBack) {
-                            transaction.rollback(err => {
-                                if (err) {
-                                    pool.close()
-                                    save_log(result, "update_status", "TMS_Special_Circles", data)
-                                    callback(server_response(501, "Error query SQL", err))
-                                }
-                            })
-                        }
-                    } else {
-                        transaction.commit(err => {
-                            pool.close()
-                            if (err) {
-                                save_log(result, "update_status", "TMS_Special_Circles", data)
-                                callback(server_response(501, "Error query SQL", err))
-                            }
-                            save_log(result, "update_status", "TMS_Special_Circles", data)
-                            callback(server_response(200, "Success", result.rowsAffected))
-                        })
-                    }
-                })
+                WHERE (tsc_document IN ("+ sql_where_in + "'inwadmin') )"
+                // console.log(sql_query);
+            req.query(sql_query).then((result) => {
+                console.log(result);
+                pool.close()
+                if (result.rowsAffected > 0) {
+                    save_log(result, "update_status", "TMS_Special_Circles", data)
+                    callback(server_response(200, "Success", result.rowsAffected))
+                }else{
+                    save_log(result, "update_status", "TMS_Special_Circles", data)
+                    callback(server_response(203, "None data query", result.rowsAffected))
+                }
+            }).catch((err) => {
+                save_log(err, "update_status", "TMS_Special_Circles", data)
+                callback(server_response(501, "Error query SQL", err))
             })
         })
     },

@@ -4,9 +4,10 @@ const Messenger = require("./Messenger")
 const TMS_Special_Circles = require("../tms_api_web/TMS_Special_Circles")
 // const TMS_Special_Circles =require("./TMS_Special_Circles")
 
-router.get("/login/:token", (req, resp) => {
-    var token = req.params.token
-    Messenger.model.find_by_token(token, (res_data) => {
+router.get("/login/:id&:pass&:token", (req, resp) => {
+    var id = req.params.id, pass = req.params.pass, token = req.params.token
+    Messenger.model.find_by_token(id,pass,token, (res_data) => {
+        // console.log("res_data",res_data);
         resp.json(res_data)
     })
 })
@@ -22,7 +23,7 @@ router.get("/tsc/check-status/:tsc_document",(req,resp)=>{
     })
 })
 router.put("/tsc/update-status/",(req,resp)=>{
-    TMS_Special_Circles.model.update_status(req.body[0],(res_data)=>{
+    TMS_Special_Circles.model.update_status(req.body,(res_data)=>{
         resp.json(res_data)
     })
 })
