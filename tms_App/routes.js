@@ -11,6 +11,11 @@ router.get("/login/:id&:pass&:token", (req, resp) => {
         resp.json(res_data)
     })
 })
+router.get("/get-submessenger/",(req,resp)=>{
+    Messenger.model.find_sub_messenger((res_data) => {
+        resp.json(res_data)
+    })
+})
 router.get("/get-messenger/",(req,resp)=>{
     Messenger.model.find_no_admin((res_data) => {
         resp.json(res_data)

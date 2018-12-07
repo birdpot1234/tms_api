@@ -78,6 +78,30 @@ const model = {
             }
         })
     },
+    find_sub_messenger(callback) {
+        sql.close()
+        const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
+        pool.connect(err => {
+            if (err) {
+                save_log("Connection is close", "find_no_admin", "Messenger", "No connection")
+                callback(server_response(500, "Connection is close", ""))
+            }
+            var req = new sql.Request(pool)
+
+            var sql_query = "SELECT IDMess, MessNO, MessName \
+            FROM            Messenger\
+            WHERE        (IDMess LIKE 'SDL%') AND (Activate = 1)"
+            req.query(sql_query).then((result) => {
+                pool.close()
+                save_log(result, "find_sub_messenger", "Messenger", "ดึงข้อมูล Messenger")
+                callback(server_response(200, "Success", result.recordset))
+            }).catch((err) => {
+                pool.close()
+                save_log("ดึงข้อมูล Messenger", "find_sub_messenger", "Messenger", "ดึงข้อมูล Messenger")
+                callback(server_response(501, "Error query SQL", err))
+            });
+        })
+    },
     find_no_admin(callback) {
         sql.close()
         const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
@@ -90,7 +114,7 @@ const model = {
 
             var sql_query = "SELECT IDMess, MessNO, MessName \
             FROM            Messenger\
-            WHERE        ([Level] LIKE 'dl') AND (Activate = 1)"
+            WHERE        (IDMess LIKE 'MDL%') AND (Activate = 1)"
             req.query(sql_query).then((result) => {
                 pool.close()
                 save_log(result, "find_no_admin", "Messenger", "ดึงข้อมูล Messenger")

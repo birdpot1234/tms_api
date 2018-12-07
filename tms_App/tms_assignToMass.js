@@ -49,7 +49,7 @@ var sql = require("mssql");
             " INSERT INTO BillToApp(INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name "+
             ",StoreZone,[Status],MessengerID,MessengerName,Trip,DELIVERYNAME,[datetime],TelCustomer,StatusRework,car_type "+
             ",shipment_staff_1,shipment_staff_2,QtyBox,NumBox,shipment_staff_3) "+
-            " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,'StoreZone',3,'"+jsonRequest[i].Mess+"','','"+jsonRequest[i].trip+"',DELIVERYNAME,getdate(),'','','"+jsonRequest[i].car_type+"','"+jsonRequest[i].staff1+"','"+jsonRequest[i].staff2+"',QTYbox,'"+jsonRequest[i].box+"','"+jsonRequest[i].staff3+"' FROM ConfirmBill "+
+            " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,3,'"+jsonRequest[i].Mess+"','','"+jsonRequest[i].trip+"',DELIVERYNAME,getdate(),'','','"+jsonRequest[i].car_type+"','"+jsonRequest[i].staff1+"','"+jsonRequest[i].staff2+"',QTYbox,'"+jsonRequest[i].box+"','"+jsonRequest[i].staff3+"' FROM ConfirmBill "+
             " WHERE INVOICEID = '"+jsonRequest[i].invoice+"' AND DocumentSet ='"+jsonRequest[i].tms_doc+"' AND NumBox ='"+jsonRequest[i].box+"' ;  "+
             " update [dbo].[TMS_Box_Amount]  SET [status] ='3' where tms_document ='" + jsonRequest[i].tms_doc+ "' AND invoice = '" + jsonRequest[i].invoice + "' AND box = '"+jsonRequest[i].box+"' ;"+
             " END "+
@@ -150,7 +150,7 @@ var sql = require("mssql");
     " INSERT INTO BillToApp(INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name "+
       ",StoreZone,[Status],MessengerID,MessengerName,Trip,DELIVERYNAME,[datetime],TelCustomer,StatusRework,car_type "+
       ",shipment_staff_1,shipment_staff_2,QtyBox,NumBox) "+
-      " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,'StoreZone',3,'"+Mess+"','','"+trip+"',DELIVERYNAME,getdate(),'','','"+car_type+"','"+staff1+"','"+staff2+"',QTYbox,'"+numBox+"' FROM ConfirmBill "+
+      " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,3,'"+Mess+"','','"+trip+"',DELIVERYNAME,getdate(),'','','"+car_type+"','"+staff1+"','"+staff2+"',QTYbox,'"+numBox+"' FROM ConfirmBill "+
       " WHERE INVOICEID = '"+inv+"' AND DocumentSet ='"+tms_doc+"' AND NumBox ='"+numBox+"'  "+
       
       " END"+
@@ -218,7 +218,7 @@ sql.close()
   " INSERT INTO BillToApp(INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name "+
     ",StoreZone,[Status],MessengerID,MessengerName,Trip,DELIVERYNAME,[datetime],TelCustomer,StatusRework,car_type "+
     ",shipment_staff_1,shipment_staff_2,QtyBox,NumBox) "+
-    " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,'StoreZone',3,'"+Mess+"','','"+trip+"',DELIVERYNAME,getdate(),'','','"+car_type+"','"+staff1+"','"+staff2+"',QTYbox,'"+numBox+"' FROM ConfirmBill "+
+    " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,3,'"+Mess+"','','"+trip+"',DELIVERYNAME,getdate(),'','','"+car_type+"','"+staff1+"','"+staff2+"',QTYbox,'"+numBox+"' FROM ConfirmBill "+
     " WHERE INVOICEID = '"+inv+"' AND DocumentSet ='"+tms_doc+"' AND NumBox ='"+numBox+"'  "+
     
     " END"+

@@ -14,6 +14,8 @@ var arr ={};
 var re_count ={};
 var sql = require("mssql");
 
+const TMS_Interface = require("./TMS_Interface")
+
   router.post('/tms/api/regis_1', function(req, res) { 
       console.log(req);
    
@@ -21,85 +23,88 @@ var sql = require("mssql");
     let invoice = req.body.invoice;
     let box     = req.body.box;
     
-
-   
-     async function main(){ 
-       let sCheck_TMSBox =  checkTMS_Box(tms_doc,invoice,box); 
-       let b = await delay(); 
-     
-    
-       if(responstatus==500)
-       {
-        res.status(500).json({
-            result: respons,
-            status:500
-       });
-       }
-       else if(responstatus==201)
-       {
-        res.status(201).json({
-            result: respons,
-            status:201
-       });
-       }
-       else if(responstatus==202)
-       {
-        res.status(202).json({
-            result: respons,
-            status:202
-       });
-       }
-       else if(responstatus==203)
-       {
-        res.status(203).json({
-            result: respons,
-            status:203
-       });
-       }
-       
-       else{
-     
-        //let b = await delay(); 
-        let sInserTMS_Box = await InserTMS_Box(tms_doc,invoice,box);
-        let b = await delay(); 
-        if(responstatus==200){
-      
-            let sUpdateTMS_Box =  await updateTMS_Box(tms_doc,invoice,box);
+    if(invoice!="" || typeof invoice!="undefined" ){
+        async function main(){ 
+            let sCheck_TMSBox =  checkTMS_Box(tms_doc,invoice,box); 
+            let b = await delay(); 
+          
+         
             if(responstatus==500)
             {
-                res.status(500).json({
-                    result: respons,
-                    status:500,
-                    detail:'Update false'
-               });
+             res.status(500).json({
+                 result: respons,
+                 status:500
+            });
             }
+            else if(responstatus==201)
+            {
+             res.status(201).json({
+                 result: respons,
+                 status:201
+            });
+            }
+            else if(responstatus==202)
+            {
+             res.status(202).json({
+                 result: respons,
+                 status:202
+            });
+            }
+            else if(responstatus==203)
+            {
+             res.status(203).json({
+                 result: respons,
+                 status:203
+            });
+            }
+            
             else{
-                res.status(200).json({
-                 
-                            result: arr,
-                            status:200,
-                            detail:'Update success'
-                        
-                      
-                    
-                 
-               });
-            }
-        }else{
-            res.status(500).json({
-                result: respons,
-                status:500,
-                detail:'Insert false'
-           });
-        }
+          
+             //let b = await delay(); 
+             let sInserTMS_Box = await InserTMS_Box(tms_doc,invoice,box);
+             let b = await delay(); 
+             if(responstatus==200){
            
+                 let sUpdateTMS_Box =  await updateTMS_Box(tms_doc,invoice,box);
+                 if(responstatus==500)
+                 {
+                     res.status(500).json({
+                         result: respons,
+                         status:500,
+                         detail:'Update false'
+                    });
+                 }
+                 else{
+                     res.status(200).json({
+                      
+                                 result: arr,
+                                 status:200,
+                                 detail:'Update success'
+                             
+                           
+                         
+                      
+                    });
+                 }
+             }else{
+                 res.status(500).json({
+                     result: respons,
+                     status:500,
+                     detail:'Insert false'
+                });
+             }
+                
+             
+            }
         
-       }
-   
-   
-   } 
-   main(); 
-    
+        
+             } 
+             main(); 
+    }else if(invoice==="" || typeof invoice==="undefined"){
+        TMS_Interface.model.update_status_claim(tms_doc,1,0,(res_data)=>{
+            res.json(res_data)
+        })
+    }
    }); 
 
 

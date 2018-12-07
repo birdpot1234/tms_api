@@ -13,12 +13,14 @@ var responstatus ='';
 var arr ={};
 var re_count ={};
 var sql = require("mssql");
+const TMS_Interface = require("./TMS_Interface")
 
   router.post('/tms/api/regis_2', function(req, res) { 
     let tms_doc = req.body.tms_doc;
     let invoice = req.body.invoice;
     let box     = req.body.box;
     
+    if(invoice!="" || typeof invoice!="undefined" ){
      async function main(){ 
        let sCheck_TMSBox =  checkTMS_Box(tms_doc,invoice,box); 
        let b = await delay(); 
@@ -116,7 +118,11 @@ var sql = require("mssql");
      
    } 
    main(); 
-    
+    }else if(invoice==="" || typeof invoice==="undefined"){
+        TMS_Interface.model.update_status_claim(tms_doc,2,1,(res_data)=>{
+            res.json(res_data)
+        })
+    }
    }); 
 
 
