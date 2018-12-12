@@ -51,7 +51,7 @@ var sql = require("mssql");
             ",shipment_staff_1,shipment_staff_2,QtyBox,NumBox,shipment_staff_3) "+
             " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,3,'"+jsonRequest[i].Mess+"','','"+jsonRequest[i].trip+"',DELIVERYNAME,getdate(),'','','"+jsonRequest[i].car_type+"','"+jsonRequest[i].staff1+"','"+jsonRequest[i].staff2+"',QTYbox,'"+jsonRequest[i].box+"','"+jsonRequest[i].staff3+"' FROM ConfirmBill "+
             " WHERE INVOICEID = '"+jsonRequest[i].invoice+"' AND DocumentSet ='"+jsonRequest[i].tms_doc+"' AND NumBox ='"+jsonRequest[i].box+"' ;  "+
-            " update [dbo].[TMS_Box_Amount]  SET [status] ='3' where tms_document ='" + jsonRequest[i].tms_doc+ "' AND invoice = '" + jsonRequest[i].invoice + "' AND box = '"+jsonRequest[i].box+"' ;"+
+            " update [dbo].[TMS_Box_Amount]  SET [status] ='3',send_scan = getdate() where tms_document ='" + jsonRequest[i].tms_doc+ "' AND invoice = '" + jsonRequest[i].invoice + "' AND box = '"+jsonRequest[i].box+"' ;"+
             " END "+
             "  IF(SELECT count([status]) from TMS_Box_Amount where tms_document ='"+jsonRequest[i].tms_doc+"' AND invoice = '"+jsonRequest[i].invoice+"' AND [status] =2)=0 " +
             " BEGIN " +
