@@ -10,10 +10,13 @@ const regis_3 = require('./tms_App/tms_registstep_3');
 const info    = require('./kerry_api/info');
 const update_status = require('./kerry_api/update_status');
 const tms_assign = require('./tms_App/tms_assignToMass');
+const api_geocoding = require('./tms_App/api_geocoding');
+const api_uploadslip = require('./tms_App/tms_uploadslip');
 
 ////Body parser 
 app.use(morgan('dev'));
 app.use('/upload',express.static('upload'));
+app.use('/images',express.static('images'));
 //app.use('/',express.static('regis_1'));
 app.use(bodyParser.urlencoded({ extended:true,limit:1024*1024*20,type:'application/x-www-form-urlencoding' }));
 app.use(bodyParser.json({limit:1024*1024*2000, type:'application/json'}));
@@ -35,6 +38,8 @@ app.use("/",web_api)
 app.use("/",info);
 app.use("/",update_status);
 app.use("/",tms_assign);
+app.use("/",api_geocoding);
+app.use("/",api_uploadslip);
 app.get('/',(req,res)=>{
     res.render('index');
 })

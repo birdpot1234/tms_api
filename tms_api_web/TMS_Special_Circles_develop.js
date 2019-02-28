@@ -11,21 +11,20 @@ const model = {
             var req = new sql.Request(pool)
 
             var sql_query = "SELECT        tsc_document, status \
-            FROM            dbo.TMS_Special_Circles \
+            FROM            dbo.TMS_Special_Circles_develop \
             WHERE        (status = 0) AND (tsc_document = '"+ tsc_document + "')"
 
             req.query(sql_query).then((result) => {
                 pool.close()
                 if (result.recordset.length > 0) {
-                    save_log(result, "check_status", "TMS_Special_Circles", result)
-                    callback(server_response(200, "Success", result.recordset))
-                } else {
-                    save_log(result, "check_status", "TMS_Special_Circles", result)
+                    save_log(result, "check_status", "TMS_Special_Circles_develop", result)
                     callback(server_response(204, "Status not 0", result.recordset))
+                } else {
+                    save_log(result, "check_status", "TMS_Special_Circles_develop", result)
+                    callback(server_response(200, "Success", result.recordset))
                 }
             }).catch((err) => {
-                save_log(err, "check_status", "TMS_Special_Circles", err)
-                callback(server_response(500, "Query Error", err))
+                if (err) throw err;
             });
         })
     },
@@ -42,7 +41,7 @@ const model = {
         const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
         pool.connect(err => {
             var req = new sql.Request(pool)
-            var sql_query = "UPDATE TMS_Special_Circles SET \
+            var sql_query = "UPDATE TMS_Special_Circles_develop SET \
                 status="+ status + ",\
                 messenger_code='"+ messenger_code + "',\
                 messenger_name='"+ messenger_name + "',\
@@ -59,14 +58,14 @@ const model = {
                 console.log(result);
                 pool.close()
                 if (result.rowsAffected > 0) {
-                    save_log(result, "update_status", "TMS_Special_Circles", data)
+                    save_log(result, "update_status", "TMS_Special_Circles_develop", data)
                     callback(server_response(200, "Success", result.rowsAffected))
                 } else {
-                    save_log(result, "update_status", "TMS_Special_Circles", data)
+                    save_log(result, "update_status", "TMS_Special_Circles_develop", data)
                     callback(server_response(203, "None data query", result.rowsAffected))
                 }
             }).catch((err) => {
-                save_log(err, "update_status", "TMS_Special_Circles", data)
+                save_log(err, "update_status", "TMS_Special_Circles_develop", data)
                 callback(server_response(501, "Error query SQL", err))
             })
         })
@@ -78,7 +77,7 @@ const model = {
             var req = new sql.Request(pool)
 
             var sql_query = "SELECT        TOP (1) tsc_document \
-            FROM           TMS_Special_Circles \
+            FROM           TMS_Special_Circles_develop \
             ORDER BY tsc_document DESC"
 
             req.query(sql_query).then((result) => {
@@ -110,13 +109,13 @@ const model = {
             var user_request_department = data.user_request_department
             var user_request_tel = (typeof data.user_request_tel != "undefined") ? data.user_request_tel : ""
             var receive_from = (typeof data.receive_from != "undefined") ? data.receive_from : ""
-            var receive_date = (typeof data.receive_date != "undefined") ? moment(data.receive_date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD")
-            var receive_time_first = (typeof data.receive_time_first != "undefined") ? moment(data.receive_time_first).format("H:m:s") : moment().format("H:m:s")
-            var receive_time_end = (typeof data.receive_time_end != "undefined") ? moment(data.receive_time_end).format("H:m:s") : moment().format("H:m:s")
+            var receive_date = (typeof data.receive_date != "undefined") ? moment(data.receive_date).format("YYYY-MM-DD") : ""
+            var receive_time_first = (typeof data.receive_time_first != "undefined") ? moment(data.receive_time_first).format("H:m:s") : ""
+            var receive_time_end = (typeof data.receive_time_end != "undefined") ? moment(data.receive_time_end).format("H:m:s") : ""
             var send_to = (typeof data.send_to != "undefined") ? data.send_to : ""
-            var send_date = (typeof data.send_date != "undefined") ? moment(data.send_date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD")
-            var send_time_first = (typeof data.send_time_first != "undefined") ? moment(data.send_time_first).format("H:m:s") : moment().format("H:m:s")
-            var send_time_end = (typeof data.send_time_end != "undefined") ? moment(data.send_time_end).format("H:m:s") : moment().format("H:m:s")
+            var send_date = (typeof data.send_date != "undefined") ? moment(data.send_date).format("YYYY-MM-DD") : ""
+            var send_time_first = (typeof data.send_time_first != "undefined") ? moment(data.send_time_first).format("H:m:s") : ""
+            var send_time_end = (typeof data.send_time_end != "undefined") ? moment(data.send_time_end).format("H:m:s") : ""
             var send_tel = (typeof data.send_tel_user != "undefined") ? data.send_tel_user : ""
             var task_group = (typeof data.task_group != "undefined") ? data.task_group : ""
             var task_group_document = (typeof data.task_group_document != "undefined") ? data.task_group_document : ""
@@ -145,7 +144,7 @@ const model = {
             const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
             pool.connect(err => {
                 if (err) {
-                    save_log("Connection is close", "create_tsc_one", "TMS_Special_Circles", "No connection")
+                    save_log("Connection is close", "create_tsc_one", "TMS_Special_Circles_develop", "No connection")
                     callback(server_response(500, "Connection is close", ""))
                 }
                 const transaction = new sql.Transaction(pool)
@@ -157,7 +156,7 @@ const model = {
                     })
                     var req = new sql.Request(transaction)
 
-                    var sql_query = "INSERT INTO TMS_Special_Circles \
+                    var sql_query = "INSERT INTO TMS_Special_Circles_develop \
                     ([tsc_document]\
                      ,[create_date]\
                      ,[user_request_code]\
@@ -232,7 +231,7 @@ const model = {
                      ,'"+ Zone + "'\
                      ,'"+ address_shipment + "'\
                      ,'"+ detail_cn + "'\
-                     ,'"+ typework + "' )"
+                     ,'"+ typework  + "' )"
 
                     req.query(sql_query, (err, result) => {
                         if (err) {
@@ -241,7 +240,7 @@ const model = {
                                     if (err) callback(server_response(501, "Error query SQL", err));
                                     pool.close()
                                     // console.log("sql_query", sql_query)
-                                    save_log(result, "create_tsc_one", "TMS_Special_Circles", data)
+                                    save_log(result, "create_tsc_one", "TMS_Special_Circles_develop", data)
                                     callback(server_response(501, "Error query SQL", err))
                                 })
                             }
@@ -249,7 +248,7 @@ const model = {
                             transaction.commit(err => {
                                 pool.close()
                                 if (err) callback(server_response(501, "Error query SQL", err));
-                                save_log(result, "create_tsc_one", "TMS_Special_Circles", data)
+                                save_log(result, "create_tsc_one", "TMS_Special_Circles_develop", data)
                                 callback(server_response(200, "Success", result.recordset))
                             })
                         }
@@ -269,17 +268,17 @@ const model = {
             ,receive_time_end, send_to, CONVERT(varchar(10), send_date, 120) AS send_date, CONVERT (varchar(5), send_time_first, 114) AS send_time_first, send_time_end, send_tel, task_group, task_group_document, task_group_amount, task_group_quantity, task_group_pic, comment, work_type, status, messenger_code \
             ,messenger_name, car_type, shipment_staff_1, shipment_staff_2, shipment_staff_3, messenger_comment, task_detail, status_finish, customerID, customerName, Zone, address_shipment, detail_cn, status_clear \
             ,time_update,CASE WHEN CONVERT (varchar(2) , create_date , 114) > 16 THEN 2 ELSE 0 END AS day_task \
-            FROM            dbo.TMS_Special_Circles \
-            WHERE        (CONVERT(VARCHAR(10),create_date,120) >= '"+ date_start + "' )"
+            FROM            dbo.TMS_Special_Circles_develop \
+            WHERE        (CONVERT(VARCHAR(10),create_date,120) LIKE '"+ date_start + "%' )"
 
             req.query(sql_query).then((result) => {
                 pool.close()
                 // console.log(sql_query,result);
                 if (result.recordset.length > 0) {
-                    save_log(result.recordset, "find_between_date", "TMS_Special_Circles", result.recordset)
+                    save_log(result.recordset, "find_between_date", "TMS_Special_Circles_develop", result.recordset)
                     callback(server_response(200, "Success", result.recordset))
                 } else {
-                    save_log(result.recordset, "find_between_date", "TMS_Special_Circles", result.recordset)
+                    save_log(result.recordset, "find_between_date", "TMS_Special_Circles_develop", result.recordset)
                     callback(server_response(500, "Error", result.recordset))
                 }
             }).catch((err) => {
@@ -298,17 +297,17 @@ const model = {
             ,receive_time_end, send_to, CONVERT(varchar(10), send_date, 120) AS send_date, CONVERT (varchar(5), send_time_first, 114) AS send_time_first, send_time_end, send_tel, task_group, task_group_document, task_group_amount, task_group_quantity, task_group_pic, comment, work_type, status, messenger_code \
             ,messenger_name, car_type, shipment_staff_1, shipment_staff_2, shipment_staff_3, messenger_comment, task_detail, status_finish, customerID, customerName, Zone, address_shipment, detail_cn, status_clear \
             ,time_update,CASE WHEN CONVERT (varchar(2) , create_date , 114) > 16 THEN 2 ELSE 0 END AS day_task \
-            FROM            dbo.TMS_Special_Circles \
-            WHERE        (CONVERT(VARCHAR(10),create_date,120) < '"+ date_start + "' ) AND (status <> 10) "
+            FROM            dbo.TMS_Special_Circles_develop \
+            WHERE        (CONVERT(VARCHAR(10),create_date,120) < '"+ date_start + "' )"
 
             req.query(sql_query).then((result) => {
                 pool.close()
                 // console.log(sql_query,result);
                 if (result.recordset.length > 0) {
-                    save_log(result.recordset, "find_between_date", "TMS_Special_Circles", result.recordset)
+                    save_log(result.recordset, "find_between_date", "TMS_Special_Circles_develop", result.recordset)
                     callback(server_response(200, "Success", result.recordset))
                 } else {
-                    save_log(result.recordset, "find_between_date", "TMS_Special_Circles", result.recordset)
+                    save_log(result.recordset, "find_between_date", "TMS_Special_Circles_develop", result.recordset)
                     callback(server_response(500, "Error", result.recordset))
                 }
             }).catch((err) => {

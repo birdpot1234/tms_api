@@ -9,18 +9,16 @@ const TBL_ReportDetail=require("./ReportDetail")
 const BillToApp=require("./BillToApp")
 const Workloop =require("./Workloop")
 const App_SignaturePic =require("./App_SignaturePic")
-const TMS_Interface = require("./TMS_Interface")
 
 //----------------All App_SignaturePic
 router.get("/signature/get-signature/:invoice", (req, resp) => {
     var invoice = req.params.invoice
     App_SignaturePic.model.get_data_signature(invoice, (res_data) => {
-        resp.json(res_data)
+        resp.status(res_data.status).json(res_data)
     })
 })
 //----------------All App_SignaturePic
 
-//----------------Edit
 router.get("/edit/work-loop/:type_data&:input_data", (req, resp) => {
     var type_data = req.params.type_data, input_data = req.params.input_data
     View_Report.model.get_TMS_Workloop(type_data, input_data, (res_data) => {
@@ -48,21 +46,6 @@ router.post("/edit/update-mess/",(req,resp)=>{
         resp.json(res_data)
     })
 })
-router.get("/edit/get-return-mess/:type_data&:input_data", (req, resp) => {
-    var type_data = req.params.type_data, input_data = req.params.input_data
-    BillToApp.model.get_data_return_mess(type_data, input_data, (res_data) => {
-        console.log("res_data", res_data)
-        resp.json(res_data)
-    })
-})
-router.post("/edit/return-mess/",(req,resp)=>{
-    // console.log('req',req);
-    var data=req.body[0]
-    BillToApp.model.return_mess(data.invoice,data.id_user,(res_data)=>{
-        resp.json(res_data)
-    })
-})
-//----------------Edit
 
 router.get("/login/:id&:pass", (req, resp) => {
     var id = req.params.id, pass = req.params.pass
@@ -110,19 +93,12 @@ router.get("/report/report-status-claim/:dateSt&:dateEn",(req,resp)=>{
         resp.json(res_data)
     })
 })
-router.get("/report/report-formaccount/:inDate",(req,resp)=>{
+router.get("/report/report-formaccount/:messNo&:inDate",(req,resp)=>{
     let mess_code=req.params.messNo
     let input_date=req.params.inDate
-    TBL_Report.model.create_report_account(input_date,(res_data)=>{
-        if(res_data.status==200){
-            // console.log("res_data",res_data);
-            TBL_Report.model.get_report_form_account(input_date,(res_data)=>{
-                // console.log("res_data",res_data);
-                resp.json(res_data)
-            })
-        }else{
-            resp.json(res_data)
-        }
+    TBL_Report.model.get_report_form_account(mess_code,input_date,(res_data)=>{
+        console.log("res_data",res_data);
+        resp.json(res_data)
     })
 })
 router.get("/report/report-clearcash-by-cleardate/:mess_no&:clear_date",(req,resp)=>{  //---Update 2019-01-28 by SamuraiiHot
@@ -132,35 +108,14 @@ router.get("/report/report-clearcash-by-cleardate/:mess_no&:clear_date",(req,res
         resp.json(res_data)
     })
 })
-router.get("/report/report-status-claim/detail/:itr_no",(req,resp)=>{
-    View_Report.model.get_ITR_Detail(req.params.itr_no,(res_data)=>{
-        resp.json(res_data)
-    })
-})
 //----------------All Report
-
-//----------------All Clearbill
-router.post("/clearbill/update-clearbill-kerry-dhl/",(req,resp)=>{
-    // console.log("req",req.body)
-    TMS_Interface.model.update_tms_kerry_dhl(req.body,(res_data)=>{
-        // console.log("res_data",res_data);
-        resp.json(res_data)
-    })
-})
-router.get("/clearbill/get-clearbill-kerry-dhl/:inType&:inDate",(req,resp)=>{
-    let in_type=req.params.inType,in_date=req.params.inDate
-    TMS_Interface.model.get_tms_kerry_dhl(in_type,in_date,(res_data)=>{
-        // console.log("res_data",res_data);
-        resp.json(res_data)
-    })
-})
 
 router.get("/clearbill/clearbill-mess-claim/:messNo&:inDate",(req,resp)=>{
     let mess_code=req.params.messNo
     let input_date=req.params.inDate
     // console.log("object",req)
     TBL_Report.model.get_clear_bill_claim_find_by_mess(mess_code,input_date,(res_data)=>{
-        // console.log("res_data",res_data);
+        console.log("res_data",res_data);
         resp.json(res_data)
     })
 })
@@ -170,7 +125,7 @@ router.get("/clearbill/clearbill-mess/:messNo&:inDate",(req,resp)=>{
     let input_date=req.params.inDate
     // console.log("object",req)
     TBL_Report.model.get_clear_bill_find_by_mess(mess_code,input_date,(res_data)=>{
-        // console.log("res_data",res_data);
+        console.log("res_data",res_data);
         resp.json(res_data)
     })
 })
@@ -193,7 +148,6 @@ router.post("/clearbill-detail/update-detail/",(req,resp)=>{
         resp.json(res_data)
     })
 })
-//----------------All Clearbill
 
 //---------for Develop
 router.get("/special-circles-dev/get-today-task/:dateSt&:dateEn",(req,resp)=>{

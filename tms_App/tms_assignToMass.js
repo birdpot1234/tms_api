@@ -34,7 +34,7 @@ var sql = require("mssql");
         for(let i in jsonRequest)
         {
            // console.log(jsonRequest.shipment[val].tms_doc)
-           console.log(jsonRequest[i])
+          // console.log(jsonRequest[i])
           if(jsonRequest[i].Mess == 'kerry')
           {
             strInsertBill = strInsertBill +" update [dbo].[TMS_Box_Amount]  SET [status] ='3' where tms_document ='" + jsonRequest[i].tms_doc+ "' AND invoice = '" + jsonRequest[i].invoice + "' AND box = '"+jsonRequest[i].box+"' ;"+
@@ -44,18 +44,19 @@ var sql = require("mssql");
            " END " 
           }
           else{
+			  //console.log('cartype55555555',jsonRequest[i].car_type)
             strInsertBill = strInsertBill +"IF(SELECT COUNT(INVOICEID) from BillToApp WHERE DocumentSet = '"+jsonRequest[i].tms_doc+"' AND INVOICEID = '"+jsonRequest[i].invoice+"' AND NumBox = '"+jsonRequest[i].box+"')=(0)"+
             " BEGIN "+
             " INSERT INTO BillToApp(INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name "+
             ",StoreZone,[Status],MessengerID,MessengerName,Trip,DELIVERYNAME,[datetime],TelCustomer,StatusRework,car_type "+
             ",shipment_staff_1,shipment_staff_2,QtyBox,NumBox,shipment_staff_3) "+
-            " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,'StoreZone',3,'"+jsonRequest[i].Mess+"','','"+jsonRequest[i].trip+"',DELIVERYNAME,getdate(),'','','"+jsonRequest[i].car_type+"','"+jsonRequest[i].staff1+"','"+jsonRequest[i].staff2+"',QTYbox,'"+jsonRequest[i].box+"','"+jsonRequest[i].staff3+"' FROM ConfirmBill "+
-            " WHERE INVOICEID = '"+jsonRequest[i].invoice+"' AND DocumentSet ='"+jsonRequest[i].tms_doc+"' AND NumBox ='"+jsonRequest[i].box+"' ;  "+
-            " update [dbo].[TMS_Box_Amount]  SET [status] ='3' where tms_document ='" + jsonRequest[i].tms_doc+ "' AND invoice = '" + jsonRequest[i].invoice + "' AND box = '"+jsonRequest[i].box+"' ;"+
+            " SELECT '"+jsonRequest[i].invoice+"','"+jsonRequest[i].tms_doc+"',customer_code,customer_name,address_shipment,sales_code,sales_name,store_zone,3,'"+jsonRequest[i].Mess+"','','"+jsonRequest[i].trip+"',customer_name,getdate(),'','','"+jsonRequest[i].car_type+"','"+jsonRequest[i].staff1+"','"+jsonRequest[i].staff2+"',box_amount,'"+jsonRequest[i].box+"','"+jsonRequest[i].staff3+"' FROM TMS_Interface "+
+            " WHERE  tms_document ='"+jsonRequest[i].tms_doc+"';  "+
+            " update [dbo].[TMS_Box_Amount]  SET [status] ='3',send_scan = getdate() where tms_document ='" + jsonRequest[i].tms_doc+ "' AND invoice = '" + jsonRequest[i].invoice + "' AND box = '"+jsonRequest[i].box+"' ;"+
             " END "+
-            "  IF(SELECT count([status]) from TMS_Box_Amount where tms_document ='"+jsonRequest[i].tms_doc+"' AND invoice = '"+jsonRequest[i].invoice+"' AND [status] =2)=0 " +
+            " IF(SELECT count([status]) from TMS_Box_Amount where tms_document ='"+jsonRequest[i].tms_doc+"' AND invoice = '"+jsonRequest[i].invoice+"' AND [status] =2)=0 " +
             " BEGIN " +
-            " UPDATE TMS_Interface set [status] = 3 where tms_document='"+jsonRequest[i].tms_doc+"' AND invoice = '"+jsonRequest[i].invoice+"'  AND [status] = 2 " +
+            " UPDATE TMS_Interface set [status] = 3,claim_send_scan = Getdate() where tms_document='"+jsonRequest[i].tms_doc+"'  AND [status] = 2 " +
             " END " 
           }
            
@@ -85,7 +86,7 @@ var sql = require("mssql");
            }
 
         //}
-        console.log(strInsertBill)
+       // console.log(strInsertBill)
     
        
  
@@ -112,7 +113,7 @@ var sql = require("mssql");
         else{
           const pool1 = new sql.ConnectionPool(con.condb1(), err => {
             var result_query = queryString;
-            console.log(result_query);
+          //  console.log(result_query);
             pool1.request().query(result_query, (err, recordsets) => {
             
              
@@ -150,7 +151,7 @@ var sql = require("mssql");
     " INSERT INTO BillToApp(INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name "+
       ",StoreZone,[Status],MessengerID,MessengerName,Trip,DELIVERYNAME,[datetime],TelCustomer,StatusRework,car_type "+
       ",shipment_staff_1,shipment_staff_2,QtyBox,NumBox) "+
-      " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,'StoreZone',3,'"+Mess+"','','"+trip+"',DELIVERYNAME,getdate(),'','','"+car_type+"','"+staff1+"','"+staff2+"',QTYbox,'"+numBox+"' FROM ConfirmBill "+
+      " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,3,'"+Mess+"','','"+trip+"',DELIVERYNAME,getdate(),'','','"+car_type+"','"+staff1+"','"+staff2+"',QTYbox,'"+numBox+"' FROM ConfirmBill "+
       " WHERE INVOICEID = '"+inv+"' AND DocumentSet ='"+tms_doc+"' AND NumBox ='"+numBox+"'  "+
       
       " END"+
@@ -162,7 +163,7 @@ var sql = require("mssql");
       
   
       
-  console.log(queryString)
+  //console.log(queryString)
     sql.connect(con.condb1(), function(err) {
   
         if (err) {
@@ -192,7 +193,7 @@ var sql = require("mssql");
               
                   var result = '';
                   result = recordsets['recordsets'];
-                  console.log(result.length)
+               //   console.log(result.length)
                   result_hold = result[0];
                 
                   arr =result_hold;
@@ -218,7 +219,7 @@ sql.close()
   " INSERT INTO BillToApp(INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name "+
     ",StoreZone,[Status],MessengerID,MessengerName,Trip,DELIVERYNAME,[datetime],TelCustomer,StatusRework,car_type "+
     ",shipment_staff_1,shipment_staff_2,QtyBox,NumBox) "+
-    " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,'StoreZone',3,'"+Mess+"','','"+trip+"',DELIVERYNAME,getdate(),'','','"+car_type+"','"+staff1+"','"+staff2+"',QTYbox,'"+numBox+"' FROM ConfirmBill "+
+    " SELECT INVOICEID,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,3,'"+Mess+"','','"+trip+"',DELIVERYNAME,getdate(),'','','"+car_type+"','"+staff1+"','"+staff2+"',QTYbox,'"+numBox+"' FROM ConfirmBill "+
     " WHERE INVOICEID = '"+inv+"' AND DocumentSet ='"+tms_doc+"' AND NumBox ='"+numBox+"'  "+
     
     " END"+
@@ -230,7 +231,7 @@ sql.close()
     
 
     
-console.log(queryString)
+//console.log(queryString)
   sql.connect(con.condb1(), function(err) {
 
       if (err) {
@@ -260,7 +261,7 @@ console.log(queryString)
             
                 var result = '';
                 result = recordsets['recordsets'];
-                console.log(result.length)
+               // console.log(result.length)
                 result_hold = result[0];
               
                 arr =result_hold;
@@ -303,7 +304,7 @@ console.log(queryString)
         else{
           const pool1 = new sql.ConnectionPool(con.condb1(), err => {
             var result_query = queryString;
-            console.log(result_query);
+           // console.log(result_query);
             pool1.request().query(result_query, (err, recordsets) => {
             
              
