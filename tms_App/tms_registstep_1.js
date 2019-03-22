@@ -188,8 +188,11 @@ async function InserTMS_Box(tms_doc,inv,numBox){
                     " SELECT INVOICEID,ITEMID, ItemName, QTY,TotalAmount,TotalAmount/QTY FROM DPLV_SCSO_InvoiceAndPreL2  "+
                     " WHERE  INVOICEID = '"+inv+"' "+
                     " END "+
+                    "IF(select count(INVOICEID) FROM ConfirmBill where INVOICEID ='"+inv+"' AND DocumentSet = '"+tms_doc+"' AND NumBox ='"+numBox+"')=(0)"+
+                    "BEGIN "+
                     "INSERT INTO [dbo].[ConfirmBill](INVOICEID,SO,DocumentSet,CustomerID,CustomerName,AddressShipment,SaleID,Sale_Name,StoreZone,Remark,[Status],QTYbox,DELIVERYNAME,CreateDate,Counting,NumBox) "+
-                    "select invoice,so,tms_document,customer_code,customer_name,address_shipment,sales_code,sales_name,store_zone,'TEST DEALER',1,box_amount,customer_name,delivery_date,3,'"+numBox+"' FROM [dbo].[TMS_Interface] where invoice = '"+inv+"' AND tms_document ='"+tms_doc+"'"
+                    "select invoice,so,tms_document,customer_code,customer_name,address_shipment,sales_code,sales_name,store_zone,'TEST DEALER',1,box_amount,customer_name,delivery_date,3,'"+numBox+"' FROM [dbo].[TMS_Interface] where invoice = '"+inv+"' AND tms_document ='"+tms_doc+"'"+
+                    "END"
 console.log(queryString) 
  sql.connect(con.condb1(), function(err) {
 
@@ -239,7 +242,7 @@ console.log(queryString)
     let setStep =1 
     sql.close()
     //var sql = require("mssql");
-      var queryString = "update [dbo].[TMS_Box_Amount]  SET [status] ='"+setStep+"' where tms_document ='" + tms_doc + "' AND invoice = '" + inv + "' AND box = '"+numBox+"' "+
+      var queryString = "update [dbo].[TMS_Box_Amount]  SET [status] ='"+setStep+"',confirm_scan = getdate() where tms_document ='" + tms_doc + "' AND invoice = '" + inv + "' AND box = '"+numBox+"' "+
                         "  IF(SELECT count([status]) from TMS_Box_Amount where tms_document ='"+tms_doc+"' AND invoice = '"+inv+"' AND [status] =0)>=1 " +
                         " BEGIN " +
                         " select top(1) * from TMS_Box_Amount " +

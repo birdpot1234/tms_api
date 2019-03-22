@@ -196,7 +196,7 @@ async function checkTMS_Box(tms_doc,inv,NumBox){
     let setStep = 2
    
     sql.close()
-      var queryString = "update [dbo].[TMS_Box_Amount]  SET [status] ="+setStep+" where tms_document ='" + tms_doc + "' AND invoice = '" + inv + "' AND box = '"+numBox+"' "+
+      var queryString = "update [dbo].[TMS_Box_Amount]  SET [status] ="+setStep+",receive_scan = getdate() where tms_document ='" + tms_doc + "' AND invoice = '" + inv + "' AND box = '"+numBox+"' "+
                         "  IF(SELECT count([status]) from TMS_Box_Amount where tms_document ='"+tms_doc+"' AND invoice = '"+inv+"' AND [status] =1)>=1 " +
                         " BEGIN " +
                         " select top(1)* from TMS_Box_Amount " +
