@@ -18,20 +18,21 @@ const model = {
                 pool.close()
                 if (result.recordset.length > 0) {
                     save_log(result, "check_status", "TMS_Special_Circles", result)
-                    callback(server_response(204, "Status not 0", result.recordset))
+                    callback(server_response(200, "Success", result.recordset))
                 } else {
                     save_log(result, "check_status", "TMS_Special_Circles", result)
-                    callback(server_response(200, "Success", result.recordset))
+                    callback(server_response(204, "Status not 0", result.recordset))
                 }
             }).catch((err) => {
-                if (err) throw err;
+                save_log(err, "check_status", "TMS_Special_Circles", err)
+                callback(server_response(500, "Query Error", err))
             });
         })
     },
     update_status(data, callback) {
         //--------------Status = 3
         let status, tsc_document, invoice, car_type, staff1, staff2, staff3, zone, trip, messenger_code, messenger_name
-        let sql_where_in=""
+        let sql_where_in = ""
         data.forEach((val, i) => {
             status = 3, invoice = val.invoice, car_type = val.car_type, staff1 = val.staff1, staff2 = val.staff2, staff3 = val.staff3, zone = val.zone, trip = val.trip, messenger_code = val.Mess, messenger_name = val.Mess_name
             tsc_document = val.tms_doc
@@ -52,14 +53,15 @@ const model = {
                 trip='"+ trip + "',\
                 Zone='"+ zone + "' \
                 WHERE (tsc_document IN ("+ sql_where_in + "'inwadmin') )"
-                // console.log(sql_query);
+
+            // console.log(sql_query);
             req.query(sql_query).then((result) => {
                 console.log(result);
                 pool.close()
                 if (result.rowsAffected > 0) {
                     save_log(result, "update_status", "TMS_Special_Circles", data)
                     callback(server_response(200, "Success", result.rowsAffected))
-                }else{
+                } else {
                     save_log(result, "update_status", "TMS_Special_Circles", data)
                     callback(server_response(203, "None data query", result.rowsAffected))
                 }
@@ -100,43 +102,44 @@ const model = {
     create_tsc_one(data, callback) {
         this.gen_tsc_document((res_data) => {
             //------กำหนดค่าให้กับตัวแปรตามฟิลด์
-
+            console.log("data", data);
             var tsc_document = res_data
             var create_date = moment().format("YYYY-MM-DD H:m:s")
             var user_request_code = data.user_request_code
             var user_request_name = data.user_request_name
             var user_request_department = data.user_request_department
-            var user_request_tel = data.user_request_tel
-            var receive_from = data.receive_from
-            var receive_date = data.receive_date
-            var receive_time_first = data.receive_time_first
-            var receive_time_end = data.receive_time_end
-            var send_to = data.send_to
-            var send_date = data.send_date
-            var send_time_first = data.send_time_first
-            var send_time_end = data.send_time_end
-            var send_tel = data.send_tel
-            var task_group = data.task_group
-            var task_group_document = data.task_group_document
-            var task_group_amount = data.task_group_amount
-            var task_group_quantity = data.task_group_quantity
-            var task_group_pic = data.task_group_pic
-            var comment = data.comment
-            var work_type = data.work_type
-            var status = data.status
-            var messenger_code = data.messenger_code
-            var messenger_name = data.messenger_name
-            var car_type = data.car_type
-            var shipment_staff_1 = data.shipment_staff_1
-            var shipment_staff_2 = data.shipment_staff_2
-            var messenger_comment = data.messenger_comment
-            var task_detail = data.task_detail
-            var status_finish = data.status_finish
-            var customerID = data.customerID
-            var customerName = data.customerName
-            var Zone = data.Zone
-            var address_shipment = data.address_shipment
-            var detail_cn = data.detail_cn
+            var user_request_tel = (typeof data.user_request_tel != "undefined") ? data.user_request_tel : ""
+            var receive_from = (typeof data.receive_from != "undefined") ? data.receive_from : ""
+            var receive_date = (typeof data.receive_date != "undefined") ? moment(data.receive_date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD")
+            var receive_time_first = (typeof data.receive_time_first != "undefined") ? moment(data.receive_time_first).format("H:m:s") : moment().format("H:m:s")
+            var receive_time_end = (typeof data.receive_time_end != "undefined") ? moment(data.receive_time_end).format("H:m:s") : moment().format("H:m:s")
+            var send_to = (typeof data.send_to != "undefined") ? data.send_to : ""
+            var send_date = (typeof data.send_date != "undefined") ? moment(data.send_date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD")
+            var send_time_first = (typeof data.send_time_first != "undefined") ? moment(data.send_time_first).format("H:m:s") : moment().format("H:m:s")
+            var send_time_end = (typeof data.send_time_end != "undefined") ? moment(data.send_time_end).format("H:m:s") : moment().format("H:m:s")
+            var send_tel = (typeof data.send_tel_user != "undefined") ? data.send_tel_user : ""
+            var task_group = (typeof data.task_group != "undefined") ? data.task_group : ""
+            var task_group_document = (typeof data.task_group_document != "undefined") ? data.task_group_document : ""
+            var task_group_amount = (typeof data.task_group_amount != "undefined") ? data.task_group_amount : ""
+            var task_group_quantity = (typeof data.task_group_quantity != "undefined") ? data.task_group_quantity : ""
+            var task_group_pic = (typeof data.task_group_pic != "undefined") ? data.task_group_pic : ""
+            var comment = (typeof data.comment != "undefined") ? data.comment : ""
+            var work_type = (typeof data.work_type != "undefined") ? data.work_type : ""
+            var status = (typeof data.status != "undefined") ? data.status : ""
+            var messenger_code = (typeof data.messenger_code != "undefined") ? data.messenger_code : ""
+            var messenger_name = (typeof data.messenger_name != "undefined") ? data.messenger_name : ""
+            var car_type = (typeof data.car_type != "undefined") ? data.car_type : ""
+            var shipment_staff_1 = (typeof data.shipment_staff_1 != "undefined") ? data.shipment_staff_1 : ""
+            var shipment_staff_2 = (typeof data.shipment_staff_2 != "undefined") ? data.shipment_staff_2 : ""
+            var messenger_comment = (typeof data.messenger_comment != "undefined") ? data.messenger_comment : ""
+            var task_detail = (typeof data.task_detail != "undefined") ? data.task_detail : ""
+            var status_finish = (typeof data.status_finish != "undefined") ? data.status_finish : ""
+            var customerID = (typeof data.customerID != "undefined") ? data.customerID : ""
+            var customerName = (typeof data.customerName != "undefined") ? data.customerName : ""
+            var Zone = (typeof data.Zone != "undefined") ? data.Zone : ""
+            var address_shipment = (typeof data.address_shipment != "undefined") ? data.address_shipment : ""
+            var detail_cn = (typeof data.detail_cn != "undefined") ? data.detail_cn : ""
+            var typework = (typeof data.typework != "undefined") ? data.typework : ""
 
             sql.close()
             const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
@@ -190,7 +193,8 @@ const model = {
                      ,[customerName]\
                      ,[Zone]\
                      ,[address_shipment] \
-                     ,[detail_cn])\
+                     ,[detail_cn] \
+                     ,[typework])\
                      VALUES \
                      ( '"+ tsc_document + "'\
                      ,'"+ create_date + "'\
@@ -227,7 +231,8 @@ const model = {
                      ,'"+ customerName + "'\
                      ,'"+ Zone + "'\
                      ,'"+ address_shipment + "'\
-                     ,'"+ detail_cn + "' )"
+                     ,'"+ detail_cn + "'\
+                     ,'"+ typework + "' )"
 
                     req.query(sql_query, (err, result) => {
                         if (err) {
@@ -253,21 +258,52 @@ const model = {
             })
         })
     },
-    find_between_date(date_start, date_end, callback) {
+    find_today_date(date_start, callback) {
+        let whereDate = moment(date_start).day(-1)
         sql.close()
         const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
         pool.connect(err => {
             var req = new sql.Request(pool)
 
-            var sql_query = "SELECT        id, tsc_document, create_date, user_request_code, user_request_name, user_request_department, user_request_tel, receive_from, CONVERT(varchar(10), receive_date, 120) AS receive_date, receive_time_first \
-            ,receive_time_end, send_to, send_date, send_time_first, send_time_end, send_tel, task_group, task_group_document, task_group_amount, task_group_quantity, task_group_pic, comment, work_type, status, messenger_code \
+            var sql_query = "SELECT        id, tsc_document, create_date, user_request_code, user_request_name, user_request_department, user_request_tel, receive_from, CONVERT(varchar(10), receive_date, 120) AS receive_date, CONVERT (varchar(5), receive_time_first, 114) AS receive_time_first \
+            ,receive_time_end, send_to, CONVERT(varchar(10), send_date, 120) AS send_date, CONVERT (varchar(5), send_time_first, 114) AS send_time_first, send_time_end, send_tel, task_group, task_group_document, task_group_amount, task_group_quantity, task_group_pic, comment, work_type, status, messenger_code \
             ,messenger_name, car_type, shipment_staff_1, shipment_staff_2, shipment_staff_3, messenger_comment, task_detail, status_finish, customerID, customerName, Zone, address_shipment, detail_cn, status_clear \
-            ,time_update \
+            ,time_update,CASE WHEN CONVERT (varchar(2) , create_date , 114) > 16 THEN 2 ELSE 0 END AS day_task \
             FROM            dbo.TMS_Special_Circles \
-            WHERE        (CONVERT(varchar(10), receive_date, 120) BETWEEN '"+ date_start + "' AND '" + date_end + "')"
+            WHERE        (CONVERT(VARCHAR(10),create_date,120) >= '"+ date_start + "' )"
 
             req.query(sql_query).then((result) => {
                 pool.close()
+                // console.log(sql_query,result);
+                if (result.recordset.length > 0) {
+                    save_log(result.recordset, "find_between_date", "TMS_Special_Circles", result.recordset)
+                    callback(server_response(200, "Success", result.recordset))
+                } else {
+                    save_log(result.recordset, "find_between_date", "TMS_Special_Circles", result.recordset)
+                    callback(server_response(500, "Error", result.recordset))
+                }
+            }).catch((err) => {
+                if (err) throw err;
+            });
+        })
+    },
+    find_over_date(date_start, callback) {
+        let whereDate = moment(date_start).day(-1)
+        sql.close()
+        const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
+        pool.connect(err => {
+            var req = new sql.Request(pool)
+
+            var sql_query = "SELECT        id, tsc_document, create_date, user_request_code, user_request_name, user_request_department, user_request_tel, receive_from, CONVERT(varchar(10), receive_date, 120) AS receive_date, CONVERT (varchar(5), receive_time_first, 114) AS receive_time_first \
+            ,receive_time_end, send_to, CONVERT(varchar(10), send_date, 120) AS send_date, CONVERT (varchar(5), send_time_first, 114) AS send_time_first, send_time_end, send_tel, task_group, task_group_document, task_group_amount, task_group_quantity, task_group_pic, comment, work_type, status, messenger_code \
+            ,messenger_name, car_type, shipment_staff_1, shipment_staff_2, shipment_staff_3, messenger_comment, task_detail, status_finish, customerID, customerName, Zone, address_shipment, detail_cn, status_clear \
+            ,time_update,CASE WHEN CONVERT (varchar(2) , create_date , 114) > 16 THEN 2 ELSE 0 END AS day_task \
+            FROM            dbo.TMS_Special_Circles \
+            WHERE        (CONVERT(VARCHAR(10),create_date,120) < '"+ date_start + "' ) AND (status <> 10) "
+
+            req.query(sql_query).then((result) => {
+                pool.close()
+                // console.log(sql_query,result);
                 if (result.recordset.length > 0) {
                     save_log(result.recordset, "find_between_date", "TMS_Special_Circles", result.recordset)
                     callback(server_response(200, "Success", result.recordset))

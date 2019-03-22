@@ -16,8 +16,9 @@ router.get("/get-submessenger/",(req,resp)=>{
         resp.json(res_data)
     })
 })
-router.get("/get-messenger/",(req,resp)=>{
-    Messenger.model.find_no_admin((res_data) => {
+router.get("/get-messenger/:type_mess",(req,resp)=>{
+    var type_mess=req.params.type_mess
+    Messenger.model.find_no_admin(type_mess,(res_data) => {
         resp.json(res_data)
     })
 })

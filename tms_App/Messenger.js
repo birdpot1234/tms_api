@@ -102,7 +102,7 @@ const model = {
             });
         })
     },
-    find_no_admin(callback) {
+    find_no_admin(type_mess,callback) {
         sql.close()
         const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
         pool.connect(err => {
@@ -114,7 +114,8 @@ const model = {
 
             var sql_query = "SELECT IDMess, MessNO, MessName \
             FROM            Messenger\
-            WHERE        (IDMess LIKE 'MDL%') AND (Activate = 1)"
+            WHERE        (IDMess LIKE '"+type_mess+"%') AND (Activate = 1) \
+            ORDER BY IDMess"
             req.query(sql_query).then((result) => {
                 pool.close()
                 save_log(result, "find_no_admin", "Messenger", "ดึงข้อมูล Messenger")
