@@ -27,7 +27,7 @@ const model = {
             }
             var req = new sql.Request(pool)
 
-            var sql_query = "SELECT      dbo.BillToApp.INVOICEID, dbo.BillToApp.DocumentSet, dbo.BillToApp.CustomerName, dbo.Messenger.IDMess, dbo.Messenger.MessName, dbo.App_workApp.status \
+            var sql_query = "SELECT    dbo.BillToApp.INVOICEID, dbo.BillToApp.DocumentSet, dbo.BillToApp.CustomerName, dbo.Messenger.IDMess, dbo.Messenger.MessName, dbo.App_workApp.status \
             FROM            dbo.BillToApp LEFT OUTER JOIN \
                                      dbo.App_workApp ON dbo.BillToApp.INVOICEID = dbo.App_workApp.invoiceNumber LEFT OUTER JOIN \
                                      dbo.Messenger ON dbo.BillToApp.MessengerID = dbo.Messenger.IDMess \
@@ -140,7 +140,7 @@ const model = {
             receive_success=0,LastUpdateBy='"+id_user+"' \
             WHERE INVOICEID LIKE '"+invoice+"' \
             DELETE FROM App_workApp WHERE invoiceNumber LIKE '"+invoice+"' "
-            console.log("result", sql_query)
+            // console.log("result", sql_query)
             req.query(sql_query).then((result, err) => {
                 pool.close()
                 // console.log("result", result)

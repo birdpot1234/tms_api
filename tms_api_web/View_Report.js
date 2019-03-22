@@ -35,6 +35,38 @@ const model = {
             });
         })
     },
+    get_TMS_Status_Surach_API_Tracking(date_start, date_end, callback) {
+        sql.close()
+        const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
+        pool.connect(err => {
+            if (err) {
+                save_log(err, "get_TMS_Status_Surach_API_Tracking", "TMS_Status_API_Tracking", err)
+                callback(server_response(500, "Error", err))
+            }
+            var req = new sql.Request(pool)
+
+            var sql_query = "SELECT        document_main, document_sub, customer_name, sales_group, store_zone, code_zone, invoice_qty, invoice_amount, box_amount, dlv_term, delivery_date, status, confirm_scan, receive_scan, send_scan, MessName, \
+            stamp_workapp, stamp_finishapp, stamp_report, create_date, invoice_date,dpl_hub_dlvterm,inventlocationid \
+            FROM            dbo.TMS_Status_API_Tracking \
+            WHERE (document_sub LIKE 'IN%') AND (inventlocationid LIKE 'WS1') AND (invoice_date BETWEEN '"+ date_start + "' AND '" + date_end + "' )"
+            console.log("object", sql_query)
+            req.query(sql_query).then((result) => {
+                pool.close()
+                if (result.recordset.length > 0) {
+                    save_log(result.recordset, "get_TMS_Status_Surach_API_Tracking", "TMS_Status_API_Tracking", result.recordset)
+                    callback(server_response(200, "Success", result.recordset))
+                } else {
+                    save_log(result.recordset, "get_TMS_Status_Surach_API_Tracking", "TMS_Status_API_Tracking", result.recordset)
+                    callback(server_response(500, "Error", result.recordset))
+                }
+            }).catch((err) => {
+                if (err) {
+                    save_log(err, "get_TMS_Status_Surach_API_Tracking", "TMS_Status_API_Tracking", err)
+                    callback(server_response(500, "Error", err))
+                }
+            });
+        })
+    },
     get_TMS_Status_Claim_API_Tracking(date_start, date_end, callback) {
         sql.close()
         const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
@@ -129,7 +161,7 @@ const model = {
             FROM TMS_Workloop \
             WHERE "+ sqlWhere + " \
             ORDER BY  INVOICEID"
-            console.log("object", sql_query)
+            // console.log("object", sql_query)
             req.query(sql_query).then((result, err) => {
                 pool.close()
                 if (result.recordset.length > 0) {

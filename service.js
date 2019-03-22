@@ -1,5 +1,8 @@
 const moment = require('moment')
 const log = require('log-to-file');
+const Cryptr = require('cryptr');
+const cryptr = new Cryptr('TMSZfeotrtDapSloufst');
+var fs = require("fs");
 
 const response = (status, dev_msg, data) => {
     switch (status) {
@@ -43,6 +46,8 @@ const save_log = (res_data, type, tbl_name, input_data) => {
     //-----3. tbl_name = ชื่อของตารางที่เกี่ยวข้อง
     //-----4. input_data = ข้อมูลที่นำเข้ามา
 
+    Check_Log_file("log-server.txt")
+
     if (Array.isArray(res_data)) {
         res_data.forEach((val, index) => {
             const lognow = moment().format("YYYY-MM-DD H:m:s")
@@ -60,11 +65,19 @@ const save_log = (res_data, type, tbl_name, input_data) => {
     }
 }
 
-const Gen_Document5digit = (char_doc, last_doc, callback) => {
+const save_log_send_mail=(result)=>{
+    Check_Log_file("log-server-send-Email.txt")
+    const lognow = moment().format("YYYY-MM-DD H:m:s")
+    log("Send email time -->  "+lognow + " :: " + result.length + " :: ", "log-server-send-Email.txt")
+}
+
+const Gen_Document5digit = (char_doc,last_doc, callback) => {
     let new_doc = "", document = ""
     let docYear = moment().format("YY")
     let docMonth = moment().format("MM")
-    if (last_doc != "") {
+    last_doc=(typeof last_doc=="undefined")?"":last_doc
+    console.log("last_doc",last_doc)
+    if (last_doc != "" ) {
         get_number_run = last_doc.split("-");
         get_number_run = get_number_run[1]
         get_number_run++
@@ -86,8 +99,34 @@ const Gen_Document5digit = (char_doc, last_doc, callback) => {
     callback(document)
 }
 
+const set_encryption = (str_data, callback) => {
+    var encrypt_str = cryptr.encrypt(str_data)
+    callback(encrypt_str)
+}
+const get_decryption = (str_data, callback) => {
+    var decrypt_str = cryptr.decrypt(str_data)
+    callback(decrypt_str)
+}
+function Check_Log_file(pathfile) {
+    //Load the filesystem module
+    var stats = fs.statSync(pathfile)
+    var fileSizeInBytes = stats["size"]
+    //Convert the file size to megabytes (optional)
+    var fileSizeInMegabytes = fileSizeInBytes / 1000000.0
+    // console.log("object", fileSizeInMegabytes)
+    if (fileSizeInMegabytes > 5) {
+        fs.writeFile(pathfile, '', function () { console.log('done') })
+        // fs.unlink('log-server-send-Email.txt', function (err) {
+        //     if (err) throw err;
+        //     console.log('File deleted!');
+        //   });
+    }
+}
 module.exports = {
     save_log: save_log,
+    save_log_send_mail:save_log_send_mail,
     Gen_Document5digit: Gen_Document5digit,
     server_response: response,
+    set_encryption: set_encryption,
+    get_decryption: get_decryption
 }

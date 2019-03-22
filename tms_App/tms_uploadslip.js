@@ -27,15 +27,16 @@ const Storage = multer.diskStorage({
   })
   
 const upload = multer({ storage: Storage })
-//app.post('/api/upload', upload.array('photo', 3), (req, res) => {
- // router.post('/tms/api/uploadslip', function(req, res) { 
+
 router.get('/upload', (req, res) => {
         res.status(200).send('You can post to /api/upload.')
       })
  router.post('/tms/api/uploadslip', upload.array('photo', 3), (req, res) => {
-    console.log('file', req.files)
-    console.log('body', req.body)
-    console.log(req.files[0].filename)
+    //console.log('file', req.files)
+    //console.log('body', req.body)
+    //console.log(req.files[0].filename)
+    
+    
     // res.status(200).json({
     //     message: 'success!',
     //   })
@@ -46,7 +47,8 @@ router.get('/upload', (req, res) => {
 
    
      async function main(){ 
-     let upload_slip =  uploadslip(req.body.userId,req.files[0].filename,req.body.amount,req.body.transfer); 
+    // let upload_slip =  uploadslip(req.body.userId,req.files[0].filename,req.body.amount,req.body.transfer); 
+     let upload_slip =  uploadslip(req.body.userId,req.files[0].filename,req.body.amount||req.body.transfer,req.body.transfer,req.body.InvocieDate,req.body.coupong,req.body.amountBill||0.00,req.body.InvocieDate_forClear||req.body.InvocieDate); 
         let b = await delay(); 
     // console.log('con',arr)
     
@@ -82,7 +84,10 @@ router.get('/upload', (req, res) => {
    }); 
 
 
-async function uploadslip(messNO,file,amount,transfer){
+//async function uploadslip(messNO,file,amount,transfer){
+    async function uploadslip(messNO,file,amount,transfer,InvoiceDate,coupong,amountbill,inv_forClear){ 
+        amount = amount==0?transfer:amount
+     //   async function uploadslip(messNO,file,amount,transfer,InvoiceDate,coupong){  
    var sql = require("mssql");
    let filename = 'http://www.dplus-system.com:3499/images/'+file
   sql.close()
@@ -96,9 +101,10 @@ async function uploadslip(messNO,file,amount,transfer){
       }
       else{
           const pool1 = new sql.ConnectionPool(con.condb1(), err => {
-          var result_tms = "INSERT INTO TMS_SlipPic(Date,Time,MessNo,URL,Amount,Tranfer_amount)VALUES(CONVERT(date,getdate()),CONVERT(time,getdate()),'"+messNO+"','"+filename+"','"+amount+"','"+transfer+"')"
-
-          //console.log(result_tms);
+      //    var result_tms = "INSERT INTO TMS_SlipPic(Date,Time,MessNo,URL,Amount,Tranfer_amount)VALUES(CONVERT(date,getdate()),CONVERT(time,getdate()),'"+messNO+"','"+filename+"','"+amount+"','"+transfer+"')"
+         var result_tms = "INSERT INTO TMS_SlipPic(Date,Time,MessNo,URL,Amount,Tranfer_amount,invoiceDate,coupon)VALUES(CONVERT(date,getdate()),CONVERT(time,getdate()),'"+messNO+"','"+filename+"','"+amount+"','"+transfer+"','"+InvoiceDate+"','"+coupong+"')"+
+         "INSERT INTO UpdateStatus_ClearSlipTB(InvoiceDate,amountActual,amountBill,MessengerID,status)VALUES('"+InvoiceDate+"','"+amount+"','"+amount+"','"+messNO+"','1')"
+         console.log(result_tms)
           pool1.request().query(result_tms, (err, recordsets) => {
           
             if (err) {
@@ -115,7 +121,7 @@ async function uploadslip(messNO,file,amount,transfer){
                  result = recordsets['recordsets'];
                 
                  result_hold = result[0];
-                 console.log('console',result_hold)
+                // console.log('console',result_hold)
                
                     respons =result_hold;
                     responstatus =200;

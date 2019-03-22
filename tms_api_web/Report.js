@@ -57,7 +57,7 @@ const model = {
             FROM            dbo.Report INNER JOIN \
             dbo.App_FinishApp ON dbo.Report.INVOICEID = dbo.App_FinishApp.invoiceNumber LEFT OUTER JOIN \
             dbo.StatusDetail ON dbo.Report.Status = dbo.StatusDetail.Status \
-            WHERE (dbo.Report.ClearingStatus <> 9 ) AND (dbo.Report.INVOICEID NOT LIKE 'INB%') AND (dbo.Report.INVOICEID NOT LIKE 'ITR%') AND (dbo.Report.MessengerID = '"+ mess_code + "') AND (convert(varchar(10),dbo.Report.Datetime,120) LIKE '" + date + "') \
+            WHERE (dbo.Report.Status LIKE 'A%') AND (dbo.Report.ClearingStatus <> 9 ) AND (dbo.Report.INVOICEID NOT LIKE 'INB%') AND (dbo.Report.INVOICEID NOT LIKE 'ITR%') AND (dbo.Report.MessengerID = '"+ mess_code + "') AND (convert(varchar(10),dbo.Report.Datetime,120) LIKE '" + date + "') \
             ORDER BY INVOICEID"
             // console.log("object",sql_query)
             req.query(sql_query).then((result, err) => {
@@ -121,8 +121,18 @@ const model = {
             });
         })
     },
-    get_report_form_account(date, callback) {
+    get_report_form_account(date, hub, callback) {
         sql.close()
+        var sql_where = ""
+        switch (hub) {
+            case "WS1":
+                sql_where = "AND inventlocationid LIKE '" + hub + "' AND convert(varchar(10),invoice_date,120) ='"+ date + "'"
+                break;
+            default:
+                sql_where = "AND inventlocationid NOT LIKE '" + hub + "' AND convert(varchar(10),invoice_date,120) ='"+ date + "' "
+                break;
+        }
+
         const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
         pool.connect(err => {
             if (err) {
@@ -131,19 +141,19 @@ const model = {
             }
             var req = new sql.Request(pool)
             var sql_query = "SELECT * FROM            TMS_Report_Form_Account \
-        WHERE sales_group LIKE 'Dealer - กรุงเทพฯ' AND payment_type LIKE 'CASH' AND convert(varchar(10),invoice_date,120) ='"+ date + "' \
+        WHERE group_sales LIKE 'BK' AND payment_type LIKE 'CASH' "+sql_where+" \
         ORDER BY invoice \
         SELECT * FROM            TMS_Report_Form_Account \
-        WHERE sales_group LIKE 'Dealer - กรุงเทพฯ' AND payment_type NOT LIKE 'CASH' AND convert(varchar(10),invoice_date,120) ='"+ date + "' \
+        WHERE group_sales LIKE 'BK' AND payment_type NOT LIKE 'CASH' "+sql_where+" \
         ORDER BY invoice \
         SELECT *  FROM            TMS_Report_Form_Account \
-        WHERE sales_group NOT LIKE 'Dealer - กรุงเทพฯ' AND convert(varchar(10),invoice_date,120) ='"+ date + "' \
+        WHERE group_sales LIKE 'UP' "+ sql_where + " \
         ORDER BY invoice "
-        // console.log("sql_query",sql_query);
+            // console.log("sql_query", sql_query);
             req.query(sql_query).then((result, err) => {
-                // console.log("result",result.recordsets[0]);
+                // console.log("result",result.recordsets);
                 pool.close()
-                if (result.recordset.length > 0) {
+                if (result.recordsets.length > 0) {
                     save_log(result.recordsets, "get_report_form_account", "Report", result.recordsets)
                     callback(server_response(200, "Success", result.recordsets))
                 } else {
@@ -170,12 +180,13 @@ const model = {
             var sql_query = "MERGE INTO \
             TMS_Report_Form_Account \
           USING \
-          (SELECT * FROM TMS_Report_Account WHERE [INVOICEID] NOT LIKE 'ITR%' AND [DocumentSet] LIKE 'TMS%'  AND convert(varchar(10),[ClearingDate],120)='"+ date + "' ) TMS_Report_Account \
+          (SELECT * FROM TMS_Report_Account WHERE [INVOICEID] NOT LIKE 'ITR%' AND [DocumentSet] LIKE 'TMS%'  AND convert(varchar(10),[invoice_date],120)='"+ date + "' ) TMS_Report_Account \
           ON \
-            TMS_Report_Form_Account.[tms_doc] = TMS_Report_Account.[DocumentSet] \
+            TMS_Report_Form_Account.[invoice] = TMS_Report_Account.[INVOICEID] \
           WHEN MATCHED THEN \
             UPDATE SET \
-                     TMS_Report_Form_Account.[ship_address]	=TMS_Report_Account.[AddressShipment] \
+                    TMS_Report_Form_Account.[tms_doc] = TMS_Report_Account.[DocumentSet] \
+                     ,TMS_Report_Form_Account.[ship_address]	=TMS_Report_Account.[AddressShipment] \
                      ,TMS_Report_Form_Account.[ship_delivery]	=TMS_Report_Account.[dlv_term] \
                      ,TMS_Report_Form_Account.[amount_bill]	=TMS_Report_Account.[AmountBill] \
                      ,TMS_Report_Form_Account.[amount_actual]	=TMS_Report_Account.[AmountActual] \
@@ -190,6 +201,9 @@ const model = {
                      ,TMS_Report_Form_Account.[cn_amount]		=TMS_Report_Account.[Amount] \
                      ,TMS_Report_Form_Account.[comment]		=TMS_Report_Account.[Comment] \
                      ,TMS_Report_Form_Account.[car_type]		=TMS_Report_Account.[car_type] \
+                     ,TMS_Report_Form_Account.[dpl_hub_dlvterm]		=TMS_Report_Account.[dpl_hub_dlvterm]\
+                     ,TMS_Report_Form_Account.[inventlocationid]		=TMS_Report_Account.[inventlocationid]\
+                     ,TMS_Report_Form_Account.[group_sales]		=TMS_Report_Account.[GroupSales]\
           WHEN NOT MATCHED THEN \
             INSERT  \
                       ([tms_doc] \
@@ -212,7 +226,10 @@ const model = {
                      ,[cn_doc] \
                      ,[cn_amount] \
                      ,[comment] \
-                     ,[car_type]) \
+                     ,[car_type]\
+                     ,[dpl_hub_dlvterm] \
+                     ,[inventlocationid]\
+                     ,[group_sales]) \
             VALUES \
               (TMS_Report_Account.[DocumentSet] \
               ,TMS_Report_Account.[create_date] \
@@ -234,16 +251,20 @@ const model = {
               ,TMS_Report_Account.[CNDoc] \
               ,TMS_Report_Account.[Amount] \
               ,TMS_Report_Account.[Comment] \
-              ,TMS_Report_Account.[car_type]); \
+              ,TMS_Report_Account.[car_type]\
+              ,TMS_Report_Account.[dpl_hub_dlvterm] \
+              ,TMS_Report_Account.[inventlocationid]\
+              ,TMS_Report_Account.[GroupSales]); \
               MERGE INTO \
                 TMS_Report_Form_Account\
                 USING\
-                (SELECT * FROM TMS_Interface WHERE [invoice] NOT LIKE 'ITR%' AND convert(varchar(10),[clear_date],120)='"+ date + "' ) TMS_Report_Account\
+                (SELECT *,left(customer_code,2) AS GroupSales FROM TMS_Interface WHERE [invoice] NOT LIKE 'ITR%' AND convert(varchar(10),[invoice_date],120)='"+ date + "' ) TMS_Report_Account\
                 ON\
-                TMS_Report_Form_Account.[tms_doc] = TMS_Report_Account.[tms_document]\
+                TMS_Report_Form_Account.[invoice] = TMS_Report_Account.[invoice]\
                 WHEN MATCHED THEN\
                 UPDATE SET\
-                        TMS_Report_Form_Account.[ship_address]	=TMS_Report_Account.[address_shipment]\
+                        TMS_Report_Form_Account.[tms_doc] = TMS_Report_Account.[tms_document]\
+                        ,TMS_Report_Form_Account.[ship_address]	=TMS_Report_Account.[address_shipment]\
                         ,TMS_Report_Form_Account.[ship_delivery]	=TMS_Report_Account.[dlv_term]\
                         ,TMS_Report_Form_Account.[amount_bill]	=TMS_Report_Account.[invoice_amount]\
                         ,TMS_Report_Form_Account.[amount_actual]	=TMS_Report_Account.[invoice_amount]\
@@ -252,6 +273,9 @@ const model = {
                         ,TMS_Report_Form_Account.[mess_id]		='MDL_55'\
                         ,TMS_Report_Form_Account.[mess_name]		='Kerry-DHL'\
                         ,TMS_Report_Form_Account.[sales_group]	=TMS_Report_Account.[sales_group]\
+                        ,TMS_Report_Form_Account.[dpl_hub_dlvterm]		=TMS_Report_Account.[dpl_hub_dlvterm]\
+                        ,TMS_Report_Form_Account.[inventlocationid]		=TMS_Report_Account.[inventlocationid]\
+                        ,TMS_Report_Form_Account.[group_sales]		=TMS_Report_Account.[GroupSales]\
                 WHEN NOT MATCHED THEN\
                 INSERT \
                             ([tms_doc]\
@@ -269,7 +293,9 @@ const model = {
                         ,[mess_id]\
                         ,[mess_name]\
                         ,[sales_group]\
-                )\
+                        ,[dpl_hub_dlvterm] \
+                        ,[inventlocationid]\
+                        ,[group_sales]) \
                 VALUES\
                     (TMS_Report_Account.[tms_document]\
                     ,TMS_Report_Account.[create_date]\
@@ -286,7 +312,9 @@ const model = {
                     ,'MDL-55'\
                     ,'Kerry-DHL'\
                     ,TMS_Report_Account.[sales_group]\
-                );"
+                    ,TMS_Report_Account.[dpl_hub_dlvterm] \
+                    ,TMS_Report_Account.[inventlocationid]\
+                    ,TMS_Report_Account.[GroupSales]);"
             // var sql_query = "SELECT        dbo.Report.ClearingStatus, dbo.Report.INVOICEID, dbo.Report.DocumentSet, dbo.Report.CustomerID, dbo.Report.CustomerName, dbo.Report.AddressShipment, dbo.Report.Status, dbo.Report.AmountBill, \
             // dbo.Report.AmountActual, dbo.Report.Type, dbo.Report.Datetime, dbo.Report.ReasonCN, dbo.Report.ClearingDate, dbo.Report.paymentType, dbo.Report.MessengerID, CONVERT(varchar(10), dbo.TMS_Interface.create_date, 120) \
             //  AS interface_date,  dbo.BillToApp.car_type \
@@ -297,7 +325,7 @@ const model = {
             // console.log("object", sql_query)
             req.query(sql_query).then((result, err) => {
                 pool.close()
-                // console.log("result",result);
+                // console.log("result",result.rowsAffected.length);
                 if (result.rowsAffected.length > 0) {
                     save_log(result.recordset, "create_report_account", "Report", result.recordset)
                     callback(server_response(200, "Success", result.recordset))
@@ -348,6 +376,34 @@ const model = {
             }).catch((err) => {
                 if (err) {
                     save_log(err, "update_clear_detail", "Report", err)
+                    callback(server_response(500, "Error", err))
+                }
+            });
+        })
+    },
+    update_comment(id,in_comment, callback) {
+        sql.close()
+        const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
+        pool.connect(err => {
+            if (err) {
+                save_log(err, "update_comment", "Report", err)
+                callback(server_response(500, "Error", err))
+            }
+            var req = new sql.Request(pool)
+            var sql_query="UPDATE Report SET Comment='"+in_comment+"' WHERE id LIKE '"+id+"' "
+            req.query(sql_query).then((result, err) => {
+                pool.close()
+                console.log("result", result)
+                if (result.rowsAffected > 0) {
+                    save_log(result.recordset, "update_comment", "Report", result.recordset)
+                    callback(server_response(200, "Success", result.recordset))
+                } else {
+                    save_log(result.recordset, "update_comment", "Report", result.recordset)
+                    callback(server_response(304, "None data this query", result.recordset))
+                }
+            }).catch((err) => {
+                if (err) {
+                    save_log(err, "update_comment", "Report", err)
                     callback(server_response(500, "Error", err))
                 }
             });
