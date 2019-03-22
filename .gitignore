@@ -78,7 +78,7 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
-
+#log
 #logserver 
 log-server.txt
 /API_TransportV2.2
