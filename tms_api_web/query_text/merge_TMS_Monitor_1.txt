@@ -1,0 +1,193 @@
+MERGE INTO
+[TMS_Monitor_1]
+USING
+(
+SELECT        DLV_Date_WaitPick, GCode_WaitPick, GName_WaitPick, WaitPick_so_amt, WaitPick_bill
+FROM            dbo.ZTS_TMS_SO_WaitPick
+WHERE DLV_Date_WaitPick BETWEEN '2019-03-28' AND '2019-03-28'
+ ) ZTS_TMS_Monitor_1
+ON
+[TMS_Monitor_1].[date] = ZTS_TMS_Monitor_1.DLV_Date_WaitPick
+AND
+[TMS_Monitor_1].[group_customer] = ZTS_TMS_Monitor_1.GCode_WaitPick
+WHEN MATCHED THEN
+UPDATE SET
+[TMS_Monitor_1].[wait_pick_order_qty]=ZTS_TMS_Monitor_1.WaitPick_bill
+,[TMS_Monitor_1].[wait_pick_order_amt]=ZTS_TMS_Monitor_1.WaitPick_so_amt
+,[TMS_Monitor_1].[last_update]=GETDATE()
+WHEN NOT MATCHED THEN
+INSERT
+([date]
+,[group_customer]
+,[wait_pick_order_qty]
+,[wait_pick_order_amt]
+,[last_update])
+VALUES
+(ZTS_TMS_Monitor_1.DLV_Date_WaitPick
+           ,ZTS_TMS_Monitor_1.GCode_WaitPick
+           ,ZTS_TMS_Monitor_1.WaitPick_bill
+           ,ZTS_TMS_Monitor_1.WaitPick_so_amt
+           ,GETDATE());
+
+MERGE INTO
+[TMS_Monitor_1]
+USING
+(
+SELECT        DLV_Date_StartPick, GCode_StartPick, GName_StartPick, StartPick_so_amt, StartPick_bill
+FROM            dbo.ZTS_TMS_SO_StartPick
+WHERE DLV_Date_StartPick BETWEEN '2019-03-28' AND '2019-03-28'
+ ) ZTS_TMS_Monitor_1
+ON
+[TMS_Monitor_1].[date] = ZTS_TMS_Monitor_1.DLV_Date_StartPick
+AND
+[TMS_Monitor_1].[group_customer] = ZTS_TMS_Monitor_1.GCode_StartPick
+WHEN MATCHED THEN
+UPDATE SET
+[TMS_Monitor_1].[start_pick_order_qty]=[ZTS_TMS_Monitor_1].StartPick_bill
+,[TMS_Monitor_1].[start_pick_order_amt]=[ZTS_TMS_Monitor_1].StartPick_so_amt
+,[TMS_Monitor_1].[last_update]=GETDATE()
+WHEN NOT MATCHED THEN
+INSERT
+([date]
+,[group_customer]
+,[start_pick_order_qty]
+,[start_pick_order_amt]
+,[last_update])
+VALUES
+(ZTS_TMS_Monitor_1.DLV_Date_StartPick
+           ,ZTS_TMS_Monitor_1.GCode_StartPick
+           ,[ZTS_TMS_Monitor_1].StartPick_bill
+           ,[ZTS_TMS_Monitor_1].StartPick_so_amt
+           ,GETDATE());
+/*
+MERGE INTO
+[TMS_Monitor_1]
+USING
+(
+SELECT        DLV_Date_Back, GCode_Back, GName_Back, Back_bill, Back_so_amt
+FROM            dbo.ZTS_TMS_SO_Back
+WHERE DLV_Date_Back BETWEEN '2019-03-28' AND '2019-03-28'
+ ) ZTS_TMS_Monitor_1
+ON
+[TMS_Monitor_1].[date] = ZTS_TMS_Monitor_1.DLV_Date_Back
+AND
+[TMS_Monitor_1].[group_customer] = ZTS_TMS_Monitor_1.GCode_Back
+WHEN MATCHED THEN
+UPDATE SET
+[TMS_Monitor_1].[back_order_qty]=[ZTS_TMS_Monitor_1].Back_bill
+,[TMS_Monitor_1].[back_order_amt]=[ZTS_TMS_Monitor_1].Back_so_amt
+,[TMS_Monitor_1].[last_update]=GETDATE()
+WHEN NOT MATCHED THEN
+INSERT
+([date]
+,[group_customer]
+,[back_order_qty]
+,[back_order_amt]
+,[last_update])
+VALUES
+(ZTS_TMS_Monitor_1.DLV_Date_Back
+           ,ZTS_TMS_Monitor_1.GCode_Back
+           ,ZTS_TMS_Monitor_1.Back_bill
+           ,ZTS_TMS_Monitor_1.Back_so_amt
+           ,GETDATE());*/
+
+MERGE INTO
+[TMS_Monitor_1]
+USING
+(
+SELECT        DLV_Date_Total, GCode_Total, GName_Total, Total_bill, Total_so_amt
+FROM            dbo.ZTS_TMS_SO_Total
+WHERE DLV_Date_Total BETWEEN '2019-03-28' AND '2019-03-28'
+ ) ZTS_TMS_Monitor_1
+ON
+[TMS_Monitor_1].[date] = ZTS_TMS_Monitor_1.DLV_Date_Total
+AND
+[TMS_Monitor_1].[group_customer] = ZTS_TMS_Monitor_1.GCode_Total
+WHEN MATCHED THEN
+UPDATE SET
+[TMS_Monitor_1].[total_order_qty]=[ZTS_TMS_Monitor_1].Total_bill
+,[TMS_Monitor_1].[total_order_amt]=[ZTS_TMS_Monitor_1].Total_so_amt
+,[TMS_Monitor_1].[last_update]=GETDATE()
+WHEN NOT MATCHED THEN
+INSERT
+([date]
+,[group_customer]
+,[total_order_qty]
+,[total_order_amt]
+,[last_update])
+VALUES
+(ZTS_TMS_Monitor_1.DLV_Date_Total
+           ,ZTS_TMS_Monitor_1.GCode_Total
+           ,ZTS_TMS_Monitor_1.Total_bill
+           ,ZTS_TMS_Monitor_1.Total_so_amt
+           ,GETDATE());
+
+
+MERGE INTO
+[TMS_Monitor_1]
+USING
+(
+SELECT        DLV_Date_FinishPick, GCode_FinishPick, GName_FinishPick, FinishPick_so_amt, FinishPick_bill
+FROM            dbo.ZTS_TMS_SO_FinishPick
+WHERE DLV_Date_FinishPick BETWEEN '2019-03-28' AND '2019-03-28'
+ ) ZTS_TMS_Monitor_1
+ON
+[TMS_Monitor_1].[date] = ZTS_TMS_Monitor_1.DLV_Date_FinishPick
+AND
+[TMS_Monitor_1].[group_customer] = ZTS_TMS_Monitor_1.GCode_FinishPick
+WHEN MATCHED THEN
+UPDATE SET
+[TMS_Monitor_1].[finish_pick_order_qty]=[ZTS_TMS_Monitor_1].[FinishPick_bill]
+,[TMS_Monitor_1].[finish_pick_order_amt]=[ZTS_TMS_Monitor_1].[FinishPick_so_amt]
+,[TMS_Monitor_1].[last_update]=GETDATE()
+WHEN NOT MATCHED THEN
+INSERT
+([date]
+,[group_customer]
+,[finish_pick_order_qty]
+,[finish_pick_order_amt]
+,[last_update])
+VALUES
+(ZTS_TMS_Monitor_1.DLV_Date_FinishPick
+           ,ZTS_TMS_Monitor_1.GCode_FinishPick
+           ,[ZTS_TMS_Monitor_1].FinishPick_bill
+           ,[ZTS_TMS_Monitor_1].FinishPick_so_amt
+           ,GETDATE());
+
+
+
+
+
+		   
+
+
+MERGE INTO
+[TMS_Monitor_1]
+USING
+(
+SELECT        DLV_Date_RemainPick, GCode_RemainPick, GName_RemainPick, RemainPick_so_amt, RemainPick_bill
+FROM            dbo.ZTS_TMS_SO_RemainPick
+WHERE DLV_Date_RemainPick BETWEEN '2019-03-28' AND '2019-03-28'
+ ) ZTS_TMS_Monitor_1
+ON
+[TMS_Monitor_1].[date] = ZTS_TMS_Monitor_1.DLV_Date_RemainPick
+AND
+[TMS_Monitor_1].[group_customer] = ZTS_TMS_Monitor_1.GCode_RemainPick
+WHEN MATCHED THEN
+UPDATE SET
+[TMS_Monitor_1].[remain_order_qty]=[ZTS_TMS_Monitor_1].RemainPick_bill
+,[TMS_Monitor_1].[remain_order_amt]=[ZTS_TMS_Monitor_1].RemainPick_so_amt
+,[TMS_Monitor_1].[last_update]=GETDATE()
+WHEN NOT MATCHED THEN
+INSERT
+([date]
+,[group_customer]
+,[remain_order_qty]
+,[remain_order_amt]
+,[last_update])
+VALUES
+(ZTS_TMS_Monitor_1.DLV_Date_RemainPick
+           ,ZTS_TMS_Monitor_1.GCode_RemainPick
+           ,[ZTS_TMS_Monitor_1].RemainPick_bill
+           ,[ZTS_TMS_Monitor_1].RemainPick_so_amt
+           ,GETDATE());  

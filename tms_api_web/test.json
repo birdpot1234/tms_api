@@ -1,0 +1,61 @@
+MERGE INTO
+[TMS_Monitor_1]
+USING
+(
+SELECT         DLV_Date_Total, GCode_Total, GName_Total, WaitPick_bill, WaitPick_so_amt, StartPick_bill, StartPick_so_amt, FinishPick_bill, FinishPick_so_amt, RemainPick_bill, RemainPick_so_amt
+FROM            ZTS_TMS_Monitor_1
+WHERE DLV_Date_Total BETWEEN '2019-03-28' AND '2019-03-28'
+ ) ZTS_TMS_Monitor_1
+ON
+[TMS_Monitor_1].date = ZTS_TMS_Monitor_1.DLV_Date_Total
+AND
+[TMS_Monitor_1].group_customer = ZTS_TMS_Monitor_1.GCode_Total
+WHEN MATCHED THEN
+UPDATE SET
+[TMS_Monitor_1].[wait_pick_order_qty]=ZTS_TMS_Monitor_1.WaitPick_bill
+,[TMS_Monitor_1].[wait_pick_order_amt]=ZTS_TMS_Monitor_1.WaitPick_so_amt
+,[TMS_Monitor_1].[start_pick_order_qty]=ZTS_TMS_Monitor_1.StartPick_bill
+,[TMS_Monitor_1].[start_pick_order_amt]=ZTS_TMS_Monitor_1.StartPick_so_amt
+,[TMS_Monitor_1].[back_order_qty]=0
+,[TMS_Monitor_1].[back_order_amt]= 0
+,[[TMS_Monitor_1].total_order_qty=ZTS_TMS_Monitor_1.Total_bill
+,[[TMS_Monitor_1].total_order_amt=ZTS_TMS_Monitor_1.Total_amt
+,[[TMS_Monitor_1].finish_pick_order_qty]=ZTS_TMS_Monitor_1.FinishPick_bill=ZTS_TMS_Monitor_1.FinishPick_bill
+,[TMS_Monitor_1].[finish_pick_order_amt]=ZTS_TMS_Monitor_1.FinishPick_so_amt=ZTS_TMS_Monitor_1.FinishPick_so_amt
+,[TMS_Monitor_1].remain_order_qty=ZTS_TMS_Monitor_1.RemainPick_bill
+,[TMS_Monitor_1].remain_order_amt=ZTS_TMS_Monitor_1.RemainPick_so_amt
+,[TMS_Monitor_1].[last_update]=GETDATE()
+WHEN NOT MATCHED THEN
+INSERT
+([date]
+,[group_customer]
+,[total_order_qty]
+,[total_order_amt]
+,[wait_pick_order_qty]
+,[wait_pick_order_amt]
+,[start_pick_order_qty]
+,[start_pick_order_amt]
+,[back_order_qty]
+,[back_order_amt]
+,[finish_pick_order_qty]
+,[finish_pick_order_amt]
+,[remain_order_qty]
+,[remain_order_amt]
+,[last_update])
+VALUES
+(ZTS_TMS_Monitor_1.date
+           ,ZTS_TMS_Monitor_1.group_customer
+           ,ZTS_TMS_Monitor_1.Total_bill
+           ,ZTS_TMS_Monitor_1.Total_amt
+           ,ZTS_TMS_Monitor_1.WaitPick_bill
+           ,ZTS_TMS_Monitor_1.WaitPick_so_amt
+           ,ZTS_TMS_Monitor_1.StartPick_bill
+           ,ZTS_TMS_Monitor_1.StartPick_so_amt
+           ,0
+           ,0
+           ,[ZTS_TMS_Monitor_1.FinishPick_bill
+           ,[ZTS_TMS_Monitor_1.FinishPick_so_amt
+           ,[ZTS_TMS_Monitor_1.RemainPick_bill.RemainPick_bill
+           ,[ZTS_TMS_Monitor_1.RemainPick_bill.RemainPick_so_amt
+           ,GETDATE());
+            

@@ -322,7 +322,7 @@ const model = {
             //                           dbo.TMS_Interface ON dbo.Report.DocumentSet = dbo.TMS_Interface.tms_document INNER JOIN \
             //                           dbo.BillToApp ON dbo.Report.DocumentSet = dbo.BillToApp.DocumentSet \
             // WHERE        (dbo.Report.ClearingStatus = '0') AND (CONVERT(varchar(10), dbo.TMS_Interface.create_date, 120) LIKE '"+ date + "' ) AND (dbo.Report.MessengerID LIKE '" + mess_code + "%')"
-            // console.log("object", sql_query)
+            console.log("object", sql_query)
             req.query(sql_query).then((result, err) => {
                 pool.close()
                 // console.log("result",result.rowsAffected.length);

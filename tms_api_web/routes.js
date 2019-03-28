@@ -13,7 +13,16 @@ const TMS_Interface = require("./TMS_Interface")
 const Rating = require("./Rating")
 const sendMail = require("./TMS_sendMail")
 const TMS_Calendar = require("./TMS_Calendar")
+const TMS_Monitor=require("./TMS_Monitor")
 var fs = require("fs");
+
+
+//----------------All TMS Monitor
+router.get("/monitor/search_data/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTL_1(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
+router.get("/monitor/get_data_monitorTL_1/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTL_1(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
+router.get("/monitor/get_data_monitorTR_1/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTL_1(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
+//----------------All TMS Monitor
+
 
 //----------------All TMS Calendar
 router.get("/calendar/get-cause/", (req, resp) => TMS_Calendar.model.get_cause_data((res_data) => resp.json(res_data)))
