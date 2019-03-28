@@ -23,7 +23,6 @@ router.get("/monitor/get_data_monitorTL_1/:stDate&:enDate",(req,resp)=>TMS_Monit
 router.get("/monitor/get_data_monitorTR_1/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTL_1(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
 //----------------All TMS Monitor
 
-
 //----------------All TMS Calendar
 router.get("/calendar/get-cause/", (req, resp) => TMS_Calendar.model.get_cause_data((res_data) => resp.json(res_data)))
 

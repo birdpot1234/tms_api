@@ -6,7 +6,7 @@ var moment = require("moment");
 var datetime = require('node-datetime');
 
 var con = require('../connect_sql');
-
+const TMS_Interface = require("./TMS_Interface")
 
 var respons ='';
 var responstatus ='';
@@ -19,8 +19,14 @@ const TMS_Interface = require("./TMS_Interface")
     let tms_doc = req.body.tms_doc;
     let invoice = req.body.invoice;
     let box     = req.body.box;
+<<<<<<< HEAD
     
     if(invoice!="" || typeof invoice!="undefined" ){
+=======
+    let sub_invoice_1 = invoice.substring(0,3)
+    let sub_invoice = sub_invoice_1.toUpperCase()
+ if(sub_invoice!="ITR" ){  
+>>>>>>> f8fcc0ed2a5f8a3e2c5b8cd9485067943c660782
      async function main(){ 
        let sCheck_TMSBox =  checkTMS_Box(tms_doc,invoice,box); 
        let b = await delay(); 
@@ -57,7 +63,7 @@ const TMS_Interface = require("./TMS_Interface")
        
        else{
             
-        //let sInserTMS_Box = await InserTMS_Box(tms_doc,invoice,box);
+        let recheck = await recheck_confirmbill(tms_doc,invoice,box);
         let b = await delay(); 
         if(responstatus==200){
         
@@ -72,7 +78,12 @@ const TMS_Interface = require("./TMS_Interface")
             }
             else{
                 res.status(200).json({
-                    result: arr,
+                    result: [{
+								"tms_document":tms_doc,
+								"invoice":invoice,
+								"box":box,
+								"status":2
+							}],
                     status:200,
                     detail:'Update success'
                });
@@ -87,42 +98,23 @@ const TMS_Interface = require("./TMS_Interface")
            
         
        }
-   
-    //    let b = await delay(); 
-
-        //    if(check)
-        //    {
-        //     let sCheck = await selectforCheck(email,arr[0].phon);
-        //     let b = await delay(); 
-        //     if(re_count[0].count==0){//insert only
-        //         let ins = await insert(OTP,arr[0].phon,email);
-        //          let wait = await delay(); 
-        //          let send = await sendSMS(arr[0].phon,OTP);
-        //     }
-            
-        //     else{//delete and insert 
-        //         console.log(arr[0].phon);
-        //         let delt = await del(arr[0].phon);
-        //         let b = await delay(); 
-        //         let ins = await insert(OTP,arr[0].phon,email);
-        //         let wait = await delay(); 
-        //       let send = await sendSMS(arr[0].phon,OTP);
-        //     }
-        //     res.status(200).json({
-        //         result: OTP,
-        //         status:200
-        //    });
-
-        //    }
-
-     
+    
    } 
    main(); 
+<<<<<<< HEAD
     }else if(invoice==="" || typeof invoice==="undefined"){
         TMS_Interface.model.update_status_claim(tms_doc,2,1,(res_data)=>{
             res.json(res_data)
         })
     }
+=======
+}else if(sub_invoice=="ITR"){
+    TMS_Interface.model.update_status_claim(tms_doc,2,1,invoice,(res_data)=>{
+        res.json(res_data)
+    })
+}
+    
+>>>>>>> f8fcc0ed2a5f8a3e2c5b8cd9485067943c660782
    }); 
 
 
@@ -140,7 +132,7 @@ async function checkTMS_Box(tms_doc,inv,NumBox){
       else{
           const pool1 = new sql.ConnectionPool(con.condb1(), err => {
           var result_tms = "SELECT * from TMS_Box_Amount where tms_document LIKE '"+tms_doc+"' AND invoice LIKE '"+inv+"' AND box = '"+NumBox+"';";
-          console.log(result_tms);
+         // console.log(result_tms);
           pool1.request().query(result_tms, (err, recordsets) => {
           
             if (err) {
@@ -158,7 +150,7 @@ async function checkTMS_Box(tms_doc,inv,NumBox){
                  result_hold = result[0];
                  if (result_hold == "") {
               
-                 respons = 'TMS is colect';
+                 respons = result_hold;
                  responstatus =201;
                  }
              
@@ -170,7 +162,7 @@ async function checkTMS_Box(tms_doc,inv,NumBox){
                  }
                  else if(result_hold[0].status!=1)
                  {
-                    respons = result_hold[0].status>=1?'TMS :'+tms_doc+' is pass'+result_hold[0].status:'TMS :'+tms_doc+' is less'+result_hold[0].status ;
+                    respons = result_hold ;
                     responstatus =203;
                  }
                  else
@@ -191,7 +183,59 @@ async function checkTMS_Box(tms_doc,inv,NumBox){
   })
 }
 
-
+async function recheck_confirmbill(tms_doc,inv,numBox){
+  
+    sql.close()
+    var queryString = "IF(SELECT count(INVOICEID) FROM ConfirmBillDetail WHERE INVOICEID = '"+inv+"')=(0) "+
+                      " BEGIN "+
+                      " INSERT INTO [dbo].[ConfirmBillDetail](INVOICEID,ItemID,ItemName,Qty,Amount,PriceOfUnit) "+
+                      " SELECT INVOICEID,ITEMID, ItemName, QTY,TotalAmount,TotalAmount/QTY FROM DPLV_SCSO_InvoiceAndPreL2  "+
+                      " WHERE  INVOICEID = '"+inv+"' "+
+                      " END "
+                    
+  //console.log(queryString) 
+   sql.connect(con.condb1(), function(err) {
+  
+        if (err) {
+            console.log(err+"connect db not found");
+            response.status(500).json({
+                statuserr: 0
+            });
+        }
+        else{
+          const pool1 = new sql.ConnectionPool(con.condb1(), err => {
+            var result_query = queryString;
+            //console.log(result_query);
+            pool1.request().query(result_query, (err, recordsets) => {
+           
+             console.log(inv,recordsets)
+            
+    
+              if (err) {
+                  console.log("error select data" + err);
+        
+               respons = [];
+               responstatus =500;
+     
+                 
+                }
+                else {
+                  var result = '';
+                  result = recordsets['recordsets'];
+                  result_hold = result[0];
+                  arr =result_hold;
+                  responstatus =200;
+                
+               
+               }
+               sql.close()
+          });
+          }); 
+       
+        }
+        
+    })
+  }
   async function updateTMS_Box(tms_doc,inv,numBox){
     let setStep = 2
    
@@ -216,7 +260,7 @@ async function checkTMS_Box(tms_doc,inv,NumBox){
         else{
           const pool1 = new sql.ConnectionPool(con.condb1(), err => {
             var result_query = queryString;
-            console.log(result_query);
+           // console.log(result_query);
             pool1.request().query(result_query, (err, recordsets) => {
             
              
