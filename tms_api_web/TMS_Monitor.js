@@ -389,13 +389,13 @@ FROM            dbo.TMS_Monitor_2 LEFT OUTER JOIN \
         if(group === 'ALL'){
             sql_query = " SELECT [DPL_SO_STATUS],[PICKINGROUTEID],[StampPickStart],[StampPickStop],[StampCheckStart],[StampCheckStop] "+
             " ,[INVOICEID],[Receive],[Assign],[Trip],[Sent],[No_],[Name],[OrderGroupName],[Qty_SO],[Qty_B],[DLV_Date],[Qty_Inv],[Box_Amount] "+
-            " FROM [Data_TransportApp].[dbo].[TMS_jar_monitorBelow] WHERE DLV_Date = '"+start+"' or DLV_Date = '"+end+"'"+
+            " FROM [Data_TransportApp].[dbo].[TMS_jar_monitorBelow] WHERE DLV_Date BETWEEN '"+start+"' AND '"+end+"'"+
             " order by [DLV_Date] ASC"
         }else{
             sql_query = " SELECT [DPL_SO_STATUS],[PICKINGROUTEID],[StampPickStart],[StampPickStop],[StampCheckStart],[StampCheckStop] "+
             " ,[INVOICEID],[Receive],[Assign],[Trip],[Sent],[No_],[Name],[OrderGroupName],[Qty_SO],[Qty_B],[DLV_Date],[Qty_Inv],[Box_Amount] "+
             " FROM [Data_TransportApp].[dbo].[TMS_jar_monitorBelow] WHERE [OrderGroupName] = '"+group+"'  "+
-            " AND [DLV_Date] = '"+start+"' or [OrderGroupName] = '"+group+"' AND [DLV_Date] = '"+end+"' "+
+            " AND DLV_Date BETWEEN '"+start+"' AND '"+end+"'" +
             " order by [DLV_Date] ASC"
         }
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
