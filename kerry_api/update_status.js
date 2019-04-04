@@ -25,13 +25,8 @@ var sql = require("mssql");
     // let location    = req.body.req.status.location;
 
 
-<<<<<<< HEAD
-    console.log(request.status.con_no)
-    console.log(request.status.con_no)
-=======
   //  console.log(request.status.con_no)
   //  console.log(request.status.con_no)
->>>>>>> f8fcc0ed2a5f8a3e2c5b8cd9485067943c660782
   //  request = req.body.req[0]
   //  console.log(request.shipment[0].tms_doc)
    
@@ -50,10 +45,7 @@ var sql = require("mssql");
                           }   
                  } 
        });
-<<<<<<< HEAD
-=======
        console.log("Kerry_FailUpdate",request.status.con_no)
->>>>>>> f8fcc0ed2a5f8a3e2c5b8cd9485067943c660782
        }
        else{
         res.status(200).json({
@@ -64,11 +56,7 @@ var sql = require("mssql");
                           }   
                  } 
        });
-<<<<<<< HEAD
-
-=======
        console.log("Kerry_SuccessUpdate",request.status.con_no)
->>>>>>> f8fcc0ed2a5f8a3e2c5b8cd9485067943c660782
        }
    
    
@@ -107,11 +95,7 @@ async function insertHead_info(shipment){
                            " ('"+shipment.status.con_no+"','"+shipment.status.status_code+"','"+shipment.status.status_desc+"','"+shipment.status.status_date+"','"+shipment.status.update_date+"','"+shipment.status.ref_no+"','"+shipment.status.location+"')" +
                            " END "
 
-<<<<<<< HEAD
-          console.log(result_tms);
-=======
           //console.log(result_tms);
->>>>>>> f8fcc0ed2a5f8a3e2c5b8cd9485067943c660782
           pool1.request().query(result_tms, (err, recordsets) => {
           
             if (err) {

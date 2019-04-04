@@ -10,10 +10,10 @@ const regis_3 = require('./tms_App/tms_registstep_3');
 const info = require('./kerry_api/info');
 const update_status = require('./kerry_api/update_status');
 const tms_assign = require('./tms_App/tms_assignToMass');
-var schedule = require('node-schedule');
-const sendMail = require("./tms_api_web/TMS_sendMail")
-const save_log_send_mail = require("./service")
-const moment = require('moment')
+// var schedule = require('node-schedule');
+// const sendMail = require("./tms_api_web/TMS_sendMail")
+// const save_log_send_mail = require("./service")
+// const moment = require('moment')
 
 ////Body parser 
 app.use(morgan('dev'));

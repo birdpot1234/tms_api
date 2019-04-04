@@ -33,11 +33,7 @@ const model = {
             });
         })
     },
-<<<<<<< HEAD
-    update_status_claim(tms_doc, status, check_status, callback) {
-=======
     update_status_claim(tms_doc, status, check_status,itr, callback) {
->>>>>>> f8fcc0ed2a5f8a3e2c5b8cd9485067943c660782
         sql.close()
         const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
         pool.connect(err => {
@@ -46,19 +42,6 @@ const model = {
                 callback(server_response(500, "Connection is close", ""))
             }
             var req = new sql.Request(pool)
-<<<<<<< HEAD
-
-            var sql_query = "UPDATE TMS_Interface SET status=" + status + " \
-            WHERE        (tms_document = '"+ tms_doc + "') AND (claim_document LIKE 'itr%') AND (status='" + check_status + "') "
-            req.query(sql_query).then((result) => {
-                pool.close()
-                if (result.rowsAffected > 0) {
-                    save_log(result, "update_status_claim_confirm", "TMS_Interface", "อัพเดทสเตตัสงานเคลมขั้นที่1")
-                    callback(server_response(200, "Success", result.recordset))
-                } else {
-                    save_log("err", "update_status_claim_confirm", "TMS_Interface", "อัพเดทสเตตัสงานเคลมขั้นที่1")
-                    callback(server_response(203, "Error อัพเดทสเตตัสงานเคลมขั้นที่1", err))
-=======
             if(status==1)
             {
                 var sql_query = "IF(SELECT count(INVOICEID) FROM ConfirmBillDetail WHERE INVOICEID = '"+itr+"')<1 "+
@@ -112,7 +95,6 @@ const model = {
                             callback(server_response(501, "Error อัพเดทสเตตัสงานเคลมขั้นที่1", res_data))
                         }
                     })
->>>>>>> f8fcc0ed2a5f8a3e2c5b8cd9485067943c660782
                 }
             }).catch((err) => {
                 pool.close()
@@ -120,8 +102,6 @@ const model = {
                 callback(server_response(501, "Error อัพเดทสเตตัสงานเคลมขั้นที่1", err))
             });
         })
-<<<<<<< HEAD
-=======
     },
     find_by_tms(tms_doc, callback) {
         sql.close()
@@ -147,7 +127,6 @@ const model = {
                 callback(server_response(501, "Error อัพเดทสเตตัสงานเคลมขั้นที่1", err))
             })
         })
->>>>>>> f8fcc0ed2a5f8a3e2c5b8cd9485067943c660782
     }
 }
 

@@ -1,7 +1,7 @@
 var { dbConnectData_TransportApp, dbConnectData_Temp } = require('../connect_sql')
-const { select_query, insert_query, server_response } = require("../service")
-const moment = require('moment')
-var sql = require('mssql')
+const { select_query, insert_query } = require("../service")
+var name_function = "", name_table = "", sql_query = "", res_data = ""
+
 
 const model = {
     async search_data(start_date, end_date, callback) {
@@ -185,6 +185,36 @@ const model = {
                    ,[ZTS_TMS_Monitor_1].StartPick_bill \
                    ,[ZTS_TMS_Monitor_1].StartPick_so_amt \
                    ,GETDATE()); \
+                   MERGE INTO \
+                   [TMS_Monitor_1] \
+                   USING \
+                   ( \
+                   SELECT        DLV_Date_Back, GCode_Back, GName_Back, Back_bill, Back_so_amt \
+                   FROM            dbo.ZTS_TMS_SO_BackOrder \
+                   WHERE DLV_Date_Back BETWEEN @stDate AND @enDate \
+                    ) ZTS_TMS_Monitor_1 \
+                   ON \
+                   [TMS_Monitor_1].[date] = ZTS_TMS_Monitor_1.DLV_Date_Back \
+                   AND \
+                   [TMS_Monitor_1].[group_customer] = ZTS_TMS_Monitor_1.GCode_Back \
+                   WHEN MATCHED THEN \
+                   UPDATE SET \
+                   [TMS_Monitor_1].[back_order_qty]=[ZTS_TMS_Monitor_1].Back_bill \
+                   ,[TMS_Monitor_1].[back_order_amt]=[ZTS_TMS_Monitor_1].Back_so_amt \
+                   ,[TMS_Monitor_1].[last_update]=GETDATE() \
+                   WHEN NOT MATCHED THEN \
+                   INSERT \
+                   ([date] \
+            ,[group_customer] \
+            ,[back_order_qty] \
+            ,[back_order_amt] \
+            ,[last_update]) \
+        VALUES \
+            (ZTS_TMS_Monitor_1.DLV_Date_Back \
+            ,ZTS_TMS_Monitor_1.GCode_Back \
+            ,ZTS_TMS_Monitor_1.Back_bill \
+            ,ZTS_TMS_Monitor_1.Back_so_amt \
+            ,GETDATE()); \
         MERGE INTO \
         [TMS_Monitor_1] \
         USING \
@@ -279,45 +309,80 @@ const model = {
         callback(res_data)
     },
     async get_data_monitorTL_1(start_date, end_date, callback) {
-        const name_function = "get_data_monitorTL_1"
-        const name_table = "TMS_Monitor_1"
-        const sql_query = "SELECT       id, date, group_customer, CASE WHEN wait_pick_order_qty IS NULL THEN 0 ELSE wait_pick_order_qty END AS wait_pick_order_qty, CASE WHEN wait_pick_order_amt IS NULL \
-        THEN 0 ELSE wait_pick_order_amt END AS wait_pick_order_amt, CASE WHEN start_pick_order_qty IS NULL THEN 0 ELSE start_pick_order_qty END AS start_pick_order_qty, CASE WHEN start_pick_order_amt IS NULL \
-        THEN 0 ELSE start_pick_order_amt END AS start_pick_order_amt, CASE WHEN back_order_qty IS NULL THEN 0 ELSE back_order_qty END AS back_order_qty, CASE WHEN back_order_amt IS NULL \
-        THEN 0 ELSE back_order_amt END AS back_order_amt \
-        FROM            TMS_Monitor_1 \
-         WHERE ([date] BETWEEN '"+ start_date + "' AND '" + end_date + "' )"
-        const res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        name_function = "get_data_monitorTL_1"
+        name_table = "TMS_Monitor_1"
+        sql_query = "SELECT        dbo.OrderGroup.Name AS group_customer, SUM(dbo.TMS_Monitor_1.wait_pick_order_qty) AS wait_pick_order_qty, SUM(dbo.TMS_Monitor_1.wait_pick_order_amt) AS wait_pick_order_amt,  \
+        SUM(dbo.TMS_Monitor_1.start_pick_order_qty) AS start_pick_order_qty, SUM(dbo.TMS_Monitor_1.start_pick_order_amt) AS start_pick_order_amt, SUM(dbo.TMS_Monitor_1.back_order_qty) AS back_order_qty, \
+        SUM(dbo.TMS_Monitor_1.back_order_amt) AS back_order_amt \
+        FROM            dbo.TMS_Monitor_1 LEFT OUTER JOIN \
+        dbo.OrderGroup ON dbo.TMS_Monitor_1.group_customer = dbo.OrderGroup.Code \
+        WHERE (dbo.TMS_Monitor_1.[date] BETWEEN '"+ start_date + "' AND '" + end_date + "' ) \
+        GROUP BY dbo.OrderGroup.Name"
+        res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
-        // var data1 = await select_query("","","select top(10) * FROM            TMS_Report_Account")
-
-        // const [d1,d2]=await Promise.all([select_query("","","select top(1) * FROM            TMS_Report_Account"),select_query("","","select top(1000) * FROM            TMS_Monitor_1")])
-        //--- Promise.all คือสั่งให้ทำงานเป็น Parallel กันและจะรอผลลัพท์ทั้งหมดก่อนจะคืนค่า
-        // resp.json(data2)
-        // console.log("res_data",res_data)
     },
     async get_data_monitorTR_1(start_date, end_date, callback) {
-        const sql_query = "SELECT id, date, group_customer, CASE WHEN total_order_qty IS NULL THEN 0 ELSE total_order_qty END AS total_order_qty, CASE WHEN total_order_amt IS NULL THEN 0 ELSE total_order_amt END AS total_order_amt, \
-        CASE WHEN finish_pick_order_qty IS NULL THEN 0 ELSE finish_pick_order_qty END AS finish_pick_order_qty, CASE WHEN finish_pick_order_amt IS NULL THEN 0 ELSE finish_pick_order_amt END AS finish_pick_order_amt, \
-        CASE WHEN remain_order_qty IS NULL THEN 0 ELSE remain_order_qty END AS remain_order_qty, CASE WHEN remain_order_amt IS NULL THEN 0 ELSE remain_order_amt END AS remain_order_amt \
-        FROM            TMS_Monitor_1 \
-         WHERE ([date] BETWEEN '"+ start_date + "' AND '" + end_date + "' )"
-        const res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        name_function = "get_data_monitorTR_1"
+        name_table = "TMS_Monitor_1"
+        sql_query = "SELECT        dbo.OrderGroup.Name AS group_customer, SUM(dbo.TMS_Monitor_1.total_order_qty) AS total_order_qty, SUM(dbo.TMS_Monitor_1.total_order_amt) AS total_order_amt, SUM(dbo.TMS_Monitor_1.finish_pick_order_qty) \
+        AS finish_pick_order_qty, SUM(dbo.TMS_Monitor_1.finish_pick_order_amt) AS finish_pick_order_amt, SUM(dbo.TMS_Monitor_1.remain_order_qty) AS remain_order_qty, SUM(dbo.TMS_Monitor_1.remain_order_amt) \
+        AS remain_order_amt \
+        FROM            dbo.TMS_Monitor_1 LEFT OUTER JOIN \
+        dbo.OrderGroup ON dbo.TMS_Monitor_1.group_customer = dbo.OrderGroup.Code \
+         WHERE (dbo.TMS_Monitor_1.[date] BETWEEN '"+ start_date + "' AND '" + end_date + "' ) \
+         GROUP BY dbo.OrderGroup.Name"
+        //  console.log("object",sql_query);
+        res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
     },
-    get_data_monitorB_1(start_date, end_date, callback) {
-
+    async get_data_monitorTL_2(start_date, end_date, callback) {
+        name_function = "get_data_monitorTL_2"
+        name_table = "TMS_Monitor_2"
+        sql_query = "SELECT        dbo.OrderGroup.Name AS group_customer, SUM(dbo.TMS_Monitor_2.waiting_check_order_qty) AS waiting_check_order_qty, SUM(dbo.TMS_Monitor_2.waiting_check_order_amt) AS waiting_check_order_amt, \
+        SUM(dbo.TMS_Monitor_2.finish_check_order_qty) AS finish_check_order_qty, SUM(dbo.TMS_Monitor_2.finish_check_order_amt) AS finish_check_order_amt, SUM(dbo.TMS_Monitor_2.fincheck_noinv_order_qty) \
+        AS fincheck_noinv_order_qty, SUM(dbo.TMS_Monitor_2.fincheck_noinv_order_amt) AS fincheck_noinv_order_amt \
+        FROM            dbo.TMS_Monitor_2 LEFT OUTER JOIN \
+        dbo.OrderGroup ON dbo.TMS_Monitor_2.group_customer = dbo.OrderGroup.Code \
+         WHERE ([date] BETWEEN '"+ start_date + "' AND '" + end_date + "' ) \
+         GROUP BY dbo.OrderGroup.Name"
+        res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        callback(res_data)
     },
-
-    get_data_monitorTL_2(start_date, end_date, callback) {
-
+    async get_data_monitorTR_2(start_date, end_date, callback) {
+        name_function = "get_data_monitorTR_2"
+        name_table = "TMS_Monitor_2"
+        sql_query = "SELECT        dbo.OrderGroup.Name AS group_customer, SUM(dbo.TMS_Monitor_2.total_order_qty) AS total_order_qty, SUM(dbo.TMS_Monitor_2.total_order_amt) AS total_order_amt, SUM(dbo.TMS_Monitor_2.open_invoice_qty) \
+        AS open_invoice_qty, SUM(dbo.TMS_Monitor_2.open_invoice_amt) AS open_invoice_amt, SUM(dbo.TMS_Monitor_2.pre_invoice_qty) AS pre_invoice_qty, SUM(dbo.TMS_Monitor_2.pre_invoice_amt) AS pre_invoice_amt, \
+        SUM(dbo.TMS_Monitor_2.sent_transport_qty) AS sent_transport_qty, SUM(dbo.TMS_Monitor_2.sent_transport_amt) AS sent_transport_amt \
+FROM            dbo.TMS_Monitor_2 LEFT OUTER JOIN \
+        dbo.OrderGroup ON dbo.TMS_Monitor_2.group_customer = dbo.OrderGroup.Code \
+         WHERE ([date] BETWEEN '"+ start_date + "' AND '" + end_date + "' ) \
+         GROUP BY dbo.OrderGroup.Name"
+        res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        callback(res_data)
     },
-    get_data_monitorTR_2(start_date, end_date, callback) {
-
+    async get_data_monitorTL_3(start_date, end_date, callback) {
+        name_function = "get_data_monitorTL_3"
+        name_table = "TMS_Monitor_3"
+        sql_query = "SELECT        group_customer, SUM(wait_rec_order_qty) AS Biil_1, SUM(wait_rec_order_amt) AS Qty_1, SUM(fin_rec_order_qty) AS Biil_2, SUM(fin_rec_order_amt) AS Qty_2, SUM(wait_send_order_qty) AS Biil_3 \
+        , SUM(wait_send_order_amt) AS Qty_3 \
+        FROM            dbo.TMS_Monitor_3 \
+        WHERE ([date] BETWEEN '"+ start_date + "' AND '" + end_date + "' ) \
+        GROUP BY group_customer"
+        res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        callback(res_data)
     },
-    get_data_monitorB_2(start_date, end_date, callback) {
-
-    }
+    async get_data_monitorTR_3(start_date, end_date, callback) {
+        name_function = "get_data_monitorTR_3"
+        name_table = "TMS_Monitor_3"
+        sql_query = "SELECT        group_customer, SUM(total_order_qty) AS Bill_4, SUM(total_order_amt) AS Qty_4,SUM(total_order_box) AS Box_4, SUM(mess_rec_order_qty) AS Bill_5, SUM(mess_rec_order_amt) AS Qty_5, SUM(mess_rec_order_box) AS Box_5, \
+        SUM(mess_wait_order_qty) AS Bill_6, SUM(mess_wait_order_amt) AS Qty_6, SUM(mess_wait_order_box) AS Box_6, SUM(mess_fin_order_qty) AS Bill_7, SUM(mess_fin_order_amt) AS Qty_7, SUM(mess_fin_order_box) AS Box_7 \
+        FROM            dbo.TMS_Monitor_3 \
+        WHERE ([date] BETWEEN '"+ start_date + "' AND '" + end_date + "' ) \
+        GROUP BY group_customer "
+        res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        callback(res_data)
+    },
 }
 
 

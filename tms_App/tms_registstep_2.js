@@ -6,7 +6,6 @@ var moment = require("moment");
 var datetime = require('node-datetime');
 
 var con = require('../connect_sql');
-const TMS_Interface = require("./TMS_Interface")
 
 var respons ='';
 var responstatus ='';
@@ -19,14 +18,9 @@ const TMS_Interface = require("./TMS_Interface")
     let tms_doc = req.body.tms_doc;
     let invoice = req.body.invoice;
     let box     = req.body.box;
-<<<<<<< HEAD
-    
-    if(invoice!="" || typeof invoice!="undefined" ){
-=======
     let sub_invoice_1 = invoice.substring(0,3)
     let sub_invoice = sub_invoice_1.toUpperCase()
  if(sub_invoice!="ITR" ){  
->>>>>>> f8fcc0ed2a5f8a3e2c5b8cd9485067943c660782
      async function main(){ 
        let sCheck_TMSBox =  checkTMS_Box(tms_doc,invoice,box); 
        let b = await delay(); 
@@ -101,20 +95,12 @@ const TMS_Interface = require("./TMS_Interface")
     
    } 
    main(); 
-<<<<<<< HEAD
-    }else if(invoice==="" || typeof invoice==="undefined"){
-        TMS_Interface.model.update_status_claim(tms_doc,2,1,(res_data)=>{
-            res.json(res_data)
-        })
-    }
-=======
 }else if(sub_invoice=="ITR"){
     TMS_Interface.model.update_status_claim(tms_doc,2,1,invoice,(res_data)=>{
         res.json(res_data)
     })
 }
     
->>>>>>> f8fcc0ed2a5f8a3e2c5b8cd9485067943c660782
    }); 
 
 

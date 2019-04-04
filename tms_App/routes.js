@@ -24,10 +24,7 @@ router.get("/get-messenger/:type_mess",(req,resp)=>{
 })
 router.get("/tsc/check-status/:tsc_document",(req,resp)=>{
     var tsc_document = req.params.tsc_document
-<<<<<<< HEAD
-=======
     console.log("tsc_document",tsc_document)
->>>>>>> f8fcc0ed2a5f8a3e2c5b8cd9485067943c660782
     TMS_Special_Circles.model.check_status(tsc_document,(res_data)=>{
         resp.json(res_data)
     })

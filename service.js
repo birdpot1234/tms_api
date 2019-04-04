@@ -145,6 +145,7 @@ const select_query = (config="",nameFN = "", nameTB = "", sql_query = "") => {
                     reject(response(502, "Error Data", result))
                 }
             }).catch((err) => {
+                pool.close()
                 if (err) {
                     save_log(sql_query, nameFN, nameTB, err)
                     reject(response(501, "Error Query", err))

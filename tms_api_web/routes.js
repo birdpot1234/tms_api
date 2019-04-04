@@ -16,11 +16,18 @@ const TMS_Calendar = require("./TMS_Calendar")
 const TMS_Monitor=require("./TMS_Monitor")
 var fs = require("fs");
 
+//----------------All TMS คิดค่ารอบ
+router.post("/import/excel-round-mess/",(req,resp)=>TMS)
+//----------------All TMS คิดค่ารอบ
 
 //----------------All TMS Monitor
-router.get("/monitor/search_data/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTL_1(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
+// router.get("/monitor/search_data/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTL_1(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
 router.get("/monitor/get_data_monitorTL_1/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTL_1(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
-router.get("/monitor/get_data_monitorTR_1/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTL_1(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
+router.get("/monitor/get_data_monitorTR_1/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTR_1(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
+router.get("/monitor/get_data_monitorTL_2/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTL_2(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
+router.get("/monitor/get_data_monitorTR_2/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTR_2(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
+router.get("/monitor/get_data_monitorTL_3/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTL_3(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
+router.get("/monitor/get_data_monitorTR_3/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTR_3(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
 //----------------All TMS Monitor
 
 //----------------All TMS Calendar
