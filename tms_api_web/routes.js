@@ -28,6 +28,7 @@ router.get("/monitor/get_data_monitorTL_2/:stDate&:enDate",(req,resp)=>TMS_Monit
 router.get("/monitor/get_data_monitorTR_2/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTR_2(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
 router.get("/monitor/get_data_monitorTL_3/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTL_3(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
 router.get("/monitor/get_data_monitorTR_3/:stDate&:enDate",(req,resp)=>TMS_Monitor.model.get_data_monitorTR_3(req.params.stDate,req.params.enDate,(res_data)=>resp.json(res_data)))
+router.get("/monitor/get_data_monitorBelow/:stDate&:enDate&:group",(req,resp)=>TMS_Monitor.model.get_data_monitorBelow(req.params.stDate,req.params.enDate,req.params.group,(res_data)=>resp.json(res_data)))
 //----------------All TMS Monitor
 
 //----------------All TMS Calendar

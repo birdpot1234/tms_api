@@ -304,8 +304,8 @@ const model = {
             var sql_query = "SELECT  *,cause as cause_name \
             FROM            dbo.TMS_Cars_Calendar LEFT OUTER JOIN\
             dbo.TMS_Cause_Cars_Round ON dbo.TMS_Cars_Calendar.cause_id = dbo.TMS_Cause_Cars_Round.id\
-            WHERE        (CONVERT(varchar(10), start_date, 120) BETWEEN '"+ stMonth + "%' AND '" + endMonth + "%' ) OR\
-            (CONVERT(varchar(10), end_date, 120) BETWEEN '"+ stMonth + "%' AND '" + endMonth + "%' ) "
+            WHERE        (CONVERT(varchar(10), start_date, 120) BETWEEN '"+ stMonth + "' AND '" + endMonth + "' ) OR\
+            (CONVERT(varchar(10), end_date, 120) BETWEEN '"+ stMonth + "' AND '" + endMonth + "' ) "
             // console.log("object", sql_query)
             req.query(sql_query).then((result, err) => {
                 pool.close()
