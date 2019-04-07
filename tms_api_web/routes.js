@@ -14,10 +14,11 @@ const Rating = require("./Rating")
 const sendMail = require("./TMS_sendMail")
 const TMS_Calendar = require("./TMS_Calendar")
 const TMS_Monitor=require("./TMS_Monitor")
+const TMS_MessRound =require("./TMS_MessRound")
 var fs = require("fs");
 
 //----------------All TMS คิดค่ารอบ
-router.post("/import/excel-round-mess/",(req,resp)=>TMS)
+router.post("/import/excel-round-mess/",(req,resp)=>TMS_MessRound.model.import_excel_round(req.body,(res_data)=>resp.json(res_data)))
 //----------------All TMS คิดค่ารอบ
 
 //----------------All TMS Monitor
