@@ -44,6 +44,7 @@ router.post("/calendar/create-task/", (req, resp) => {
 router.get("/calendar/get-all-calendar/:stDate&:endDate", (req, resp) => {
     TMS_Calendar.model.get_all_calendar(req.params.stDate, req.params.endDate, (res_data) => resp.json(res_data))
 })
+
 router.get("/calendar/get-report-calendar/:stDate&:endDate", (req, resp) => {
     TMS_Calendar.model.get_report_calendar(req.params.stDate, req.params.endDate, (res_data) => resp.json(res_data))
 })
@@ -62,6 +63,19 @@ router.post("/calendar/create-cause/", (req, resp) => {
     TMS_Calendar.model.create_cause_data(inData, (res_data) => resp.json(res_data))
 })
 //----------------All TMS Calendar
+
+//----------------Delete Calendar *******Jar
+router.delete("/calendar/delete-task/", (req, resp) => {
+    var document = req.body
+    TMS_Monitor.model.delete_task(document, (res_data) => resp.json(res_data))
+})
+router.get("/calendar/get-calendar/:document", (req, resp) => {
+    TMS_Monitor.model.get_calendar(req.params.document, (res_data) => resp.json(res_data))
+})
+router.put("/calendar/update-task/", (req, resp) => {
+    var inData = req.body
+        TMS_Monitor.model.update_task(inData, async(res_data) => await resp.json(res_data))
+})
 
 //----------------All App_SignaturePic
 router.get("/signature/get-signature/:invoice", (req, resp) => {

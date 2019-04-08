@@ -357,7 +357,84 @@ const model = {
                 });
             });
         // })
-    }
+    },
+    // delete_task(document, callback) {
+    //     sql.close()
+    //     const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
+    //     pool.connect(err => {
+    //         if (err) {
+    //             save_log(err, "delete_task", "TMS_Calendar", err)
+    //             callback(server_response(500, "Error", err))
+    //         }
+    //         const transaction = new sql.Transaction(pool)
+    //         transaction.begin(err => {
+    //             if (err) callback(server_response(500, "Connection is close", ""));
+    //             let rolledBack = false
+    //             transaction.on("rollback", aborted => {
+    //                 rolledBack = true
+    //             })
+    //             var req = new sql.Request(transaction)
+    //             var sql_query = " DELETE FROM [dbo].[TMS_Cars_Calendar] "+
+    //             " WHERE [document_no] = "+ document
+    //             req.query(sql_query).then((result, err) => {
+    //                 if (err) {
+    //                     if (!rolledBack) {
+    //                         transaction.rollback(err => {
+    //                             if (err) callback(server_response(501, "Error query SQL", err));
+    //                             pool.close()
+    //                             save_log(result, "delete_task", "TMS_Calendar", document)
+    //                             callback(server_response(501, "Error query SQL", err))
+    //                         })
+    //                     }
+    //                 } else {
+    //                     transaction.commit(err => {
+    //                         pool.close()
+    //                         if (err) callback(server_response(501, "Error query SQL", err));
+    //                         save_log(result, "delete_task", "TMS_Calendar", document)
+    //                         callback(server_response(200, "Success", result.recordset))
+    //                     })
+    //                 }
+    //             }).catch((err) => {
+    //                 if (err) {
+    //                     save_log(err, "delete_task", "TMS_Calendar", err)
+    //                     callback(server_response(500, "Error", err))
+    //                 }
+    //             });
+    //         })
+    //     })
+    // },
+    // get_all_calendar(document, callback) {
+    //     sql.close()
+    //     const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
+    //     pool.connect(err => {
+    //         if (err) {
+    //             save_log(err, "get_calendar", "TMS_Cars_Calendar", err)
+    //             callback(server_response(500, "Error", err))
+    //         }
+    //         var req = new sql.Request(pool)
+    //         var sql_query = "SELECT  *\
+    //         FROM            dbo.TMS_Cars_Calendar LEFT OUTER JOIN\
+    //         dbo.Messenger ON dbo.TMS_Cars_Calendar.mess_code = dbo.Messenger.IDMess\
+    //         WHERE        document_no = '"+ document +"'"
+    //         console.log("object", sql_query)
+    //         req.query(sql_query).then((result, err) => {
+    //             pool.close()
+    //             // console.log("res", result)
+    //             if (result.recordset.length > 0) {
+    //                 save_log(result.recordset, "get_calendar", "TMS_Cars_Calendar", result.recordset)
+    //                 callback(server_response(200, "Success", result.recordset))
+    //             } else {
+    //                 save_log(result.recordset, "get_calendar", "TMS_Cars_Calendar", result.recordset)
+    //                 callback(server_response(304, "None data this query", result.recordset))
+    //             }
+    //         }).catch((err) => {
+    //             if (err) {
+    //                 save_log(err, "get_calendar", "TMS_Cars_Calendar", err)
+    //                 callback(server_response(500, "Error", err))
+    //             }
+    //         });
+    //     })
+    // },
 }
 
 module.exports = {

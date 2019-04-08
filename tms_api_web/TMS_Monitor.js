@@ -401,6 +401,44 @@ FROM            dbo.TMS_Monitor_2 LEFT OUTER JOIN \
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
     },
+    async get_calendar(document, callback) {
+        name_function = "get_calendar"
+        name_table = "TMS_Cars_Calendar"
+        sql_query = "SELECT  *\
+        FROM            dbo.TMS_Cars_Calendar LEFT OUTER JOIN\
+        dbo.Messenger ON dbo.TMS_Cars_Calendar.mess_code = dbo.Messenger.IDMess\
+        WHERE        document_no = '"+ document +"'"
+        //console.log("object", sql_query)
+        res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        callback(res_data)
+    },
+    async delete_task(document, callback) {
+        name_function = "delete_task"
+        name_table = "TMS_Cars_Calendar"
+        sql_query = " DELETE FROM [dbo].[TMS_Cars_Calendar] "+
+        " WHERE [document_no] = '"+ document+"'"
+        //console.log("object", sql_query)
+        res_data = await insert_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        callback(res_data)
+    },
+    async update_task(inData, callback) {
+        //console.log("inData", inData)
+        name_function = "update_task"
+        name_table = "TMS_Cars_Calendar"
+        sql_query = " UPDATE [dbo].[TMS_Cars_Calendar] "+
+        " SET [car_license] = '"+inData[0].car_license+"'"+
+        " ,[car_type] = '"+inData[0].car_type+"'"+
+        " ,[start_date] = '"+inData[0].start_date+"'"+
+        " ,[end_date] = '"+inData[0].end_date+"'"+
+        " ,[start_point] = '"+inData[0].start_point+"'"+
+        " ,[end_point] = '"+inData[0].end_point+"'"+
+        " ,[remark] = '"+inData[0].remark+"'"+
+        " ,[mess_code] = '"+inData[0].mess_code+"'"+
+        " WHERE [document_no] = '"+ inData[0].document_no+"'"
+        //console.log("object", sql_query)
+        res_data = await insert_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        callback(res_data)
+    },
 }
 
 
