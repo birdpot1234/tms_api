@@ -161,7 +161,7 @@ const model = {
             FROM TMS_Workloop \
             WHERE "+ sqlWhere + " \
             ORDER BY  INVOICEID"
-            // console.log("object", sql_query)
+            console.log("object", sql_query)
             req.query(sql_query).then((result, err) => {
                 pool.close()
                 if (result.recordset.length > 0) {
