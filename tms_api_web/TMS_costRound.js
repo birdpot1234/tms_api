@@ -44,7 +44,9 @@ const model = {
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
     },
+    
 }
+
 
 
 module.exports = {

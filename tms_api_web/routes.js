@@ -20,6 +20,7 @@ var fs = require("fs");
 
 //----------------All TMS คิดค่ารอบ
 router.post("/import/excel-round-mess/",(req,resp)=>TMS_MessRound.model.import_excel_round(req.body,(res_data)=>resp.json(res_data)))
+router.get("/round-cost/get-round-mess/:inDate&:messCode",(req,resp)=>TMS_MessRound.model.get_round_mess(req.params.inDate,req.params.messCode,(res_data)=>resp.json(res_data)))
 //----------------All TMS คิดค่ารอบ
 
 //----------------All TMS Monitor
