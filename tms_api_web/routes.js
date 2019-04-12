@@ -15,6 +15,7 @@ const sendMail = require("./TMS_sendMail")
 const TMS_Calendar = require("./TMS_Calendar")
 const TMS_Monitor=require("./TMS_Monitor")
 const TMS_MessRound =require("./TMS_MessRound")
+const TMS_costRound =require("./TMS_costRound")
 var fs = require("fs");
 
 //----------------All TMS คิดค่ารอบ
@@ -321,6 +322,23 @@ router.get("/email", (req, resp) => {
             console.log('Auto send email ::' + new Date(), res_data2);
         })
     })
+})
+
+////////////costRound
+router.get("/get_report_costmess_MDL/:month", (req, resp) => {
+    TMS_costRound.model.get_report_costmess_MDL(req.params.month, (res_data) => resp.json(res_data))
+})
+
+router.get("/get_report_costmess_MCV/:month", (req, resp) => {
+    TMS_costRound.model.get_report_costmess_MCV(req.params.month, (res_data) => resp.json(res_data))
+})
+
+router.get("/get-daily-costmess-MCV/:date&:id", (req, resp) => {
+    TMS_costRound.model.get_daily_costmess_MCV(req.params.date,req.params.id, (res_data) => resp.json(res_data))
+})
+
+router.get("/get-daily-costmess-MDL/:date&:id&:type", (req, resp) => {
+    TMS_costRound.model.get_daily_costmess_MDL(req.params.date,req.params.id,req.params.type, (res_data) => resp.json(res_data))
 })
 
 module.exports = router

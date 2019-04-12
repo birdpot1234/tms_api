@@ -142,7 +142,7 @@ const select_query = (config="",nameFN = "", nameTB = "", sql_query = "") => {
                     resolve(response(200, "Success", result.recordset))
                 } else {
                     save_log(sql_query, nameFN, nameTB, result.recordset)
-                    reject(response(502, "Error Data", result))
+                    resolve(response(502, "Error Data", result))
                 }
             }).catch((err) => {
                 pool.close()
