@@ -301,9 +301,13 @@ const model = {
                 callback(server_response(500, "Error", err))
             }
             var req = new sql.Request(pool)
-            var sql_query = "SELECT  *,cause as cause_name \
-            FROM            dbo.TMS_Cars_Calendar LEFT OUTER JOIN\
-            dbo.TMS_Cause_Cars_Round ON dbo.TMS_Cars_Calendar.cause_id = dbo.TMS_Cause_Cars_Round.id\
+            var sql_query = "SELECT  dbo.Messenger.MessName, dbo.TMS_Cars_Calendar.document_no, dbo.TMS_Cars_Calendar.linenumber, dbo.TMS_Cars_Calendar.car_license, dbo.TMS_Cars_Calendar.car_type, dbo.TMS_Cars_Calendar.create_date, \
+            dbo.TMS_Cars_Calendar.start_date, dbo.TMS_Cars_Calendar.end_date, dbo.TMS_Cars_Calendar.start_point, dbo.TMS_Cars_Calendar.end_point, dbo.TMS_Cars_Calendar.remark, dbo.TMS_Cars_Calendar.status, \
+            dbo.TMS_Cars_Calendar.qty_product, dbo.TMS_Cars_Calendar.rec_time, dbo.TMS_Cars_Calendar.exit_time, dbo.TMS_Cars_Calendar.finish_time, dbo.TMS_Cars_Calendar.cause_id \
+            ,cause as cause_name, dbo.Messenger.MessName AS mess_code  \
+            FROM            dbo.TMS_Cars_Calendar LEFT OUTER JOIN \
+            dbo.Messenger ON dbo.TMS_Cars_Calendar.mess_code = dbo.Messenger.IDMess LEFT OUTER JOIN \
+            dbo.TMS_Cause_Cars_Round ON dbo.TMS_Cars_Calendar.cause_id = dbo.TMS_Cause_Cars_Round.id \
             WHERE        (CONVERT(varchar(10), start_date, 120) BETWEEN '"+ stMonth + "' AND '" + endMonth + "' ) OR\
             (CONVERT(varchar(10), end_date, 120) BETWEEN '"+ stMonth + "' AND '" + endMonth + "' ) "
             // console.log("object", sql_query)
