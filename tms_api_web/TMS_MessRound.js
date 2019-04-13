@@ -31,6 +31,7 @@ const model = {
         FROM            dbo.ZTS_TMS_RoundCost_Personal \
         WHERE (MessengerID LIKE '"+mess_code+"') AND (ClearingDate LIKE '"+date+"') \
         ORDER BY MessengerID, car_type, Trip, ship_cost DESC"
+        console.log("sql_query",sql_query)
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
     }
