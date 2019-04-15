@@ -27,11 +27,29 @@ const model = {
     async get_round_mess(date,mess_code,callback){
         name_function = "get_round_mess"
         name_table = "ZTS_TMS_RoundCost_Personal"
-        sql_query="SELECT   ClearingDate, MessengerID, MessName, car_type, ship_cost, Trip \
-        FROM            dbo.ZTS_TMS_RoundCost_Personal \
+        sql_query="SELECT   ClearingDate, MessengerID, MessName, car_type, ship_cost, Trip, ship_name, CustomerID, CustomerName, INVOICEID, \
+        ship_code        FROM            dbo.ZTS_TMS_RoundCost_Personal \
         WHERE (MessengerID LIKE '"+mess_code+"') AND (ClearingDate LIKE '"+date+"') \
         ORDER BY MessengerID, car_type, Trip, ship_cost DESC"
-        console.log("sql_query",sql_query)
+        res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        callback(res_data)
+    },
+    async get_group_shipCode(date,mess_code,callback){
+        name_function = "get_group_shipCode"
+        name_table = "ZTS_TMS_RoundMess_GShipCode"
+        sql_query="SELECT    ClearingDate, MessengerID, ship_code, ship_name, Trip, car_type, ship_cost, round_cost \
+        FROM            dbo.ZTS_TMS_RoundMess_GShipCode \
+        WHERE (MessengerID LIKE '"+mess_code+"') AND (ClearingDate LIKE '"+date+"') \
+        ORDER BY MessengerID, Trip, ship_cost DESC"
+        res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        callback(res_data)
+    },
+    async get_group_billCost(date,mess_code,callback){
+        name_function = "get_group_billCost"
+        name_table = "ZTS_TMS_RoundCost_BillCost"
+        sql_query="SELECT        TOP (100) PERCENT ClearingDate, MessengerID, car_type, bill_cost \
+        FROM            dbo.ZTS_TMS_RoundCost_BillCost \
+        WHERE (MessengerID LIKE '"+mess_code+"') AND (ClearingDate LIKE '"+date+"')"
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
     }
