@@ -174,6 +174,7 @@ const insert_query = (config="",nameFN = "", nameTB = "", sql_query = "") => {
                     rolledBack = true
                 })
                 var req = new sql.Request(transaction)
+                // console.log("sql_query",sql_query)
                 req.query(sql_query).then((result, err) => {
                     if (err) {
                         if (!rolledBack) {

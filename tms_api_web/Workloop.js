@@ -35,10 +35,10 @@ const model = {
             WHERE INVOICEID LIKE '"+invoice+"' \
             UPDATE ReportDetail SET ClearingStatus=8 \
             WHERE INVOICEID LIKE '"+invoice+"' "
-            // console.log("result", sql_query)
+            console.log("sql_query", sql_query)
             req.query(sql_query).then((result, err) => {
                 pool.close()
-                // console.log("result", result)
+                console.log("result", result)
                 // result.rowsAffected.forEach((val,index) => {
                 //     if(val)
                 // });
