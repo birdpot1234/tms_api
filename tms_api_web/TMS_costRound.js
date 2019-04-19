@@ -49,9 +49,10 @@ const model = {
     async get_tms_plan(start_date, end_date, express, callback) {
         name_function = "get_tms_plan"
         name_table = "TMS_jar_TMSPlan"
-        sql_query = "SELECT * FROM [Data_TransportApp].[dbo].[TMS_jar_TMSPlan] "+
+        sql_query = "SELECT * FROM [Data_TransportApp].[dbo].[TMS_jar_TMSPlan+BoxAmount] "+
         "WHERE [delivery_date] BETWEEN '"+ start_date + "' AND '"+ end_date + "' "+
         "AND [Express] = " + express
+        console.log()
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
     },
