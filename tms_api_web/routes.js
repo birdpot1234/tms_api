@@ -44,6 +44,10 @@ router.get("/monitor/get_data_monitorTR_3/:stDate&:enDate", (req, resp) => TMS_M
 router.get("/monitor/get_data_monitorBelow/:stDate&:enDate&:group", (req, resp) => TMS_Monitor.model.get_data_monitorBelow(req.params.stDate, req.params.enDate, req.params.group, (res_data) => resp.json(res_data)))
 //----------------All TMS Monitor
 
+//----------------TMS Plan
+router.get("/TMSPlan/get_tms_plan/:stDate&:enDate&:express",(req,resp)=>TMS_costRound.model.get_tms_plan(req.params.stDate,req.params.enDate,req.params.express,(res_data)=>resp.json(res_data)))
+//----------------TMS Plan
+
 //----------------All TMS Calendar
 router.get("/calendar/get-cause/", (req, resp) => TMS_Calendar.model.get_cause_data((res_data) => resp.json(res_data)))
 
