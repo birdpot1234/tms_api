@@ -10,7 +10,7 @@ const model = {
         sql_query =  " SELECT *"+
         " FROM [Data_TransportApp].[dbo].[TMS_jar_reportCostMess_Monthly]"+
         " where MessengerID like 'MDL%' and month = '"+month+"'"+
-        " order by MessengerID "
+        " order by MessNO"
         //console.log("object", sql_query)
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
@@ -21,7 +21,7 @@ const model = {
         sql_query =  " SELECT *"+
         " FROM [Data_TransportApp].[dbo].[TMS_jar_reportCostMess_Monthly]"+
         " where MessengerID like 'MCV%' and month = '"+month+"'"+
-        " order by MessengerID "
+        " order by MessNO"
         //console.log("object", sql_query)
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
