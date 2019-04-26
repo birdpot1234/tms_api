@@ -1,6 +1,7 @@
 var { dbConnectDplusSystem } = require('../connect_sql')
 var sql = require('mssql')
-const { save_log, server_response } = require("../service")
+const { save_log, server_response, select_query } = require("../service")
+var name_function = "", name_table = "", sql_query = "", res_data = ""
 
 const model = {
     find_by_id_pass(id, pass, callback) {
@@ -35,6 +36,13 @@ const model = {
             });
 
         })
+    },
+    async find_username(ID_User, Web_No, callback) {
+        name_function = "find_username"
+        name_table = "DPLT_ADDP_DplusSystem_MapUser"
+        sql_query = "SELECT * FROM DPLT_ADDP_DplusSystem_MapUser WHERE (ID_User = '" + ID_User + "') AND ([Web No_] = '" + Web_No + "')"
+        res_data = await select_query(dbConnectDplusSystem, name_function, name_table, sql_query)
+        callback(res_data)
     }
 }
 
