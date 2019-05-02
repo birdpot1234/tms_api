@@ -31,6 +31,9 @@ router.get("/round-cost/get-group-billCost/:inDate&:messCode&:numShip", (req, re
 router.post("/round-cost/cost-round-mess/", (req, resp) => {
     TMS_MessRound.model.post_insert_roundCost(req.body, (res_data) => resp.json(res_data))
 })
+router.get("/round-cost/get-round-report/:stDate&:enDate&:messCode&:numShip", (req,resp)=>{
+    TMS_MessRound.model.get_round_report(req.params.stDate,req.params.enDate,req.params.messCode,req.params.numShip,(res_data)=>resp.json(res_data))
+})
 //----------------All TMS คิดค่ารอบ
 
 //----------------All TMS Monitor

@@ -26,7 +26,7 @@ const model = {
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
     },
-    async get_round_mess(date, mess_code,num_ship, callback) {
+    async get_round_mess(date, mess_code, num_ship, callback) {
         name_function = "get_round_mess"
         name_table = "ZTS_TMS_RoundCost_Personal"
         if (mess_code.substring(0, 1) === "M") {
@@ -35,17 +35,17 @@ const model = {
         WHERE (MessengerID LIKE '"+ mess_code + "') AND (ClearingDate LIKE '" + date + "') \
         ORDER BY MessengerID, car_type, Trip, ship_cost DESC"
         } else if (mess_code.substring(0, 1) === "S") {
-            if(num_ship==="Staff Ship1"){
+            if (num_ship === "Staff Ship1") {
                 sql_query = "SELECT   ClearingDate, MessengerID, MessName, car_type, ship_cost,ship_cost2, Trip, ship_name, CustomerID, CustomerName, INVOICEID, \
                 ship_code        FROM            dbo.ZTS_TMS_RoundCost_Personal \
                 WHERE (shipment_staff_1 LIKE '"+ mess_code + "') AND (ClearingDate LIKE '" + date + "') \
                 ORDER BY MessengerID, car_type, Trip, ship_cost DESC"
-            }else if(num_ship==="Staff Ship2"){
+            } else if (num_ship === "Staff Ship2") {
                 sql_query = "SELECT   ClearingDate, MessengerID, MessName, car_type, ship_cost,ship_cost2, Trip, ship_name, CustomerID, CustomerName, INVOICEID, \
                 ship_code        FROM            dbo.ZTS_TMS_RoundCost_Personal \
                 WHERE (shipment_staff_2 LIKE '"+ mess_code + "') AND (ClearingDate LIKE '" + date + "') \
                 ORDER BY MessengerID, car_type, Trip, ship_cost DESC"
-            }else if(num_ship==="Staff Ship3"){
+            } else if (num_ship === "Staff Ship3") {
                 sql_query = "SELECT   ClearingDate, MessengerID, MessName, car_type, ship_cost,ship_cost2, Trip, ship_name, CustomerID, CustomerName, INVOICEID, \
                 ship_code        FROM            dbo.ZTS_TMS_RoundCost_Personal \
                 WHERE (shipment_staff_3 LIKE '"+ mess_code + "') AND (ClearingDate LIKE '" + date + "') \
@@ -55,7 +55,7 @@ const model = {
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
     },
-    async get_group_shipCode(date, mess_code,num_ship, callback) {
+    async get_group_shipCode(date, mess_code, num_ship, callback) {
         name_function = "get_group_shipCode"
         name_table = "ZTS_TMS_RoundMess_GShipCode"
         if (mess_code.substring(0, 1) === "M") {
@@ -64,20 +64,20 @@ const model = {
             FROM            dbo.ZTS_TMS_RoundMess_GShipCode \
             WHERE (MessengerID LIKE '"+ mess_code + "') AND (ClearingDate LIKE '" + date + "') \
             ORDER BY MessengerID, Trip, ship_cost DESC"
-        }else if (mess_code.substring(0, 1) === "S") {
-            if(num_ship==="Staff Ship1"){
+        } else if (mess_code.substring(0, 1) === "S") {
+            if (num_ship === "Staff Ship1") {
                 sql_query = "SELECT    ClearingDate, MessengerID, ship_code, ship_name, Trip, car_type, ship_cost, round_cost \
                 ,ship_cost2,staff_cost \
                 FROM            dbo.ZTS_TMS_RoundMess_GShipCode \
                 WHERE (shipment_staff_1 LIKE '"+ mess_code + "') AND (ClearingDate LIKE '" + date + "') \
                 ORDER BY MessengerID, Trip, ship_cost DESC"
-            }else if(num_ship==="Staff Ship2"){
+            } else if (num_ship === "Staff Ship2") {
                 sql_query = "SELECT    ClearingDate, MessengerID, ship_code, ship_name, Trip, car_type, ship_cost, round_cost \
                 ,ship_cost2,staff_cost \
                 FROM            dbo.ZTS_TMS_RoundMess_GShipCode \
                 WHERE (shipment_staff_2 LIKE '"+ mess_code + "') AND (ClearingDate LIKE '" + date + "') \
                 ORDER BY MessengerID, Trip, ship_cost DESC"
-            }else if(num_ship==="Staff Ship3"){
+            } else if (num_ship === "Staff Ship3") {
                 sql_query = "SELECT    ClearingDate, MessengerID, ship_code, ship_name, Trip, car_type, ship_cost, round_cost \
                 ,ship_cost2,staff_cost \
                 FROM            dbo.ZTS_TMS_RoundMess_GShipCode \
@@ -88,7 +88,7 @@ const model = {
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
     },
-    async get_group_billCost(date, mess_code,num_ship, callback) {
+    async get_group_billCost(date, mess_code, num_ship, callback) {
         name_function = "get_group_billCost"
         name_table = "ZTS_TMS_RoundCost_BillCost"
         sql_query = "SELECT        TOP (100) PERCENT ClearingDate, MessengerID, car_type, bill_cost \
@@ -117,6 +117,37 @@ const model = {
         VALUES "+ sql_insert
         var res_query = await insert_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_query)
+    },
+    async get_round_report(stDate, enDate, mess_code, num_ship, callback) {
+        name_function = "get_round_report"
+        name_table = "ZTS_TMS_Roundcost_Report"
+        var mess1digit = mess_code.substring(0, 1)
+        if (mess1digit == "M") {
+            sql_query = "SELECT        ClearingDate,Trip, MessengerID,car_type, ship_code, ship_name, bill_count, ship_cost, round_cost \
+        FROM            dbo.ZTS_TMS_Roundcost_Report \
+        WHERE        (ClearingDate BETWEEN '"+ stDate + "' AND '" + enDate + "') AND (MessengerID = '" + mess_code + "') \
+        ORDER BY ship_cost DESC"
+        } else if (mess1digit == "S") {
+            if (num_ship === "Staff Ship1") {
+                sql_query = "SELECT        * \
+            FROM            dbo.ZTS_TMS_Roundcost_Report \
+            WHERE        (ClearingDate BETWEEN '"+ stDate + "' AND '" + enDate + "') AND (shipment_staff_1 = '" + mess_code + "') \
+            ORDER BY ship_cost DESC"
+            } else if (num_ship === "Staff Ship2") {
+                sql_query = "SELECT        * \
+            FROM            dbo.ZTS_TMS_Roundcost_Report \
+            WHERE        (ClearingDate BETWEEN '"+ stDate + "' AND '" + enDate + "') AND (shipment_staff_2 = '" + mess_code + "') \
+            ORDER BY ship_cost DESC"
+            } else if (num_ship === "Staff Ship3") {
+                sql_query = "SELECT        * \
+            FROM            dbo.ZTS_TMS_Roundcost_Report \
+            WHERE        (ClearingDate BETWEEN '"+ stDate + "' AND '" + enDate + "') AND (shipment_staff_3 = '" + mess_code + "') \
+            ORDER BY ship_cost DESC"
+            }
+        }
+        console.log("sql_query", sql_query);
+        res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        callback(res_data)
     }
 }
 
