@@ -6,16 +6,15 @@ var moment = require("moment");
 var datetime = require('node-datetime');
 
 var con = require('../connect_sql');
-
-var respons = '';
-var responstatus = '';
-var arr = {};
-var re_count = {};
-var sql = require("mssql");
-
 const TMS_Interface = require("./TMS_Interface")
 
-router.post('/tms/api/regis_3', function (req, res) {
+var respons ='';
+var responstatus ='';
+var arr ={};
+var re_count ={};
+var sql = require("mssql");
+
+  router.post('/tms/api/regis_3', function(req, res) { 
     let tms_doc = req.body.tms_doc;
     let invoice = req.body.invoice;
     let box     = req.body.box;

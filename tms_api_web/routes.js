@@ -158,6 +158,7 @@ router.get("/login/:id&:pass", (req, resp) => {
 })
 router.get("/webno/:idUser&:webNo",(req,resp)=>DPLT_ADDP_DplusSystem_User.model.find_username(req.params.idUser,req.params.webNo,(res_data)=>resp.json(res_data)))
 router.post("/special-circles/add-task/", (req, resp) => {
+    console.log("req",req.body)
     TMS_Special_Circles.model.create_tsc_one(req.body[0], (res_data) => {
         //------------Commit
         resp.json(res_data)

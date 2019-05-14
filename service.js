@@ -78,7 +78,7 @@ const Gen_Document5digit = (char_doc, last_doc, callback) => {
     let docYear = moment().format("YY")
     let docMonth = moment().format("MM")
     last_doc = (typeof last_doc == "undefined") ? "" : last_doc
-    console.log("last_doc", last_doc)
+    // console.log("last_doc", last_doc)
     if (last_doc != "") {
         get_number_run = last_doc.split("-");
         get_number_run = get_number_run[1]

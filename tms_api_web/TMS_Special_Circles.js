@@ -102,7 +102,7 @@ const model = {
     create_tsc_one(data, callback) {
         this.gen_tsc_document((res_data) => {
             //------กำหนดค่าให้กับตัวแปรตามฟิลด์
-            console.log("data", data);
+            // console.log("data", data);
             var tsc_document = res_data
             var create_date = moment().format("YYYY-MM-DD H:m:s")
             var user_request_code = data.user_request_code
@@ -110,13 +110,15 @@ const model = {
             var user_request_department = data.user_request_department
             var user_request_tel = (typeof data.user_request_tel != "undefined") ? data.user_request_tel : ""
             var receive_from = (typeof data.receive_from != "undefined") ? data.receive_from : ""
-            var receive_date = (typeof data.receive_date != "undefined") ? moment(data.receive_date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD")
-            var receive_time_first = (typeof data.receive_time_first != "undefined") ? moment(data.receive_time_first).format("H:m:s") : moment().format("H:m:s")
-            var receive_time_end = (typeof data.receive_time_end != "undefined") ? moment(data.receive_time_end).format("H:m:s") : moment().format("H:m:s")
+            // console.log("object",data.receive_date,moment().format("YYYY-MM-DD"))
+            var receive_date = (typeof data.receive_date != "undefined") ? (data.receive_date !="")?moment(data.receive_date).format("YYYY-MM-DD"):moment().format("YYYY-MM-DD") :moment().format("YYYY-MM-DD") 
+            // console.log("object",receive_date)
+            var receive_time_first = (typeof data.receive_time_first != "undefined" ) ?(data.receive_time_first !="")? moment(data.receive_time_first).format("H:m:s") : moment().format("H:m:s"):moment().format("H:m:s")
+            var receive_time_end = (typeof data.receive_time_end != "undefined" ) ?(data.receive_time_end !="")? moment(data.receive_time_end).format("H:m:s") : moment().format("H:m:s"):moment().format("H:m:s")
             var send_to = (typeof data.send_to != "undefined") ? data.send_to : ""
-            var send_date = (typeof data.send_date != "undefined") ? moment(data.send_date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD")
-            var send_time_first = (typeof data.send_time_first != "undefined") ? moment(data.send_time_first).format("H:m:s") : moment().format("H:m:s")
-            var send_time_end = (typeof data.send_time_end != "undefined") ? moment(data.send_time_end).format("H:m:s") : moment().format("H:m:s")
+            var send_date = (typeof data.send_date != "undefined") ?(data.send_date !="")? moment(data.send_date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"): moment().format("YYYY-MM-DD")
+            var send_time_first = (typeof data.send_time_first != "undefined" ) ?(data.send_time_first !="")? moment(data.send_time_first).format("H:m:s") : moment().format("H:m:s"):moment().format("H:m:s")
+            var send_time_end = (typeof data.send_time_end != "undefined" ) ?(data.send_time_end !="")? moment(data.send_time_end).format("H:m:s") : moment().format("H:m:s"):moment().format("H:m:s")
             var send_tel = (typeof data.send_tel_user != "undefined") ? data.send_tel_user : ""
             var task_group = (typeof data.task_group != "undefined") ? data.task_group : ""
             var task_group_document = (typeof data.task_group_document != "undefined") ? data.task_group_document : ""
@@ -233,7 +235,7 @@ const model = {
                      ,'"+ address_shipment + "'\
                      ,'"+ detail_cn + "'\
                      ,'"+ typework + "' )"
-
+                    //  console.log("sql_query", sql_query)
                     req.query(sql_query, (err, result) => {
                         if (err) {
                             if (!rolledBack) {
