@@ -344,6 +344,14 @@ router.get("/email", (req, resp) => {
 })
 
 ////////////costRound
+router.get("/get-yearly-costmess-MCV/:year", (req, resp) => {
+    TMS_costRound.model.get_yearly_costmess_MCV(req.params.year, (res_data) => resp.json(res_data))
+})
+
+router.get("/get-yearly-costmess-MDL/:year", (req, resp) => {
+    TMS_costRound.model.get_yearly_costmess_MDL(req.params.year, (res_data) => resp.json(res_data))
+})
+
 router.get("/get_report_costmess_MDL/:month", (req, resp) => {
     TMS_costRound.model.get_report_costmess_MDL(req.params.month, (res_data) => resp.json(res_data))
 })

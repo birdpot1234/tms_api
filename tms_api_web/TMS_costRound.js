@@ -77,6 +77,26 @@ const model = {
     //     res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
     //     callback(res_data)
     // },
+    async get_yearly_costmess_MCV(year, callback) {
+        name_function = "get_yearly_costmess_MCV"
+        name_table = "TMS_jar_CostMess_Yearly_MCV"
+        sql_query =  " SELECT *" +
+        " FROM [Data_TransportApp].[dbo].[TMS_jar_CostMess_Yearly_MCV]" +
+        " WHERE year = '"+year+"'"
+        console.log("object", sql_query)
+        res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        callback(res_data)
+    },
+    async get_yearly_costmess_MDL(year, callback) {
+        name_function = "get_yearly_costmess_MDL"
+        name_table = "TMS_jar_CostMess_Yearly_MDL"
+        sql_query =  " SELECT *" +
+        " FROM [Data_TransportApp].[dbo].[TMS_jar_CostMess_Yearly_MDL]" +
+        " WHERE year = '"+year+"'"
+        //console.log("object", sql_query)
+        res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        callback(res_data)
+    },
     
 }
 
