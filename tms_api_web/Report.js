@@ -199,7 +199,7 @@ const model = {
                      ,TMS_Report_Form_Account.[check_tranfer]	=TMS_Report_Account.[CheckboxTranfer] \
                      ,TMS_Report_Form_Account.[cn_doc]		=TMS_Report_Account.[CNDoc] \
                      ,TMS_Report_Form_Account.[cn_amount]		=TMS_Report_Account.[Amount] \
-                     ,TMS_Report_Form_Account.[comment]		=TMS_Report_Account.[Comment] \
+                     ,TMS_Report_Form_Account.[comment]		=TMS_Report_Account.[Comment]+TMS_Report_Account.[ReasonCN] \
                      ,TMS_Report_Form_Account.[car_type]		=TMS_Report_Account.[car_type] \
                      ,TMS_Report_Form_Account.[dpl_hub_dlvterm]		=TMS_Report_Account.[dpl_hub_dlvterm]\
                      ,TMS_Report_Form_Account.[inventlocationid]		=TMS_Report_Account.[inventlocationid]\
@@ -250,7 +250,7 @@ const model = {
               ,TMS_Report_Account.[CheckboxTranfer] \
               ,TMS_Report_Account.[CNDoc] \
               ,TMS_Report_Account.[Amount] \
-              ,TMS_Report_Account.[Comment] \
+              ,TMS_Report_Account.[Comment]+TMS_Report_Account.[ReasonCN] \
               ,TMS_Report_Account.[car_type]\
               ,TMS_Report_Account.[dpl_hub_dlvterm] \
               ,TMS_Report_Account.[inventlocationid]\
