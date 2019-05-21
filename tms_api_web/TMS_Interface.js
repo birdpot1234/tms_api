@@ -38,7 +38,32 @@ const model = {
             var sql_query = "SELECT        tms_document, document_sub, document_tran, status, date, dlv_term, customer_name, invoice_qty, invoice_amount, address_shipment, delivery_date, code_zone, store_zone,dpl_hub_dlvterm,inventlocationid \
             FROM            TMS_Clearbill_kerry_dhl \
             WHERE document_sub LIKE 'INA%' AND inventlocationid LIKE 'WS1' AND dlv_term LIKE '"+ in_type + "%' AND CONVERT(VARCHAR(10),date,120) LIKE '" + in_date + "'"
-            // console.log("sql_query",sql_query)
+            console.log("sql_query",sql_query)
+            req.query(sql_query).then((result) => {
+                pool.close()
+                // console.log("get_tms_kerry_dhl",result);
+                if (result.recordset.length > 0) {
+                    save_log(result.recordset, "get_tms_kerry_dhl", "TMS_Clearbill_kerry_dhl", result.recordset)
+                    callback(server_response(200, "Success", result.recordset))
+                } else {
+                    save_log(result.recordset, "get_tms_kerry_dhl", "TMS_Clearbill_kerry_dhl", result.recordset)
+                    callback(server_response(500, "Error", result.recordset))
+                }
+            }).catch((err) => {
+                if (err) throw err;
+            });
+        })
+    },
+    get_tms_phitsanulok_kerry_dhl(in_type, in_date, callback) {
+        in_type=(in_type==="ALL")?"":in_type
+        sql.close()
+        const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
+        pool.connect(err => {
+            var req = new sql.Request(pool)
+            var sql_query = "SELECT        tms_document, document_sub, document_tran, status, date, dlv_term, customer_name, invoice_qty, invoice_amount, address_shipment, delivery_date, code_zone, store_zone,dpl_hub_dlvterm,inventlocationid \
+            FROM            TMS_Clearbill_kerry_dhl \
+            WHERE document_sub LIKE 'INA%' AND inventlocationid LIKE 'WN1' AND dlv_term LIKE '"+ in_type + "%' AND CONVERT(VARCHAR(10),date,120) LIKE '" + in_date + "'"
+            console.log("sql_query",sql_query)
             req.query(sql_query).then((result) => {
                 pool.close()
                 // console.log("get_tms_kerry_dhl",result);

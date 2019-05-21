@@ -128,11 +128,14 @@ const model = {
             case "WS1":
                 sql_where = "AND inventlocationid LIKE '" + hub + "' AND convert(varchar(10),invoice_date,120) ='"+ date + "'"
                 break;
+            case "WN1":
+                sql_where = "AND inventlocationid LIKE '" + hub + "' AND convert(varchar(10),invoice_date,120) ='"+ date + "'"
+                break;
             default:
                 sql_where = "AND inventlocationid NOT LIKE '" + hub + "' AND convert(varchar(10),invoice_date,120) ='"+ date + "' "
                 break;
         }
-
+        console.log("sql_where", sql_where)
         const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
         pool.connect(err => {
             if (err) {

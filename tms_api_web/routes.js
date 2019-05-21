@@ -205,6 +205,13 @@ router.get("/report/report-status-surach/:dateSt&:dateEn", (req, resp) => {
         resp.json(res_data)
     })
 })
+router.get("/report/report-status-phitsanulok/:dateSt&:dateEn", (req, resp) => {
+    let date_start = req.params.dateSt
+    let date_end = req.params.dateEn
+    View_Report.model.get_TMS_Status_Phitsanulok_API_Tracking(date_start, date_end, (res_data) => {
+        resp.json(res_data)
+    })
+})
 router.get("/report/report-formaccount/:inHUB&:inDate", (req, resp) => {
     let check_hub = req.params.inHUB
     let input_date = req.params.inDate
@@ -258,6 +265,13 @@ router.get("/clearbill/get-clearbill-kerry-dhl/:inType&:inDate", (req, resp) => 
 router.get("/clearbill/get-clearbill-surach-kerry-dhl/:inType&:inDate", (req, resp) => {
     let in_type = req.params.inType, in_date = req.params.inDate
     TMS_Interface.model.get_tms_surach_kerry_dhl(in_type, in_date, (res_data) => {
+        // console.log("res_data",res_data);
+        resp.json(res_data)
+    })
+})
+router.get("/clearbill/get-clearbill-phitsanulok-kerry-dhl/:inType&:inDate", (req, resp) => {
+    let in_type = req.params.inType, in_date = req.params.inDate
+    TMS_Interface.model.get_tms_phitsanulok_kerry_dhl(in_type, in_date, (res_data) => {
         // console.log("res_data",res_data);
         resp.json(res_data)
     })
