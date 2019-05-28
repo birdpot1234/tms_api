@@ -131,11 +131,14 @@ const select_query = (config="",nameFN = "", nameTB = "", sql_query = "") => {
         pool.connect(err => {
             if (err) {
                 save_log(pool, nameFN, nameTB, err)
-                reject(response(500, "Error Connection", err))
+                // reject(response(500, "Error Connection", err))
+                throw err;
             }
             var req = new sql.Request(pool)
+
+            // console.log("sql_query", sql_query)
             req.query(sql_query).then((result) => {
-                console.log("sql_query", sql_query)
+                
                 pool.close()
                 if (result.recordset.length > 0) {
                     save_log(sql_query, nameFN, nameTB, result.recordset)
@@ -148,7 +151,8 @@ const select_query = (config="",nameFN = "", nameTB = "", sql_query = "") => {
                 pool.close()
                 if (err) {
                     save_log(sql_query, nameFN, nameTB, err)
-                    reject(response(501, "Error Query", err))
+                    // reject(response(501, "Error Query", err))
+                    throw err;
                 }
             });
         })

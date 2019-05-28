@@ -1,10 +1,33 @@
-var { dbConnectData_TransportApp,dbConnectData_WEBSaleClaim } = require('../connect_sql')
-const { Gen_Document5digit, save_log, server_response } = require("../service")
+var { dbConnectData_TransportApp, dbConnectData_WEBSaleClaim } = require('../connect_sql')
+const { Gen_Document5digit, save_log, server_response, select_query } = require("../service")
 const moment = require('moment')
 var sql = require('mssql')
+var nameFN, nameTB, sql_query, sql_where = []
 
 const model = {
-    get_ITR_Detail(itr_no,callback){
+    async get_status_main(stDate, enDate, cExpress, fSalesGroup, callback) {
+        nameFN = "get_status_main"
+        nameTB = "ReportMain"
+        sql_where = []
+        if (fSalesGroup != "ALL") sql_where.push(`INVENTLOCATIONID LIKE '${fSalesGroup}'`)
+        // if (cExpress == "1") sql_where.push(`(DLV_Date BETWEEN '${stDate}' AND '${enDate}')`)
+        if (stDate <= enDate) {
+            sql_where.push(`WHERE DLV_Date BETWEEN '${stDate}' AND '${enDate}'`)
+        } else {
+            sql_where.push(`WHERE DLV_Date BETWEEN '${enDate}' AND '${enDate}'`)
+        }
+        sql_where.join(` AND `)
+        sql_query = `SELECT        *
+        FROM            dbo.ZTSV_TMS_Report_StatusMain_Track
+        ${sql_where}`
+        try {
+            var res_data = await select_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query)
+            callback(res_data)
+        } catch (error) {
+            callback(error)
+        }
+    },
+    get_ITR_Detail(itr_no, callback) {
         sql.close()
         const pool = new sql.ConnectionPool(dbConnectData_WEBSaleClaim)
         pool.connect(err => {
@@ -13,9 +36,9 @@ const model = {
                 callback(server_response(500, "Error", err))
             }
             var req = new sql.Request(pool)
-            var sql_query="SELECT        itemNo, itemName, Qty, ITRNo \
+            var sql_query = "SELECT        itemNo, itemName, Qty, ITRNo \
             FROM            dbo.TMS_ITR_Detail \
-            WHERE        (ITRNo = '"+itr_no+"')"
+            WHERE        (ITRNo = '"+ itr_no + "')"
             // console.log("object",sql_query)
             req.query(sql_query).then((result) => {
                 pool.close()

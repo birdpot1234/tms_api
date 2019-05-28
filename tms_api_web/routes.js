@@ -20,19 +20,19 @@ const TMS_costRound = require("./TMS_costRound")
 //----------------All TMS คิดค่ารอบ
 router.post("/import/excel-round-mess/", (req, resp) => TMS_MessRound.model.import_excel_round(req.body, (res_data) => resp.json(res_data)))
 router.get("/round-cost/get-round-mess/:inDate&:messCode&:numShip", (req, resp) => {
-    TMS_MessRound.model.get_round_mess(req.params.inDate, req.params.messCode,req.params.numShip, (res_data) => resp.json(res_data))
+    TMS_MessRound.model.get_round_mess(req.params.inDate, req.params.messCode, req.params.numShip, (res_data) => resp.json(res_data))
 })
 router.get("/round-cost/get-group-shipCode/:inDate&:messCode&:numShip", (req, resp) => {
-    TMS_MessRound.model.get_group_shipCode(req.params.inDate, req.params.messCode,req.params.numShip, (res_data) => resp.json(res_data))
+    TMS_MessRound.model.get_group_shipCode(req.params.inDate, req.params.messCode, req.params.numShip, (res_data) => resp.json(res_data))
 })
 router.get("/round-cost/get-group-billCost/:inDate&:messCode&:numShip", (req, resp) => {
-    TMS_MessRound.model.get_group_billCost(req.params.inDate, req.params.messCode,req.params.numShip, (res_data) => resp.json(res_data))
+    TMS_MessRound.model.get_group_billCost(req.params.inDate, req.params.messCode, req.params.numShip, (res_data) => resp.json(res_data))
 })
 router.post("/round-cost/cost-round-mess/", (req, resp) => {
     TMS_MessRound.model.post_insert_roundCost(req.body, (res_data) => resp.json(res_data))
 })
-router.get("/round-cost/get-round-report/:stDate&:enDate&:messCode&:numShip", (req,resp)=>{
-    TMS_MessRound.model.get_round_report(req.params.stDate,req.params.enDate,req.params.messCode,req.params.numShip,(res_data)=>resp.json(res_data))
+router.get("/round-cost/get-round-report/:stDate&:enDate&:messCode&:numShip", (req, resp) => {
+    TMS_MessRound.model.get_round_report(req.params.stDate, req.params.enDate, req.params.messCode, req.params.numShip, (res_data) => resp.json(res_data))
 })
 //----------------All TMS คิดค่ารอบ
 
@@ -48,7 +48,7 @@ router.get("/monitor/get_data_monitorBelow/:stDate&:enDate&:group", (req, resp) 
 //----------------All TMS Monitor
 
 //----------------TMS Plan
-router.get("/TMSPlan/get_tms_plan/:stDate&:enDate&:express",(req,resp)=>TMS_costRound.model.get_tms_plan(req.params.stDate,req.params.enDate,req.params.express,(res_data)=>resp.json(res_data)))
+router.get("/TMSPlan/get_tms_plan/:stDate&:enDate&:express", (req, resp) => TMS_costRound.model.get_tms_plan(req.params.stDate, req.params.enDate, req.params.express, (res_data) => resp.json(res_data)))
 //----------------TMS Plan
 
 //----------------All TMS Calendar
@@ -156,9 +156,9 @@ router.get("/login/:id&:pass", (req, resp) => {
         resp.json(res_data)
     })
 })
-router.get("/webno/:idUser&:webNo",(req,resp)=>DPLT_ADDP_DplusSystem_User.model.find_username(req.params.idUser,req.params.webNo,(res_data)=>resp.json(res_data)))
+router.get("/webno/:idUser&:webNo", (req, resp) => DPLT_ADDP_DplusSystem_User.model.find_username(req.params.idUser, req.params.webNo, (res_data) => resp.json(res_data)))
 router.post("/special-circles/add-task/", (req, resp) => {
-    console.log("req",req.body)
+    console.log("req", req.body)
     TMS_Special_Circles.model.create_tsc_one(req.body[0], (res_data) => {
         //------------Commit
         resp.json(res_data)
@@ -231,6 +231,12 @@ router.get("/report/report-clearcash-by-cleardate/:mess_no&:clear_date", (req, r
 router.get("/report/report-status-claim/detail/:itr_no", (req, resp) => {
     View_Report.model.get_ITR_Detail(req.params.itr_no, (res_data) => {
         resp.json(res_data)
+    })
+})
+router.get("/report/report-status-main/:stDate&:enDate&:cExpress&:fSalesGroup", (req, resp) => {
+    var inData = req.params
+    View_Report.model.get_status_main(inData.stDate, inData.enDate, inData.cExpress, inData.fSalesGroup, (res_data) => {
+        resp.status(res_data.status).json(res_data)
     })
 })
 //----------------All Report
