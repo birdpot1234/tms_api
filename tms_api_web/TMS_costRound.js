@@ -4,24 +4,28 @@ var name_function = "", name_table = "", sql_query = "", res_data = ""
 
 
 const model = {
-    async get_report_costmess_MDL(month, callback) {
+    async get_report_costmess_MDL(start,end, callback) {
         name_function = "get_report_costmess_MDL"
         name_table = "TMS_jar_reportCostMess_Monthly"
-        sql_query =  " SELECT *"+
-        " FROM [Data_TransportApp].[dbo].[TMS_jar_reportCostMess_Monthly]"+
-        " where MessengerID like 'MDL%' and month = '"+month+"'"+
-        " order by MessNO"
+        sql_query =  " SELECT MessNO, MessName, MessengerID, SUM(Trip) AS trip, SUM(shop) AS shop, SUM(Bill) AS bill, SUM(round_cost) AS round_cost \
+        , SUM(bill_cost) AS bill_cost, SUM(oil_cost) AS oil_cost, SUM(net_cost) AS net_cost \
+        FROM TMS_jar_reportCostMess_Monthly \
+        WHERE (MessengerID like 'MDL%' AND DateTime BETWEEN '"+start+"' AND '"+end+"') \
+        GROUP BY MessNO, MessName, MessengerID \
+        ORDER BY MessNO"
         //console.log("object", sql_query)
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
     },
-    async get_report_costmess_MCV(month, callback) {
+    async get_report_costmess_MCV(start,end, callback) {
         name_function = "get_report_costmess_MCV"
         name_table = "TMS_jar_reportCostMess_Monthly"
-        sql_query =  " SELECT *"+
-        " FROM [Data_TransportApp].[dbo].[TMS_jar_reportCostMess_Monthly]"+
-        " where MessengerID like 'MCV%' and month = '"+month+"'"+
-        " order by MessNO"
+        sql_query =  " SELECT MessNO, MessName, MessengerID, SUM(Trip) AS trip, SUM(shop) AS shop, SUM(Bill) AS bill, SUM(round_cost) AS round_cost \
+        , SUM(bill_cost) AS bill_cost, SUM(oil_cost) AS oil_cost, SUM(net_cost) AS net_cost \
+        FROM TMS_jar_reportCostMess_Monthly \
+        WHERE (MessengerID like 'MCV%' AND DateTime BETWEEN '"+start+"' AND '"+end+"') \
+        GROUP BY MessNO, MessName, MessengerID \
+        ORDER BY MessNO"
         //console.log("object", sql_query)
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
