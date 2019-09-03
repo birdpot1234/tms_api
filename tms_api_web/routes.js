@@ -17,6 +17,17 @@ const TMS_Monitor = require("./TMS_Monitor")
 const TMS_MessRound = require("./TMS_MessRound")
 const TMS_costRound = require("./TMS_costRound")
 
+//----------------API งานนอก Outside
+router.get("/outside/getTask/:inType&:inDate", (req, resp) => {
+    TMS_Interface.model.get_outsideTask(req.params.inType, req.params.inDate, (res_data) => {
+        resp.json(res_data)
+    })
+})
+router.post("/outside/updateStatus/", (req, resp) => {
+    TMS_Interface.model.update_outsideStatus(req.body, (res_data) => resp.json(res_data))
+})
+//----------------API งานนอก Outside
+
 //----------------All TMS คิดค่ารอบ
 router.post("/import/excel-round-mess/", (req, resp) => TMS_MessRound.model.import_excel_round(req.body, (res_data) => resp.json(res_data)))
 router.get("/round-cost/get-round-mess/:inDate&:messCode&:numShip", (req, resp) => {
@@ -205,6 +216,13 @@ router.get("/report/report-status-surach/:dateSt&:dateEn", (req, resp) => {
         resp.json(res_data)
     })
 })
+router.get("/report/report-status-phitsanulok/:dateSt&:dateEn", (req, resp) => {
+    let date_start = req.params.dateSt
+    let date_end = req.params.dateEn
+    View_Report.model.get_TMS_Status_Phitsanulok_API_Tracking(date_start, date_end, (res_data) => {
+        resp.json(res_data)
+    })
+})
 router.get("/report/report-formaccount/:inHUB&:inDate", (req, resp) => {
     let check_hub = req.params.inHUB
     let input_date = req.params.inDate
@@ -239,6 +257,11 @@ router.get("/report/report-status-main/:stDate&:enDate&:cExpress&:fSalesGroup", 
         resp.status(res_data.status).json(res_data)
     })
 })
+router.get("/report/modal-back-order/:inDoc", (req, resp) => {
+    View_Report.model.get_modal_back_order(req.params.inDoc, (res_data) => {
+        resp.json(res_data)
+    })
+})
 //----------------All Report
 
 //----------------All Clearbill
@@ -264,6 +287,13 @@ router.get("/clearbill/get-clearbill-kerry-dhl/:inType&:inDate", (req, resp) => 
 router.get("/clearbill/get-clearbill-surach-kerry-dhl/:inType&:inDate", (req, resp) => {
     let in_type = req.params.inType, in_date = req.params.inDate
     TMS_Interface.model.get_tms_surach_kerry_dhl(in_type, in_date, (res_data) => {
+        // console.log("res_data",res_data);
+        resp.json(res_data)
+    })
+})
+router.get("/clearbill/get-clearbill-phitsanulok-kerry-dhl/:inType&:inDate", (req, resp) => {
+    let in_type = req.params.inType, in_date = req.params.inDate
+    TMS_Interface.model.get_tms_phitsanulok_kerry_dhl(in_type, in_date, (res_data) => {
         // console.log("res_data",res_data);
         resp.json(res_data)
     })
@@ -351,6 +381,14 @@ router.get("/email", (req, resp) => {
 })
 
 ////////////costRound
+router.get("/get-yearly-costmess-MCV/:year", (req, resp) => {
+    TMS_costRound.model.get_yearly_costmess_MCV(req.params.year, (res_data) => resp.json(res_data))
+})
+
+router.get("/get-yearly-costmess-MDL/:year", (req, resp) => {
+    TMS_costRound.model.get_yearly_costmess_MDL(req.params.year, (res_data) => resp.json(res_data))
+})
+
 router.get("/get_report_costmess_MDL/:month", (req, resp) => {
     TMS_costRound.model.get_report_costmess_MDL(req.params.month, (res_data) => resp.json(res_data))
 })

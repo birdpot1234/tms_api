@@ -27,6 +27,7 @@
     "node-datetime": "^2.0.6",
     "node-schedule": "^1.3.2",
     "nodemailer": "^4.6.5",
+    "npm": "^6.11.2",
     "sendotp": "^1.2.9",
     "socket.io": "^2.1.1",
     "tedious": "^2.2.4"

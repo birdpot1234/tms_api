@@ -5,21 +5,37 @@ var sql = require('mssql')
 var nameFN, nameTB, sql_query, sql_where = []
 
 const model = {
+    async get_modal_back_order(inDoc, callback) {
+        nameFN = "get_modal_back_order"
+        nameTB = "ZTSV_TMS_SalesLine_less"
+        sql_query = `SELECT        ITEMID, NAME, ISNULL(REMAINSALESPHYSICAL, 0) AS deliveryRemainder
+        FROM            DPLUSAX63_GOLIVE_2017.dbo.SALESLINE
+        WHERE    ISNULL(REMAINSALESPHYSICAL, 0) > 0 AND    (SALESID = N'${inDoc}')`
+        try {
+            var res_data = await select_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query)
+            callback(res_data)
+        } catch (error) {
+            callback(error)
+        }
+    },
     async get_status_main(stDate, enDate, cExpress, fSalesGroup, callback) {
         nameFN = "get_status_main"
         nameTB = "ReportMain"
         sql_where = []
-        if (fSalesGroup != "ALL") sql_where.push(`INVENTLOCATIONID LIKE '${fSalesGroup}'`)
-        // if (cExpress == "1") sql_where.push(`(DLV_Date BETWEEN '${stDate}' AND '${enDate}')`)
+
+
         if (stDate <= enDate) {
             sql_where.push(`WHERE DLV_Date BETWEEN '${stDate}' AND '${enDate}'`)
         } else {
             sql_where.push(`WHERE DLV_Date BETWEEN '${enDate}' AND '${enDate}'`)
         }
-        sql_where.join(` AND `)
+        if (cExpress == "1") sql_where.push(`Express = 1`)
+        if (fSalesGroup != "ALL") sql_where.push(`INVENTLOCATIONID LIKE '${fSalesGroup}'`)
+        var sqlWhere = sql_where.join(` AND `)
         sql_query = `SELECT        *
-        FROM            dbo.ZTSV_TMS_Report_StatusMain_Track
-        ${sql_where}`
+        FROM            dbo.ZTSV_TMS_Report_StatusMain_Track2
+        ${sqlWhere}`
+        // console.log("sql_query",sql_query)
         try {
             var res_data = await select_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query)
             callback(res_data)
@@ -72,7 +88,7 @@ const model = {
             stamp_workapp, stamp_finishapp, stamp_report, create_date, invoice_date,dpl_hub_dlvterm,inventlocationid \
             FROM            dbo.TMS_Status_API_Tracking \
             WHERE (document_sub LIKE 'IN%') AND (inventlocationid LIKE 'WS1') AND (invoice_date BETWEEN '"+ date_start + "' AND '" + date_end + "' )"
-            console.log("object", sql_query)
+            console.log("status-surach", sql_query)
             req.query(sql_query).then((result) => {
                 pool.close()
                 if (result.recordset.length > 0) {
@@ -85,6 +101,38 @@ const model = {
             }).catch((err) => {
                 if (err) {
                     save_log(err, "get_TMS_Status_Surach_API_Tracking", "TMS_Status_API_Tracking", err)
+                    callback(server_response(500, "Error", err))
+                }
+            });
+        })
+    },
+    get_TMS_Status_Phitsanulok_API_Tracking(date_start, date_end, callback) {
+        sql.close()
+        const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
+        pool.connect(err => {
+            if (err) {
+                save_log(err, "get_TMS_Status_Phitsanulok_API_Tracking", "TMS_Status_API_Tracking", err)
+                callback(server_response(500, "Error", err))
+            }
+            var req = new sql.Request(pool)
+
+            var sql_query = "SELECT        document_main, document_sub, customer_name, sales_group, store_zone, code_zone, invoice_qty, invoice_amount, box_amount, dlv_term, delivery_date, status, confirm_scan, receive_scan, send_scan, MessName, \
+            stamp_workapp, stamp_finishapp, stamp_report, create_date, invoice_date,dpl_hub_dlvterm,inventlocationid \
+            FROM            [Data_TransportApp].[dbo].TMS_Status_API_Tracking \
+            WHERE (document_sub LIKE 'IN%') AND (inventlocationid LIKE 'WN1') AND (invoice_date BETWEEN '"+ date_start + "' AND '" + date_end + "' )"
+            console.log("status-phitsanulok", sql_query)
+            req.query(sql_query).then((result) => {
+                pool.close()
+                if (result.recordset.length > 0) {
+                    save_log(result.recordset, "get_TMS_Status_Phitsanulok_API_Tracking", "TMS_Status_API_Tracking", result.recordset)
+                    callback(server_response(200, "Success", result.recordset))
+                } else {
+                    save_log(result.recordset, "get_TMS_Status_Phitsanulok_API_Tracking", "TMS_Status_API_Tracking", result.recordset)
+                    callback(server_response(500, "Error", result.recordset))
+                }
+            }).catch((err) => {
+                if (err) {
+                    save_log(err, "get_TMS_Status_Phitsanulok_API_Tracking", "TMS_Status_API_Tracking", err)
                     callback(server_response(500, "Error", err))
                 }
             });
