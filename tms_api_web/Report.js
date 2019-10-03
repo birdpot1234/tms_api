@@ -1,5 +1,5 @@
 var { dbConnectData_TransportApp } = require('../connect_sql')
-const { Gen_Document5digit, save_log, server_response } = require("../service")
+const { Gen_Document5digit, save_log, server_response, insert_query } = require("../service")
 const moment = require('moment')
 const ReportDetail = require("./ReportDetail")
 var sql = require('mssql')
@@ -126,13 +126,13 @@ const model = {
         var sql_where = ""
         switch (hub) {
             case "WS1":
-                sql_where = "AND inventlocationid LIKE '" + hub + "' AND convert(varchar(10),invoice_date,120) ='"+ date + "'"
+                sql_where = "AND inventlocationid LIKE '" + hub + "' AND convert(varchar(10),invoice_date,120) ='" + date + "'"
                 break;
             case "WN1":
-                sql_where = "AND inventlocationid LIKE '" + hub + "' AND convert(varchar(10),invoice_date,120) ='"+ date + "'"
+                sql_where = "AND inventlocationid LIKE '" + hub + "' AND convert(varchar(10),invoice_date,120) ='" + date + "'"
                 break;
             default:
-                sql_where = "AND inventlocationid NOT LIKE '" + hub + "' AND convert(varchar(10),invoice_date,120) ='"+ date + "' "
+                sql_where = "AND inventlocationid NOT LIKE '" + hub + "' AND convert(varchar(10),invoice_date,120) ='" + date + "' "
                 break;
         }
         console.log("sql_where", sql_where)
@@ -144,10 +144,10 @@ const model = {
             }
             var req = new sql.Request(pool)
             var sql_query = "SELECT * FROM            TMS_Report_Form_Account \
-        WHERE group_sales LIKE 'BK' AND payment_type LIKE 'CASH' "+sql_where+" \
+        WHERE group_sales LIKE 'BK' AND payment_type LIKE 'CASH' "+ sql_where + " \
         ORDER BY invoice \
         SELECT * FROM            TMS_Report_Form_Account \
-        WHERE group_sales LIKE 'BK' AND payment_type NOT LIKE 'CASH' "+sql_where+" \
+        WHERE group_sales LIKE 'BK' AND payment_type NOT LIKE 'CASH' "+ sql_where + " \
         ORDER BY invoice \
         SELECT *  FROM            TMS_Report_Form_Account \
         WHERE group_sales LIKE 'UP' "+ sql_where + " \
@@ -232,7 +232,7 @@ const model = {
                      ,[car_type]\
                      ,[dpl_hub_dlvterm] \
                      ,[inventlocationid]\
-                     ,[group_sales]) \
+                     ,[group_sales] ) \
             VALUES \
               (TMS_Report_Account.[DocumentSet] \
               ,TMS_Report_Account.[create_date] \
@@ -257,7 +257,8 @@ const model = {
               ,TMS_Report_Account.[car_type]\
               ,TMS_Report_Account.[dpl_hub_dlvterm] \
               ,TMS_Report_Account.[inventlocationid]\
-              ,TMS_Report_Account.[GroupSales]); \
+              ,TMS_Report_Account.[GroupSales] \
+              ); \
               MERGE INTO \
                 TMS_Report_Form_Account\
                 USING\
@@ -298,7 +299,8 @@ const model = {
                         ,[sales_group]\
                         ,[dpl_hub_dlvterm] \
                         ,[inventlocationid]\
-                        ,[group_sales]) \
+                        ,[group_sales] \
+                        ) \
                 VALUES\
                     (TMS_Report_Account.[tms_document]\
                     ,TMS_Report_Account.[create_date]\
@@ -317,7 +319,8 @@ const model = {
                     ,TMS_Report_Account.[sales_group]\
                     ,TMS_Report_Account.[dpl_hub_dlvterm] \
                     ,TMS_Report_Account.[inventlocationid]\
-                    ,TMS_Report_Account.[GroupSales]);"
+                    ,TMS_Report_Account.[GroupSales] \
+                    );"
             // var sql_query = "SELECT        dbo.Report.ClearingStatus, dbo.Report.INVOICEID, dbo.Report.DocumentSet, dbo.Report.CustomerID, dbo.Report.CustomerName, dbo.Report.AddressShipment, dbo.Report.Status, dbo.Report.AmountBill, \
             // dbo.Report.AmountActual, dbo.Report.Type, dbo.Report.Datetime, dbo.Report.ReasonCN, dbo.Report.ClearingDate, dbo.Report.paymentType, dbo.Report.MessengerID, CONVERT(varchar(10), dbo.TMS_Interface.create_date, 120) \
             //  AS interface_date,  dbo.BillToApp.car_type \
@@ -325,7 +328,7 @@ const model = {
             //                           dbo.TMS_Interface ON dbo.Report.DocumentSet = dbo.TMS_Interface.tms_document INNER JOIN \
             //                           dbo.BillToApp ON dbo.Report.DocumentSet = dbo.BillToApp.DocumentSet \
             // WHERE        (dbo.Report.ClearingStatus = '0') AND (CONVERT(varchar(10), dbo.TMS_Interface.create_date, 120) LIKE '"+ date + "' ) AND (dbo.Report.MessengerID LIKE '" + mess_code + "%')"
-            // console.log("object", sql_query)
+            console.log("object", sql_query)
             req.query(sql_query).then((result, err) => {
                 pool.close()
                 // console.log("result",result.rowsAffected.length);
@@ -384,7 +387,7 @@ const model = {
             });
         })
     },
-    update_comment(id,in_comment, callback) {
+    update_comment(id, in_comment, callback) {
         sql.close()
         const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
         pool.connect(err => {
@@ -393,7 +396,7 @@ const model = {
                 callback(server_response(500, "Error", err))
             }
             var req = new sql.Request(pool)
-            var sql_query="UPDATE Report SET Comment='"+in_comment+"' WHERE id LIKE '"+id+"' "
+            var sql_query = "UPDATE Report SET Comment='" + in_comment + "' WHERE id LIKE '" + id + "' "
             req.query(sql_query).then((result, err) => {
                 pool.close()
                 console.log("result", result)
@@ -411,6 +414,60 @@ const model = {
                 }
             });
         })
+    },
+    update_status_tranfer(INV, stTranfer, callback) {
+        sql.close()
+        const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
+        pool.connect(err => {
+            if (err) {
+                save_log(err, "update_clear_bill", "Report", err)
+                callback(server_response(500, "Error", err))
+            }
+            var req = new sql.Request(pool)
+
+            var sql_query = `UPDATE TMS_Report_Form_Account SET status_tranfer='${stTranfer}' WHERE invoice LIKE '${INV}' `
+            // console.log("object",sql_query)
+            req.query(sql_query).then((result) => {
+                pool.close()
+                if (result.rowsAffected > 0) {
+                    callback(server_response(200, "Success", result))
+                } else {
+                    save_log(result.recordset, "update_clear_bill", "Report", result.recordset)
+                    callback(server_response(304, "Error", result.recordset))
+                }
+            }).catch((err) => {
+                if (err) {
+                    save_log(err, "update_clear_bill", "Report", err)
+                    callback(server_response(500, "Error", err))
+                }
+            });
+        })
+    },
+    async update_delivery_status(inSO, inINV, inVal, callback) {
+        var nameFN = "update_delivery_status"
+        var nameTB = "TMS_Interface"
+        var sql_update = []
+        try {
+            sql_update.push(`UPDATE [dbo].[TMS_Interface] SET [Delivery_Status]='${inVal}' 
+            WHERE invoice LIKE '${inINV}'  `)
+            var res_model = await insert_query(dbConnectData_TransportApp, nameFN, nameTB, sql_update.join(" "))
+            callback(res_model)
+        } catch (error) {
+
+        }
+    },
+    async update_delay_status_stock(inSO, inINV, inVal, callback) {
+        var nameFN = "update_delay_status_stock"
+        var nameTB = "TMS_Interface"
+        var sql_update = []
+        try {
+            sql_update.push(`UPDATE [dbo].[TMS_Interface] SET [Delay_Status_Stock]='${inVal}' 
+            WHERE invoice LIKE '${inINV}'  `)
+            var res_model = await insert_query(dbConnectData_TransportApp, nameFN, nameTB, sql_update.join(" "))
+            callback(res_model)
+        } catch (error) {
+
+        }
     }
 }
 

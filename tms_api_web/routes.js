@@ -16,23 +16,33 @@ const TMS_Calendar = require("./TMS_Calendar")
 const TMS_Monitor = require("./TMS_Monitor")
 const TMS_MessRound = require("./TMS_MessRound")
 const TMS_costRound = require("./TMS_costRound")
+//----------------API งานนอก Outside
+router.get("/outside/getTask/:inType&:inDate", (req, resp) => {
+    TMS_Interface.model.get_outsideTask(req.params.inType, req.params.inDate, (res_data) => {
+        resp.json(res_data)
+    })
+})
+router.post("/outside/updateStatus/", (req, resp) => {
+    TMS_Interface.model.update_outsideStatus(req.body, (res_data) => resp.json(res_data))
+})
+//----------------API งานนอก Outside
 
 //----------------All TMS คิดค่ารอบ
 router.post("/import/excel-round-mess/", (req, resp) => TMS_MessRound.model.import_excel_round(req.body, (res_data) => resp.json(res_data)))
 router.get("/round-cost/get-round-mess/:inDate&:messCode&:numShip", (req, resp) => {
-    TMS_MessRound.model.get_round_mess(req.params.inDate, req.params.messCode,req.params.numShip, (res_data) => resp.json(res_data))
+    TMS_MessRound.model.get_round_mess(req.params.inDate, req.params.messCode, req.params.numShip, (res_data) => resp.json(res_data))
 })
 router.get("/round-cost/get-group-shipCode/:inDate&:messCode&:numShip", (req, resp) => {
-    TMS_MessRound.model.get_group_shipCode(req.params.inDate, req.params.messCode,req.params.numShip, (res_data) => resp.json(res_data))
+    TMS_MessRound.model.get_group_shipCode(req.params.inDate, req.params.messCode, req.params.numShip, (res_data) => resp.json(res_data))
 })
 router.get("/round-cost/get-group-billCost/:inDate&:messCode&:numShip", (req, resp) => {
-    TMS_MessRound.model.get_group_billCost(req.params.inDate, req.params.messCode,req.params.numShip, (res_data) => resp.json(res_data))
+    TMS_MessRound.model.get_group_billCost(req.params.inDate, req.params.messCode, req.params.numShip, (res_data) => resp.json(res_data))
 })
 router.post("/round-cost/cost-round-mess/", (req, resp) => {
     TMS_MessRound.model.post_insert_roundCost(req.body, (res_data) => resp.json(res_data))
 })
-router.get("/round-cost/get-round-report/:stDate&:enDate&:messCode&:numShip", (req,resp)=>{
-    TMS_MessRound.model.get_round_report(req.params.stDate,req.params.enDate,req.params.messCode,req.params.numShip,(res_data)=>resp.json(res_data))
+router.get("/round-cost/get-round-report/:stDate&:enDate&:messCode&:numShip", (req, resp) => {
+    TMS_MessRound.model.get_round_report(req.params.stDate, req.params.enDate, req.params.messCode, req.params.numShip, (res_data) => resp.json(res_data))
 })
 //----------------All TMS คิดค่ารอบ
 
@@ -48,7 +58,7 @@ router.get("/monitor/get_data_monitorBelow/:stDate&:enDate&:group", (req, resp) 
 //----------------All TMS Monitor
 
 //----------------TMS Plan
-router.get("/TMSPlan/get_tms_plan/:stDate&:enDate&:express",(req,resp)=>TMS_costRound.model.get_tms_plan(req.params.stDate,req.params.enDate,req.params.express,(res_data)=>resp.json(res_data)))
+router.get("/TMSPlan/get_tms_plan/:stDate&:enDate&:express", (req, resp) => TMS_costRound.model.get_tms_plan(req.params.stDate, req.params.enDate, req.params.express, (res_data) => resp.json(res_data)))
 //----------------TMS Plan
 
 //----------------All TMS Calendar
@@ -156,20 +166,48 @@ router.get("/login/:id&:pass", (req, resp) => {
         resp.json(res_data)
     })
 })
-router.get("/webno/:idUser&:webNo",(req,resp)=>DPLT_ADDP_DplusSystem_User.model.find_username(req.params.idUser,req.params.webNo,(res_data)=>resp.json(res_data)))
-router.post("/special-circles/add-task/", (req, resp) => {
-    console.log("req",req.body)
-    TMS_Special_Circles.model.create_tsc_one(req.body[0], (res_data) => {
-        //------------Commit
+router.get("/webno/:idUser&:webNo", (req, resp) => DPLT_ADDP_DplusSystem_User.model.find_username(req.params.idUser, req.params.webNo, (res_data) => resp.json(res_data)))
+
+//-------------TMS_Special_Circles
+router.get("/special-circles/get-zone/", (req, resp) => {
+    TMS_Special_Circles.model.get_zone((res_data) => {
         resp.json(res_data)
     })
 })
-router.post("/special-circles-dev/add-task/", (req, resp) => {
-    TMS_Special_Circles_develop.model.create_tsc_one(req.body[0], (res_data) => {
-        //------------Commit
-        resp.json(res_data)
-    })
+var multer = require('multer')
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './tms_api_web/img')
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname)
+    }
 })
+var upload = multer({ storage: storage }).array('file')
+// var upload = multer({ dest: 'uploads/' });
+router.post('/special-circles/add-task/', (req, resp) => {
+    upload(req, resp, function (err) {
+        if (err) {
+            console.log("err", err);
+            return resp.status(500).json(err)
+        } else {
+            TMS_Special_Circles.model.create_tsc_one(JSON.parse(req.body.data), (res_data) => {
+                console.log("res_data", res_data)
+                sendMail.model.set_form_tsc_send(res_data.result, (resp_data) => {
+                    resp.json(resp_data)
+                })
+            })
+        }
+    })
+});
+// router.post("/special-circles-dev/add-task/", (req, resp) => {
+// console.log("req.file",req.file)
+// resp.json(true)
+// TMS_Special_Circles_develop.model.create_tsc_one(req,resp, (res_data) => {
+//     //------------Commit
+//     resp.json(res_data)
+// })
+// })
 router.get("/special-circles/get-today-task/:dateSt&:dateEn", (req, resp) => {
     let date_start = req.params.dateSt, date_end = req.params.dateEn
     TMS_Special_Circles.model.find_today_date(date_start, (res_data) => {
@@ -184,6 +222,12 @@ router.get("/special-circles/get-over-task/:dateSt&:dateEn", (req, resp) => {
 })
 
 //----------------All Report
+router.post("/report/update-status-tranfer/", (req, resp) => {
+    // console.log("object")
+    TBL_Report.model.update_status_tranfer(req.body[0].inv, req.body[0].status, (res_data) => {
+        resp.json(res_data)
+    })
+})
 router.get("/report/report-status/:dateSt&:dateEn", (req, resp) => {
     let date_start = req.params.dateSt
     let date_end = req.params.dateEn
@@ -237,6 +281,47 @@ router.get("/report/report-clearcash-by-cleardate/:mess_no&:clear_date", (req, r
 })
 router.get("/report/report-status-claim/detail/:itr_no", (req, resp) => {
     View_Report.model.get_ITR_Detail(req.params.itr_no, (res_data) => {
+        resp.json(res_data)
+    })
+})
+router.post("/report/report-status-main/update-delay-status-stock/", (req, resp) => {
+    TBL_Report.model.update_delay_status_stock(req.body[0].so, req.body[0].inv, req.body[0].value, (res_data) => {
+        resp.json(res_data)
+    })
+})
+router.post("/report/report-status-main/update-delay-reason/", (req, resp) => {
+    TBL_Report.model.update_delivery_status(req.body[0].so, req.body[0].inv, req.body[0].value, (res_data) => {
+        resp.json(res_data)
+    })
+})
+router.get("/report/report-status-main/:stDate&:enDate&:cExpress&:fSalesGroup", (req, resp) => {
+    var inData = req.params
+    View_Report.model.get_status_main(inData.stDate, inData.enDate, inData.cExpress, inData.fSalesGroup, (res_data) => {
+        resp.status(res_data.status).json(res_data)
+    })
+})
+router.get("/report/modal-back-order/:inDoc", (req, resp) => {
+    View_Report.model.get_modal_back_order(req.params.inDoc, (res_data) => {
+        resp.json(res_data)
+    })
+})
+router.get("/report/modal-remarkTMS/:inDoc", (req, resp) => {
+    View_Report.model.get_modal_remarkTMS(req.params.inDoc, (res_data) => {
+        resp.json(res_data)
+    })
+})
+router.post("/report/modal-remarkTMS/", (req, resp) => {
+    View_Report.model.post_modal_remarkTMS(req.body[0].so, req.body[0].remarkTMS, (res_data) => {
+        resp.json(res_data)
+    })
+})
+router.get("/report/modal-POQ/:inDoc", (req, resp) => {
+    View_Report.model.get_modal_Issues(req.params.inDoc, (res_data) => {
+        resp.json(res_data)
+    })
+})
+router.post("/report/modal-POQ/", (req, resp) => {
+    View_Report.model.post_modal_Issues(req.body[0].so, req.body[0].POQ, (res_data) => {
         resp.json(res_data)
     })
 })
@@ -368,11 +453,11 @@ router.get("/get-yearly-costmess-MDL/:year", (req, resp) => {
 })
 
 router.get("/get_report_costmess_MDL/:start&:end", (req, resp) => {
-    TMS_costRound.model.get_report_costmess_MDL(req.params.start,req.params.end, (res_data) => resp.json(res_data))
+    TMS_costRound.model.get_report_costmess_MDL(req.params.start, req.params.end, (res_data) => resp.json(res_data))
 })
 
 router.get("/get_report_costmess_MCV/:start&:end", (req, resp) => {
-    TMS_costRound.model.get_report_costmess_MCV(req.params.start,req.params.end, (res_data) => resp.json(res_data))
+    TMS_costRound.model.get_report_costmess_MCV(req.params.start, req.params.end, (res_data) => resp.json(res_data))
 })
 
 router.get("/get-daily-costmess-MCV/:date&:id&:trip", (req, resp) => {

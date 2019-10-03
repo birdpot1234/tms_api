@@ -131,24 +131,28 @@ const select_query = (config="",nameFN = "", nameTB = "", sql_query = "") => {
         pool.connect(err => {
             if (err) {
                 save_log(pool, nameFN, nameTB, err)
-                reject(response(500, "Error Connection", err))
+                return reject(response(500, "Error Connection", err))
+                // throw err;
             }
             var req = new sql.Request(pool)
+
+            // console.log("sql_query", sql_query)
             req.query(sql_query).then((result) => {
-                console.log("sql_query", sql_query)
+                
                 pool.close()
                 if (result.recordset.length > 0) {
                     save_log(sql_query, nameFN, nameTB, result.recordset)
-                    resolve(response(200, "Success", result.recordset))
+                    return resolve(response(200, "Success", result.recordset))
                 } else {
                     save_log(sql_query, nameFN, nameTB, result.recordset)
-                    resolve(response(502, "Error Data", result))
+                    return resolve(response(502, "Error Data", result))
                 }
             }).catch((err) => {
                 pool.close()
                 if (err) {
                     save_log(sql_query, nameFN, nameTB, err)
-                    reject(response(501, "Error Query", err))
+                    return reject(response(501, "Error Query", err))
+                    // throw err;
                 }
             });
         })
@@ -161,13 +165,13 @@ const insert_query = (config="",nameFN = "", nameTB = "", sql_query = "") => {
         pool.connect(err => {
             if (err) {
                 save_log(pool, nameFN, nameTB, err)
-                reject(response(500, "Error Connection", err))
+                return reject(response(500, "Error Connection", err))
             }
             const transaction = new sql.Transaction(pool)
             transaction.begin(err => {
                 if (err) {
                     save_log(transaction, nameFN, nameTB, err)
-                    reject(response(500, "Connection is close", err))
+                    return reject(response(500, "Connection is close", err))
                 }
                 let rolledBack = false
                 transaction.on("rollback", aborted => {
@@ -182,10 +186,10 @@ const insert_query = (config="",nameFN = "", nameTB = "", sql_query = "") => {
                                 pool.close()
                                 if (err) {
                                     save_log(transaction, nameFN, nameTB, err)
-                                    reject(response(501, "Error query SQL No Rollback", err))
+                                    return reject(response(501, "Error query SQL No Rollback", err))
                                 }
                                 save_log(transaction, nameFN, nameTB, err)
-                                reject(response(502, "Error query SQL to Rollback", err))
+                                return reject(response(502, "Error query SQL to Rollback", err))
                             })
                         }
                     } else {
@@ -193,16 +197,16 @@ const insert_query = (config="",nameFN = "", nameTB = "", sql_query = "") => {
                             pool.close()
                             if (err) {
                                 save_log(transaction, nameFN, nameTB, err)
-                                reject(response(503, "Error query SQL No Commit", err))
+                                return reject(response(503, "Error query SQL No Commit", err))
                             }
                             save_log(transaction, nameFN, nameTB, result.recordset)
-                            resolve(response(200, "Success", result.recordset))
+                            return resolve(response(200, "Success", result.recordset))
                         })
                     }
                 }).catch((err) => {
                     if (err) {
                         save_log(err, nameFN, nameTB, err)
-                        reject(response(504, "Error query SQL", err))
+                        return reject(response(504, "Error query SQL", err))
                     }
                 });
             })
