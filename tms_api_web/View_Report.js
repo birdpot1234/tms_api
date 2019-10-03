@@ -1,10 +1,63 @@
 var { dbConnectData_TransportApp, dbConnectData_WEBSaleClaim } = require('../connect_sql')
-const { Gen_Document5digit, save_log, server_response, select_query } = require("../service")
+const { Gen_Document5digit, save_log, server_response, select_query, insert_query } = require("../service")
 const moment = require('moment')
 var sql = require('mssql')
 var nameFN, nameTB, sql_query, sql_where = []
 
 const model = {
+    async get_modal_remarkTMS(inDoc, callback) {
+        nameFN = "get_modal_remarkTMS"
+        nameTB = "TMS_Interface"
+        sql_query = `SELECT RemarkTMS
+        FROM            TMS_Interface
+        WHERE so LIKE '${inDoc}'`
+        try {
+            var res_data = await select_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query)
+            callback(res_data)
+        } catch (error) {
+            callback(error)
+        }
+    },
+    async get_modal_get_TMS_Status_API_Tracking(inDoc, callback) {
+        nameFN = "get_modal_Issues"
+        nameTB = "TMS_Interface"
+        sql_query = `SELECT Issues
+        FROM            TMS_Interface
+        WHERE so LIKE '${inDoc}'`
+        try {
+            var res_data = await select_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query)
+            callback(res_data)
+        } catch (error) {
+            callback(error)
+        }
+    },
+    async post_modal_remarkTMS(inDoc, inData, callback) {
+        nameFN = "post_modal_remarkTMS"
+        nameTB = "TMS_Interface"
+        sql_query = `UPDATE [dbo].[TMS_Interface]
+        SET [RemarkTMS]='${inData}'
+        WHERE so LIKE '${inDoc}' `
+        console.log("sql_query",sql_query)
+        try {
+            var res_data = await insert_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query)
+            callback(res_data)
+        } catch (error) {
+            callback(error)
+        }
+    },
+    async post_modal_Issues(inDoc, inData, callback) {
+        nameFN = "post_modal_remarkTMS"
+        nameTB = "TMS_Interface"
+        sql_query = `UPDATE [dbo].[TMS_Interface]
+        SET [Issues]='${inData}'
+        WHERE so LIKE '${inDoc}' `
+        try {
+            var res_data = await insert_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query)
+            callback(res_data)
+        } catch (error) {
+            callback(error)
+        }
+    },
     async get_modal_back_order(inDoc, callback) {
         nameFN = "get_modal_back_order"
         nameTB = "ZTSV_TMS_SalesLine_less"
@@ -22,7 +75,7 @@ const model = {
         nameFN = "get_status_main"
         nameTB = "ReportMain"
         sql_where = []
-
+        console.log("fSalesGroup",fSalesGroup)
 
         if (stDate <= enDate) {
             sql_where.push(`WHERE DLV_Date BETWEEN '${stDate}' AND '${enDate}'`)
@@ -34,8 +87,9 @@ const model = {
         var sqlWhere = sql_where.join(` AND `)
         sql_query = `SELECT        *
         FROM            dbo.ZTSV_TMS_Report_StatusMain_Track2
-        ${sqlWhere}`
-        // console.log("sql_query",sql_query)
+        ${sqlWhere}
+        ORDER BY DLV_Date`
+        console.log("sql_query",sql_query)
         try {
             var res_data = await select_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query)
             callback(res_data)
@@ -185,7 +239,7 @@ const model = {
             var req = new sql.Request(pool)
 
             var sql_query = "SELECT        document_main, document_sub, customer_name, sales_group, store_zone, code_zone, invoice_qty, invoice_amount, box_amount, dlv_term, delivery_date, status, confirm_scan, receive_scan, send_scan, MessName, \
-            stamp_workapp, stamp_finishapp, stamp_report, create_date, invoice_date \
+            stamp_workapp, stamp_finishapp, stamp_report, create_date, invoice_date, so \
             FROM            dbo.TMS_Status_API_Tracking \
             WHERE (document_sub LIKE 'IN%') AND (invoice_date BETWEEN '"+ date_start + "' AND '" + date_end + "' )"
             // console.log("object",sql_query)

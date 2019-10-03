@@ -12,7 +12,7 @@ var transporter = nodemailer.createTransport({
 })
 
 const model = {
-    get_customer_sendmail(round_seed,rate_date,callback) {
+    get_customer_sendmail(round_seed, rate_date, callback) {
         var in_data = ""
         sql.close()
         const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
@@ -20,7 +20,7 @@ const model = {
             var req = new sql.Request(pool)
             var sql_query = "SELECT  customerCode, customerName, Email, roundSeed, rateDate\
             FROM            TMS_Rate_Mail\
-            WHERE roundSeed LIKE '"+round_seed+"' AND rateDate LIKE '"+rate_date+"' "
+            WHERE roundSeed LIKE '"+ round_seed + "' AND rateDate LIKE '" + rate_date + "' "
             // console.log("sql_query",sql_query);
             req.query(sql_query).then((result) => {
                 // console.log("update_tms_kerry_dhl",result.rowsAffected.length);
@@ -67,7 +67,7 @@ const model = {
                             } else {
                                 check_send = false
                             }
-                            if( i+1===result.length && check_send)callback({status:200,dev_msg:"Success",result:resp})
+                            if (i + 1 === result.length && check_send) callback({ status: 200, dev_msg: "Success", result: resp })
                         })
                     } else {
                         check_send = false
@@ -118,6 +118,27 @@ const model = {
                 callback(server_response(501, "Error query SQL", err))
             })
         })
+    },
+    set_form_tsc_send(inData, callback) {
+        var from = "System@dplusonline.net"
+        var to = ""
+        var subject = ""
+        var content = ""
+        inData.forEach((val, i) => {
+            to = `${val.user_request_email},transportcenter@dplusonline.net`
+            subject = `รอบงานพิเศษ ${val.tsc_document} ได้รับแล้ว`
+            content = `เรียน คุณ ${val.user_request_name} <br><br>
+            ท่านได้แจ้งขอรอบงานพิเศษ: ${val.tsc_document} เรียบร้อยแล้ว<br>
+            เจ้าหน้าที่จะดำเนินการภายในระยะเวลาที่กำหนด <br><br>
+            ขอบคุณค่ะ`
+            this.send_mail(from, to, subject, content, (res_data_mail) => {
+                if (res_data_mail.status === 200) {
+                    callback({ status: 200, dev_msg: "Success", result: res_data_mail })
+                } else {
+                    callback({ status: 500, dev_msg: "UnSuccess", result: res_data_mail })
+                }
+            })
+        });
     }
 }
 

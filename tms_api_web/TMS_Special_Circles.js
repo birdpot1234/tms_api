@@ -1,7 +1,10 @@
 var { dbConnectData_TransportApp } = require('../connect_sql')
-const { Gen_Document5digit, save_log, server_response } = require("../service")
+const { Gen_Document5digit, save_log, server_response, select_query, insert_query } = require("../service")
 const moment = require('moment')
 var sql = require('mssql')
+var sql_insert = []
+
+
 //11//
 const model = {
     check_status(tsc_document, callback) {
@@ -99,166 +102,89 @@ const model = {
             });
         })
     },
-    create_tsc_one(data, callback) {
-        this.gen_tsc_document((res_data) => {
-            //------กำหนดค่าให้กับตัวแปรตามฟิลด์
-            // console.log("data", data);
-            var tsc_document = res_data
-            var create_date = moment().format("YYYY-MM-DD H:m:s")
-            var user_request_code = data.user_request_code
-            var user_request_name = data.user_request_name
-            var user_request_department = data.user_request_department
-            var user_request_tel = (typeof data.user_request_tel != "undefined") ? data.user_request_tel : ""
-            var receive_from = (typeof data.receive_from != "undefined") ? data.receive_from : ""
-            // console.log("object",data.receive_date,moment().format("YYYY-MM-DD"))
-            var receive_date = (typeof data.receive_date != "undefined") ? (data.receive_date !="")?moment(data.receive_date).format("YYYY-MM-DD"):moment().format("YYYY-MM-DD") :moment().format("YYYY-MM-DD") 
-            // console.log("object",receive_date)
-            var receive_time_first = (typeof data.receive_time_first != "undefined" ) ?(data.receive_time_first !="")? moment(data.receive_time_first).format("H:m:s") : moment().format("H:m:s"):moment().format("H:m:s")
-            var receive_time_end = (typeof data.receive_time_end != "undefined" ) ?(data.receive_time_end !="")? moment(data.receive_time_end).format("H:m:s") : moment().format("H:m:s"):moment().format("H:m:s")
-            var send_to = (typeof data.send_to != "undefined") ? data.send_to : ""
-            var send_date = (typeof data.send_date != "undefined") ?(data.send_date !="")? moment(data.send_date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"): moment().format("YYYY-MM-DD")
-            var send_time_first = (typeof data.send_time_first != "undefined" ) ?(data.send_time_first !="")? moment(data.send_time_first).format("H:m:s") : moment().format("H:m:s"):moment().format("H:m:s")
-            var send_time_end = (typeof data.send_time_end != "undefined" ) ?(data.send_time_end !="")? moment(data.send_time_end).format("H:m:s") : moment().format("H:m:s"):moment().format("H:m:s")
-            var send_tel = (typeof data.send_tel_user != "undefined") ? data.send_tel_user : ""
-            var task_group = (typeof data.task_group != "undefined") ? data.task_group : ""
-            var task_group_document = (typeof data.task_group_document != "undefined") ? data.task_group_document : ""
-            var task_group_amount = (typeof data.task_group_amount != "undefined") ? data.task_group_amount : ""
-            var task_group_quantity = (typeof data.task_group_quantity != "undefined") ? data.task_group_quantity : ""
-            var task_group_pic = (typeof data.task_group_pic != "undefined") ? data.task_group_pic : ""
-            var comment = (typeof data.comment != "undefined") ? data.comment : ""
-            var work_type = (typeof data.work_type != "undefined") ? data.work_type : ""
-            var status = (typeof data.status != "undefined") ? data.status : ""
-            var messenger_code = (typeof data.messenger_code != "undefined") ? data.messenger_code : ""
-            var messenger_name = (typeof data.messenger_name != "undefined") ? data.messenger_name : ""
-            var car_type = (typeof data.car_type != "undefined") ? data.car_type : ""
-            var shipment_staff_1 = (typeof data.shipment_staff_1 != "undefined") ? data.shipment_staff_1 : ""
-            var shipment_staff_2 = (typeof data.shipment_staff_2 != "undefined") ? data.shipment_staff_2 : ""
-            var messenger_comment = (typeof data.messenger_comment != "undefined") ? data.messenger_comment : ""
-            var task_detail = (typeof data.task_detail != "undefined") ? data.task_detail : ""
-            var status_finish = (typeof data.status_finish != "undefined") ? data.status_finish : ""
-            var customerID = (typeof data.customerID != "undefined") ? data.customerID : ""
-            var customerName = (typeof data.customerName != "undefined") ? data.customerName : ""
-            var Zone = (typeof data.Zone != "undefined") ? data.Zone : ""
-            var address_shipment = (typeof data.address_shipment != "undefined") ? data.address_shipment : ""
-            var detail_cn = (typeof data.detail_cn != "undefined") ? data.detail_cn : ""
-            var typework = (typeof data.typework != "undefined") ? data.typework : ""
-
-            sql.close()
-            const pool = new sql.ConnectionPool(dbConnectData_TransportApp)
-            pool.connect(err => {
-                if (err) {
-                    save_log("Connection is close", "create_tsc_one", "TMS_Special_Circles", "No connection")
-                    callback(server_response(500, "Connection is close", ""))
+    create_tsc_one(inData, callback) {
+        nameFN = "create_tsc_one"
+        nameTB = "[TMS_Special_Circles]"
+        this.gen_tsc_document(async (res_data) => {
+            sql_insert = []
+            console.log("inData", inData.length)
+            inData.forEach((val, i) => {
+                if (val.pictures.length > 0) {
+                    val.pictures.forEach((valPic, iPic) => {
+                        sql_insert.push(`
+                    INSERT INTO [dbo].[TMS_Special_Picture]
+                        ([tsc_document]
+                        ,[picture])
+                    VALUES
+                        ('${res_data}'
+                        ,'${valPic}')
+                    `)
+                    });
                 }
-                const transaction = new sql.Transaction(pool)
-                transaction.begin(err => {
-                    if (err) callback(server_response(500, "Connection is close", ""));
-                    let rolledBack = false
-                    transaction.on("rollback", aborted => {
-                        rolledBack = true
+                sql_insert.push(`INSERT INTO [dbo].[TMS_Special_Circles]
+                ([tsc_document]
+                ,[create_date]
+                ,[user_request_email]
+                ,[user_request_code]
+                ,[user_request_name]
+                ,[user_request_department]
+                ,[user_request_tel]
+                ,[receive_from]
+                ,[receive_date]
+                ,[receive_time_first]
+                ,[send_to]
+                ,[send_date]
+                ,[send_time_first]
+                ,[send_tel]
+                ,[task_group]
+                ,[task_group_document]
+                ,[task_group_amount]
+                ,[comment]
+                ,[typework]
+                ,[Code_Zone]
+                ,[Zone])
+          VALUES
+                ('${res_data}'
+                ,GETDATE()
+                ,'${val.user_request_email}'
+                ,'${val.user_request_code}'
+                ,'${val.user_request_name}'
+                ,'${val.user_request_department}'
+                ,'${val.user_request_tel}'
+                ,'${val.receive_from}'
+                ,'${val.receive_date}'
+                ,'${moment(val.receive_time_first).format('H:m:s')}'
+                ,'${val.send_to}'
+                ,'${val.send_date}'
+                ,'${moment(val.send_time_first).format('H:m:s')}'
+                ,'${val.send_tel}'
+                ,'${val.task_group}'
+                ,'${val.task_group_document}'
+                ,'${val.task_group_amount}'
+                ,'${val.comment}'
+                ,'${val.typework}'
+                ,'${val.code_zone}'
+                ,'${val.zone}')`)
+            });
+            // console.log("sql_insert",sql_insert.join(" "))
+            try {
+                var res_query = await insert_query(dbConnectData_TransportApp, nameFN, nameTB, sql_insert.join(" "))
+                if(res_query.status==200){
+                    this.find_by_tsc(res_data,(res_tsc)=>{
+                        callback(res_tsc)
                     })
-                    var req = new sql.Request(transaction)
-
-                    var sql_query = "INSERT INTO TMS_Special_Circles \
-                    ([tsc_document]\
-                     ,[create_date]\
-                     ,[user_request_code]\
-                     ,[user_request_name]\
-                     ,[user_request_department]\
-                     ,[user_request_tel]\
-                     ,[receive_from]\
-                     ,[receive_date]\
-                     ,[receive_time_first]\
-                     ,[receive_time_end]\
-                     ,[send_to]\
-                     ,[send_date]\
-                     ,[send_time_first]\
-                     ,[send_time_end]\
-                     ,[send_tel]\
-                     ,[task_group]\
-                     ,[task_group_document]\
-                     ,[task_group_amount]\
-                     ,[task_group_quantity]\
-                     ,[task_group_pic]\
-                     ,[comment]\
-                     ,[work_type]\
-                     ,[status]\
-                     ,[messenger_code]\
-                     ,[messenger_name]\
-                     ,[car_type]\
-                     ,[shipment_staff_1]\
-                     ,[shipment_staff_2]\
-                     ,[messenger_comment]\
-                     ,[task_detail]\
-                     ,[status_finish]\
-                     ,[customerID]\
-                     ,[customerName]\
-                     ,[Zone]\
-                     ,[address_shipment] \
-                     ,[detail_cn] \
-                     ,[typework])\
-                     VALUES \
-                     ( '"+ tsc_document + "'\
-                     ,'"+ create_date + "'\
-                     ,'"+ user_request_code + "'\
-                     ,'"+ user_request_name + "'\
-                     ,'"+ user_request_department + "'\
-                     ,'"+ user_request_tel + "'\
-                     ,'"+ receive_from + "'\
-                     ,'"+ receive_date + "'\
-                     ,'"+ receive_time_first + "'\
-                     ,'"+ receive_time_end + "'\
-                     ,'"+ send_to + "'\
-                     ,'"+ send_date + "'\
-                     ,'"+ send_time_first + "'\
-                     ,'"+ send_time_end + "'\
-                     ,'"+ send_tel + "'\
-                     ,'"+ task_group + "'\
-                     ,'"+ task_group_document + "'\
-                     ,'"+ task_group_amount + "'\
-                     ,'"+ task_group_quantity + "'\
-                     ,'"+ task_group_pic + "'\
-                     ,'"+ comment + "'\
-                     ,'"+ work_type + "'\
-                     ,'"+ status + "'\
-                     ,'"+ messenger_code + "'\
-                     ,'"+ messenger_name + "'\
-                     ,'"+ car_type + "'\
-                     ,'"+ shipment_staff_1 + "'\
-                     ,'"+ shipment_staff_2 + "'\
-                     ,'"+ messenger_comment + "'\
-                     ,'"+ task_detail + "'\
-                     ,'"+ status_finish + "'\
-                     ,'"+ customerID + "'\
-                     ,'"+ customerName + "'\
-                     ,'"+ Zone + "'\
-                     ,'"+ address_shipment + "'\
-                     ,'"+ detail_cn + "'\
-                     ,'"+ typework + "' )"
-                    //  console.log("sql_query", sql_query)
-                    req.query(sql_query, (err, result) => {
-                        if (err) {
-                            if (!rolledBack) {
-                                transaction.rollback(err => {
-                                    if (err) callback(server_response(501, "Error query SQL", err));
-                                    pool.close()
-                                    // console.log("sql_query", sql_query)
-                                    save_log(result, "create_tsc_one", "TMS_Special_Circles", data)
-                                    callback(server_response(501, "Error query SQL", err))
-                                })
-                            }
-                        } else {
-                            transaction.commit(err => {
-                                pool.close()
-                                if (err) callback(server_response(501, "Error query SQL", err));
-                                save_log(result, "create_tsc_one", "TMS_Special_Circles", data)
-                                callback(server_response(200, "Success", result.recordset))
-                            })
-                        }
-                    })
-                })
-            })
+                }
+            } catch (error) {
+                callback(error)
+            }
         })
+    },
+    async find_by_tsc(in_tsc,callback){
+        var nameFN = "find_by_tsc"
+        var nameTB = "TMS_Special_Circles"
+        var sql_query = `SELECT * FROM TMS_Special_Circles WHERE tsc_document = '${in_tsc}'`
+        var res_query = await select_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query)
+        callback(res_query)
     },
     find_today_date(date_start, callback) {
         let whereDate = moment(date_start).day(-1)
@@ -267,13 +193,14 @@ const model = {
         pool.connect(err => {
             var req = new sql.Request(pool)
 
-            var sql_query = "SELECT        id, tsc_document, create_date, user_request_code, user_request_name, user_request_department, user_request_tel, receive_from, CONVERT(varchar(10), receive_date, 120) AS receive_date, CONVERT (varchar(5), receive_time_first, 114) AS receive_time_first \
-            ,receive_time_end, send_to, CONVERT(varchar(10), send_date, 120) AS send_date, CONVERT (varchar(5), send_time_first, 114) AS send_time_first, send_time_end, send_tel, task_group, task_group_document, task_group_amount, task_group_quantity, task_group_pic, comment, work_type, status, messenger_code \
-            ,messenger_name, car_type, shipment_staff_1, shipment_staff_2, shipment_staff_3, messenger_comment, task_detail, status_finish, customerID, customerName, Zone, address_shipment, detail_cn, status_clear \
-            ,time_update,CASE WHEN CONVERT (varchar(2) , create_date , 114) > 16 THEN 2 ELSE 0 END AS day_task \
-            FROM            dbo.TMS_Special_Circles \
-            WHERE        (CONVERT(VARCHAR(10),create_date,120) >= '"+ date_start + "' )"
-
+            var sql_query = `SELECT        id, tsc_document, create_date, user_request_code, user_request_name, user_request_department, user_request_tel, receive_from, CONVERT(varchar(10), receive_date, 120) AS receive_date, CONVERT(varchar(5), 
+            receive_time_first, 114) AS receive_time_first, receive_time_end, send_to, CONVERT(varchar(10), send_date, 120) AS send_date, CONVERT(varchar(5), send_time_first, 114) AS send_time_first, send_time_end, send_tel, 
+            task_group, task_group_document, task_group_amount, task_group_quantity, task_group_pic, comment, work_type, status, messenger_code, messenger_name, car_type, shipment_staff_1, shipment_staff_2, shipment_staff_3, 
+            messenger_comment, task_detail, status_finish, customerID, customerName, Zone, address_shipment, detail_cn, status_clear, time_update, CASE WHEN CONVERT(varchar(2), create_date, 114) 
+            > 16 THEN 2 ELSE 0 END AS day_task
+            FROM            dbo.TMS_Special_Circles
+            WHERE          (CONVERT(VARCHAR(10), create_date, 120) = CONVERT(varchar(10), GETDATE(), 120)) AND (status = 0)`
+            // console.log("sql_query",sql_query)
             req.query(sql_query).then((result) => {
                 pool.close()
                 // console.log(sql_query,result);
@@ -301,7 +228,7 @@ const model = {
             ,messenger_name, car_type, shipment_staff_1, shipment_staff_2, shipment_staff_3, messenger_comment, task_detail, status_finish, customerID, customerName, Zone, address_shipment, detail_cn, status_clear \
             ,time_update,CASE WHEN CONVERT (varchar(2) , create_date , 114) > 16 THEN 2 ELSE 0 END AS day_task \
             FROM            dbo.TMS_Special_Circles \
-            WHERE        (CONVERT(VARCHAR(10),create_date,120) < '"+ date_start + "' ) AND (status <> 10) "
+            WHERE        (CONVERT(VARCHAR(10), create_date, 120) < CONVERT(varchar(10), GETDATE(), 120)) AND (status <> 10) "
 
             req.query(sql_query).then((result) => {
                 pool.close()
@@ -317,6 +244,16 @@ const model = {
                 if (err) throw err;
             });
         })
+    },
+    async get_zone(callback) {
+        var nameFN = "get_zone"
+        var nameTB = "RoundCost"
+        var sql_query = `SELECT ship_code, ship_name
+        FROM dbo.RoundCost
+        GROUP BY ship_code, ship_name
+        ORDER BY ship_code`
+        var res_query = await select_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query)
+        callback(res_query)
     }
 }
 
