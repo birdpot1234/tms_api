@@ -375,12 +375,12 @@ router.get("/get_report_costmess_MCV/:start&:end", (req, resp) => {
     TMS_costRound.model.get_report_costmess_MCV(req.params.start,req.params.end, (res_data) => resp.json(res_data))
 })
 
-router.get("/get-daily-costmess-MCV/:date&:id", (req, resp) => {
-    TMS_costRound.model.get_daily_costmess_MCV(req.params.date, req.params.id, (res_data) => resp.json(res_data))
+router.get("/get-daily-costmess-MCV/:date&:id&:trip", (req, resp) => {
+    TMS_costRound.model.get_daily_costmess_MCV(req.params.date, req.params.id, req.params.trip, (res_data) => resp.json(res_data))
 })
 
-router.get("/get-daily-costmess-MDL/:date&:id&:type", (req, resp) => {
-    TMS_costRound.model.get_daily_costmess_MDL(req.params.date, req.params.id, req.params.type, (res_data) => resp.json(res_data))
+router.get("/get-daily-costmess-MDL/:date&:id&:type&:trip", (req, resp) => {
+    TMS_costRound.model.get_daily_costmess_MDL(req.params.date, req.params.id, req.params.type, req.params.trip, (res_data) => resp.json(res_data))
 })
 
 module.exports = router
