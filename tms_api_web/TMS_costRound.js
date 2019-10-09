@@ -44,7 +44,7 @@ const model = {
                 " where MessengerID = '" + id + "' and Datetime = '" + date + "' and Trip = " + trip 
         }
 
-        //console.log("object", sql_query)
+        console.log("object", sql_query)
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
     },
@@ -60,7 +60,7 @@ const model = {
             " FROM [Data_TransportApp].[dbo].[TMS_jar_daily_dealer]  " +
             " where MessengerID = '" + id + "' and Datetime = '" + date + "' and car_type like '" + type + "%' and Trip = " + trip 
         }
-        //console.log("object", sql_query)
+        console.log("object", sql_query)
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
     },
