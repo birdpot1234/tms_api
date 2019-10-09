@@ -1,5 +1,5 @@
 var { dbConnectData_TransportApp } = require('../connect_sql')
-const { Gen_Document5digit, save_log, server_response, insert_query } = require("../service")
+const { Gen_Document5digit, save_log, server_response, select_query, insert_query } = require("../service")
 const moment = require('moment')
 const ReportDetail = require("./ReportDetail")
 var sql = require('mssql')
@@ -51,15 +51,17 @@ const model = {
             }
             var req = new sql.Request(pool)
 
-            var sql_query = "SELECT        dbo.Report.id, dbo.Report.INVOICEID, dbo.Report.DocumentSet, dbo.Report.CustomerID, dbo.Report.CustomerName, dbo.Report.AddressShipment, dbo.Report.Status, dbo.Report.AmountBill, dbo.Report.AmountActual, \
-            dbo.Report.Type, dbo.Report.Datetime, dbo.Report.ReasonCN, dbo.Report.ClearingStatus, dbo.Report.ClearingDate, dbo.Report.paymentType, dbo.Report.MessengerID, dbo.Report.MessengerName, dbo.StatusDetail.Detail, \
-            dbo.App_FinishApp.paymentType AS Expr1, dbo.App_FinishApp.tranType, dbo.App_FinishApp.CheckboxTranfer,dbo.Report.Comment \
-            FROM            dbo.Report INNER JOIN \
-            dbo.App_FinishApp ON dbo.Report.INVOICEID = dbo.App_FinishApp.invoiceNumber LEFT OUTER JOIN \
-            dbo.StatusDetail ON dbo.Report.Status = dbo.StatusDetail.Status \
-            WHERE (dbo.Report.Status LIKE 'A%') AND (dbo.Report.ClearingStatus <> 9 ) AND (dbo.Report.INVOICEID NOT LIKE 'INB%') AND (dbo.Report.INVOICEID NOT LIKE 'ITR%') AND (dbo.Report.MessengerID = '"+ mess_code + "') AND (convert(varchar(10),dbo.Report.Datetime,120) LIKE '" + date + "') \
-            ORDER BY INVOICEID"
-            // console.log("object",sql_query)
+            var sql_query = `SELECT        TOP (100) PERCENT dbo.Report.id, dbo.Report.INVOICEID, dbo.Report.DocumentSet, dbo.Report.CustomerID, dbo.Report.CustomerName, dbo.Report.AddressShipment, dbo.Report.Status, dbo.Report.AmountBill, 
+            dbo.Report.AmountActual, dbo.Report.Type, dbo.Report.Datetime, dbo.Report.ReasonCN, dbo.Report.ClearingStatus, dbo.Report.ClearingDate, dbo.Report.paymentType, dbo.Report.MessengerID, dbo.Report.MessengerName, 
+            dbo.StatusDetail.Detail, dbo.App_FinishApp.paymentType AS Expr1, dbo.App_FinishApp.tranType, dbo.App_FinishApp.CheckboxTranfer, dbo.Report.Comment, dbo.TMS_Interface.remark, dbo.TMS_Interface.store_zone, 
+            dbo.TMS_Interface.code_zone
+FROM            dbo.Report INNER JOIN
+            dbo.App_FinishApp ON dbo.Report.INVOICEID = dbo.App_FinishApp.invoiceNumber LEFT OUTER JOIN
+            dbo.TMS_Interface ON dbo.Report.INVOICEID = dbo.TMS_Interface.invoice AND dbo.Report.DocumentSet = dbo.TMS_Interface.tms_document LEFT OUTER JOIN
+            dbo.StatusDetail ON dbo.Report.Status = dbo.StatusDetail.Status
+            WHERE (dbo.Report.Status LIKE 'A%')  AND (dbo.Report.INVOICEID NOT LIKE 'INB%') AND (dbo.Report.INVOICEID NOT LIKE 'ITR%') AND (dbo.Report.MessengerID = '${mess_code}') AND (convert(varchar(10),dbo.Report.Datetime,120) LIKE '${date}')
+            ORDER BY INVOICEID`
+            console.log("object", sql_query)
             req.query(sql_query).then((result, err) => {
                 pool.close()
                 if (result.recordset.length > 0) {
@@ -463,6 +465,34 @@ const model = {
         try {
             sql_update.push(`UPDATE [dbo].[TMS_Interface] SET [Delay_Status_Stock]='${inVal}' 
             WHERE invoice LIKE '${inINV}'  `)
+            var res_model = await insert_query(dbConnectData_TransportApp, nameFN, nameTB, sql_update.join(" "))
+            callback(res_model)
+        } catch (error) {
+
+        }
+    },
+    async get_ship_code(callback) {
+        var nameFN = "get_ship_code"
+        var nameTB = "RoundCost"
+        var sql_query = `SELECT        ship_code, ship_name
+        FROM            dbo.RoundCost
+        GROUP BY ship_code, ship_name
+        ORDER BY ship_name`
+        try {
+            var res_model = await select_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query)
+            callback(res_model)
+        } catch (error) {
+
+        }
+    },
+    async update_zone(inINV,inShipCode,inShipName,callback){
+        var nameFN = "update_zone"
+        var nameTB = "TMS_Interface"
+        var sql_update = []
+        try {
+            sql_update.push(`UPDATE [dbo].[TMS_Interface] SET [code_zone]='${inShipCode}',[store_zone]='${inShipName}' 
+            WHERE invoice LIKE '${inINV}'  `)
+            // console.log("sql_update",sql_update.join(" "));
             var res_model = await insert_query(dbConnectData_TransportApp, nameFN, nameTB, sql_update.join(" "))
             callback(res_model)
         } catch (error) {

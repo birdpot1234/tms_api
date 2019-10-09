@@ -300,6 +300,11 @@ router.get("/report/report-status-main/:stDate&:enDate&:cExpress&:fSalesGroup", 
         resp.status(res_data.status).json(res_data)
     })
 })
+router.get("/report/modal-inv-detail/:inDoc", (req, resp) => {
+    View_Report.model.get_modal_inv_detail(req.params.inDoc, (res_data) => {
+        resp.json(res_data)
+    })
+})
 router.get("/report/modal-back-order/:inDoc", (req, resp) => {
     View_Report.model.get_modal_back_order(req.params.inDoc, (res_data) => {
         resp.json(res_data)
@@ -328,6 +333,9 @@ router.post("/report/modal-POQ/", (req, resp) => {
 //----------------All Report
 
 //----------------All Clearbill
+router.post("/clearbill/update-zone/", (req, resp) => {
+    TBL_Report.model.update_zone(req.body[0].invoice, req.body[0].ship_code, req.body[0].ship_name, (resp_data) => resp.json(resp_data))
+})
 router.post("/clearbill/update-comment/", (req, resp) => {
     TBL_Report.model.update_comment(req.body[0].id, req.body[0].comment, (res_data) => {
         resp.json(res_data)
@@ -467,5 +475,9 @@ router.get("/get-daily-costmess-MCV/:date&:id&:trip", (req, resp) => {
 router.get("/get-daily-costmess-MDL/:date&:id&:type&:trip", (req, resp) => {
     TMS_costRound.model.get_daily_costmess_MDL(req.params.date, req.params.id, req.params.type, req.params.trip, (res_data) => resp.json(res_data))
 })
-
+router.get("/get-ship-code/", (req, resp) => {
+    TBL_Report.model.get_ship_code((res_data) => {
+        resp.json(res_data)
+    })
+})
 module.exports = router

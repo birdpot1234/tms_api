@@ -136,7 +136,7 @@ const select_query = (config="",nameFN = "", nameTB = "", sql_query = "") => {
             }
             var req = new sql.Request(pool)
 
-            // console.log("sql_query", sql_query)
+            console.log("sql_query", sql_query)
             req.query(sql_query).then((result) => {
                 
                 pool.close()

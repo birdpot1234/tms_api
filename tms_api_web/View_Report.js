@@ -58,6 +58,19 @@ const model = {
             callback(error)
         }
     },
+    async get_modal_inv_detail(inDoc, callback) {
+        nameFN = "get_modal_inv_detail"
+        nameTB = "ZTSV_TMS_SalesLine_less"
+        sql_query = `SELECT        ITEMID, NAME, QTYORDERED AS deliveryRemainder
+        FROM            DPLUSAX63_GOLIVE_2017.dbo.SALESLINE
+        WHERE        (SALESID = N'${inDoc}')`
+        try {
+            var res_data = await select_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query)
+            callback(res_data)
+        } catch (error) {
+            callback(error)
+        }
+    },
     async get_modal_back_order(inDoc, callback) {
         nameFN = "get_modal_back_order"
         nameTB = "ZTSV_TMS_SalesLine_less"
