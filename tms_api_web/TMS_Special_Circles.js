@@ -107,7 +107,7 @@ const model = {
         nameTB = "[TMS_Special_Circles]"
         this.gen_tsc_document(async (res_data) => {
             sql_insert = []
-            console.log("inData", inData.length)
+            console.log("inData", inData)
             inData.forEach((val, i) => {
                 if (val.pictures.length > 0) {
                     val.pictures.forEach((valPic, iPic) => {
@@ -152,10 +152,10 @@ const model = {
                 ,'${val.user_request_department}'
                 ,'${val.user_request_tel}'
                 ,'${val.receive_from}'
-                ,'${val.receive_date}'
+                ,'${moment(val.receive_date).format("YYYY-MM-DD")}'
                 ,'${moment(val.receive_time_first).format('H:m:s')}'
                 ,'${val.send_to}'
-                ,'${val.send_date}'
+                ,'${moment(val.send_date).format("YYYY-MM-DD")}'
                 ,'${moment(val.send_time_first).format('H:m:s')}'
                 ,'${val.send_tel}'
                 ,'${val.task_group}'
@@ -199,7 +199,8 @@ const model = {
             messenger_comment, task_detail, status_finish, customerID, customerName, Zone, address_shipment, detail_cn, status_clear, time_update, CASE WHEN CONVERT(varchar(2), create_date, 114) 
             > 16 THEN 2 ELSE 0 END AS day_task
             FROM            dbo.TMS_Special_Circles
-            WHERE          (CONVERT(VARCHAR(10), create_date, 120) = CONVERT(varchar(10), GETDATE(), 120)) AND (status = 0)`
+            WHERE          (CONVERT(VARCHAR(10), create_date, 120) = CONVERT(varchar(10), GETDATE(), 120)) AND (status = 0)
+            ORDER BY create_date DESC `
             // console.log("sql_query",sql_query)
             req.query(sql_query).then((result) => {
                 pool.close()
@@ -228,7 +229,8 @@ const model = {
             ,messenger_name, car_type, shipment_staff_1, shipment_staff_2, shipment_staff_3, messenger_comment, task_detail, status_finish, customerID, customerName, Zone, address_shipment, detail_cn, status_clear \
             ,time_update,CASE WHEN CONVERT (varchar(2) , create_date , 114) > 16 THEN 2 ELSE 0 END AS day_task \
             FROM            dbo.TMS_Special_Circles \
-            WHERE        (CONVERT(VARCHAR(10), create_date, 120) < CONVERT(varchar(10), GETDATE(), 120)) AND (status <> 10) "
+            WHERE       ( CONVERT(VARCHAR(10),create_date,120) BETWEEN '"+moment().subtract(60,"days").format("YYYY-MM-DD")+"' AND GETDATE() ) AND (CONVERT(VARCHAR(10), create_date, 120) < CONVERT(varchar(10), GETDATE(), 120)) AND (status <> 10)\
+            ORDER BY create_date DESC "
 
             req.query(sql_query).then((result) => {
                 pool.close()
@@ -253,6 +255,16 @@ const model = {
         GROUP BY ship_code, ship_name
         ORDER BY ship_code`
         var res_query = await select_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query)
+        callback(res_query)
+    },
+    async delete_task(tsc,callback){
+        var nameFN = "delete_task"
+        var nameTB = "TMS_Special_Circles"
+        var sql_query = `DELETE FROM TMS_Special_Circles
+        WHERE tsc_document LIKE '${tsc}'`
+        console.log("sql_query",sql_query);
+        var res_query = await insert_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query)
+        console.log("res_query",res_query);
         callback(res_query)
     }
 }

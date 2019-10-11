@@ -208,6 +208,9 @@ router.post('/special-circles/add-task/', (req, resp) => {
 //     resp.json(res_data)
 // })
 // })
+router.post("/special-circles/delete/", (req, resp) => {
+    TMS_Special_Circles.model.delete_task(req.body[0].tsc_document, (res_data) => resp.json(res_data))
+})
 router.get("/special-circles/get-today-task/:dateSt&:dateEn", (req, resp) => {
     let date_start = req.params.dateSt, date_end = req.params.dateEn
     TMS_Special_Circles.model.find_today_date(date_start, (res_data) => {

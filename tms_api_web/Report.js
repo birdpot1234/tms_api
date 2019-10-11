@@ -23,7 +23,7 @@ const model = {
             dbo.StatusDetail ON dbo.Report.Status = dbo.StatusDetail.Status \
             WHERE (dbo.Report.ClearingStatus <> 9 ) AND (dbo.Report.INVOICEID LIKE 'ITR%') AND (dbo.Report.MessengerID = '"+ mess_code + "') AND (convert(varchar(10),dbo.Report.Datetime,120) LIKE '" + date + "') \
             ORDER BY INVOICEID"
-            // console.log("object",sql_query)
+            console.log("object", sql_query)
             req.query(sql_query).then((result, err) => {
                 pool.close()
                 if (result.recordset.length > 0) {
@@ -55,11 +55,11 @@ const model = {
             dbo.Report.AmountActual, dbo.Report.Type, dbo.Report.Datetime, dbo.Report.ReasonCN, dbo.Report.ClearingStatus, dbo.Report.ClearingDate, dbo.Report.paymentType, dbo.Report.MessengerID, dbo.Report.MessengerName, 
             dbo.StatusDetail.Detail, dbo.App_FinishApp.paymentType AS Expr1, dbo.App_FinishApp.tranType, dbo.App_FinishApp.CheckboxTranfer, dbo.Report.Comment, dbo.TMS_Interface.remark, dbo.TMS_Interface.store_zone, 
             dbo.TMS_Interface.code_zone
-FROM            dbo.Report INNER JOIN
+            FROM            dbo.Report INNER JOIN
             dbo.App_FinishApp ON dbo.Report.INVOICEID = dbo.App_FinishApp.invoiceNumber LEFT OUTER JOIN
-            dbo.TMS_Interface ON dbo.Report.INVOICEID = dbo.TMS_Interface.invoice AND dbo.Report.DocumentSet = dbo.TMS_Interface.tms_document LEFT OUTER JOIN
+            dbo.TMS_Interface ON dbo.Report.INVOICEID = dbo.TMS_Interface.invoice LEFT OUTER JOIN
             dbo.StatusDetail ON dbo.Report.Status = dbo.StatusDetail.Status
-            WHERE (dbo.Report.Status LIKE 'A%')  AND (dbo.Report.INVOICEID NOT LIKE 'INB%') AND (dbo.Report.INVOICEID NOT LIKE 'ITR%') AND (dbo.Report.MessengerID = '${mess_code}') AND (convert(varchar(10),dbo.Report.Datetime,120) LIKE '${date}')
+            WHERE (dbo.Report.Status LIKE 'A%') AND (dbo.Report.MessengerID = '${mess_code}') AND (convert(varchar(10),dbo.Report.Datetime,120) LIKE '${date}')
             ORDER BY INVOICEID`
             console.log("object", sql_query)
             req.query(sql_query).then((result, err) => {
@@ -485,14 +485,19 @@ FROM            dbo.Report INNER JOIN
 
         }
     },
-    async update_zone(inINV,inShipCode,inShipName,callback){
+    async update_zone(inINV, inShipCode, inShipName, callback) {
         var nameFN = "update_zone"
         var nameTB = "TMS_Interface"
+        var checkININV = substring(0, 3, inINV)
         var sql_update = []
         try {
-            sql_update.push(`UPDATE [dbo].[TMS_Interface] SET [code_zone]='${inShipCode}',[store_zone]='${inShipName}' 
-            WHERE invoice LIKE '${inINV}'  `)
-            // console.log("sql_update",sql_update.join(" "));
+            if(checkININV=="ITR"){
+                sql_update.push(`UPDATE [dbo].[TMS_Interface] SET [code_zone]='${inShipCode}',[store_zone]='${inShipName}' 
+                WHERE claim_document LIKE '${inINV}'  `)
+            }else{
+                sql_update.push(`UPDATE [dbo].[TMS_Interface] SET [code_zone]='${inShipCode}',[store_zone]='${inShipName}' 
+                WHERE invoice LIKE '${inINV}'  `)
+            }
             var res_model = await insert_query(dbConnectData_TransportApp, nameFN, nameTB, sql_update.join(" "))
             callback(res_model)
         } catch (error) {
