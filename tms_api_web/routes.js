@@ -225,6 +225,9 @@ router.get("/special-circles/get-over-task/:dateSt&:dateEn", (req, resp) => {
 })
 
 //----------------All Report
+router.get("/report/report-round-mess/:dlvDate&:messCode", (req, resp) => {
+    TBL_Report.model.get_report_round_mess(req.params.dlvDate, req.params.messCode, (res_data) => resp.json(res_data))
+})
 router.post("/report/update-status-tranfer/", (req, resp) => {
     // console.log("object")
     TBL_Report.model.update_status_tranfer(req.body[0].inv, req.body[0].status, (res_data) => {

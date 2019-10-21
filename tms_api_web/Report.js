@@ -53,11 +53,13 @@ const model = {
 
             var sql_query = `SELECT        TOP (100) PERCENT dbo.Report.id, dbo.Report.INVOICEID, dbo.Report.DocumentSet, dbo.Report.CustomerID, dbo.Report.CustomerName, dbo.Report.AddressShipment, dbo.Report.Status, dbo.Report.AmountBill, 
             dbo.Report.AmountActual, dbo.Report.Type, dbo.Report.Datetime, dbo.Report.ReasonCN, dbo.Report.ClearingStatus, dbo.Report.ClearingDate, dbo.Report.paymentType, dbo.Report.MessengerID, dbo.Report.MessengerName, 
-            dbo.StatusDetail.Detail, dbo.App_FinishApp.paymentType AS Expr1, dbo.App_FinishApp.tranType, dbo.App_FinishApp.CheckboxTranfer, dbo.Report.Comment, dbo.TMS_Interface.remark, dbo.TMS_Interface.store_zone, 
-            dbo.TMS_Interface.code_zone
+            dbo.StatusDetail.Detail, dbo.App_FinishApp.paymentType AS Expr1, dbo.App_FinishApp.tranType, dbo.App_FinishApp.CheckboxTranfer, dbo.Report.Comment, TMS_Interface_1.remark, CASE WHEN LEFT(INVOICEID, 3) 
+            LIKE 'ITR' THEN TMS_Interface.store_zone ELSE TMS_Interface_1.store_zone END AS store_zone, CASE WHEN LEFT(INVOICEID, 3) 
+            LIKE 'ITR' THEN TMS_Interface.code_zone ELSE TMS_Interface_1.code_zone END AS code_zone
             FROM            dbo.Report INNER JOIN
             dbo.App_FinishApp ON dbo.Report.INVOICEID = dbo.App_FinishApp.invoiceNumber LEFT OUTER JOIN
-            dbo.TMS_Interface ON dbo.Report.INVOICEID = dbo.TMS_Interface.invoice LEFT OUTER JOIN
+            dbo.TMS_Interface ON dbo.Report.INVOICEID = dbo.TMS_Interface.claim_document LEFT OUTER JOIN
+            dbo.TMS_Interface AS TMS_Interface_1 ON dbo.Report.INVOICEID = TMS_Interface_1.invoice LEFT OUTER JOIN
             dbo.StatusDetail ON dbo.Report.Status = dbo.StatusDetail.Status
             WHERE (dbo.Report.Status LIKE 'A%') AND (dbo.Report.MessengerID = '${mess_code}') AND (convert(varchar(10),dbo.Report.Datetime,120) LIKE '${date}')
             ORDER BY INVOICEID`
@@ -488,17 +490,46 @@ const model = {
     async update_zone(inINV, inShipCode, inShipName, callback) {
         var nameFN = "update_zone"
         var nameTB = "TMS_Interface"
-        var checkININV = substring(0, 3, inINV)
+        var checkININV = inINV.substring(0, 3)
         var sql_update = []
         try {
-            if(checkININV=="ITR"){
+            if (checkININV == "ITR") {
                 sql_update.push(`UPDATE [dbo].[TMS_Interface] SET [code_zone]='${inShipCode}',[store_zone]='${inShipName}' 
                 WHERE claim_document LIKE '${inINV}'  `)
-            }else{
+            } else {
                 sql_update.push(`UPDATE [dbo].[TMS_Interface] SET [code_zone]='${inShipCode}',[store_zone]='${inShipName}' 
                 WHERE invoice LIKE '${inINV}'  `)
             }
+            console.log("object", sql_update.join(" "));
             var res_model = await insert_query(dbConnectData_TransportApp, nameFN, nameTB, sql_update.join(" "))
+            callback(res_model)
+        } catch (error) {
+
+        }
+    },
+    async get_report_round_mess(dlv_date, mess_code, callback) {
+        var nameFN = "get_report_round_mess"
+        var nameTB = "TMS_Interface"
+        var sql_query=[]
+        dlv_date=moment(dlv_date).format("YYYY-MM-DD")
+        switch(mess_code.substring(0,3)){
+            case "MDL":
+                sql_query.push(`SELECT        TOP (100) PERCENT ClearingDate, MessengerID, Trip, ship_name, bill_count, car_type
+                FROM            dbo.ZTS_TMS_Roundcost_Report
+                WHERE        (ClearingDate = '${dlv_date}') AND (MessengerID = '${mess_code}')
+                GROUP BY ClearingDate, MessengerID, Trip, ship_name, bill_count, car_type
+                ORDER BY Trip`)
+                break;
+            case "SDL":
+                sql_query.push(`SELECT        TOP (100) PERCENT ClearingDate, Trip, ship_name, bill_count, car_type
+                FROM            dbo.ZTS_TMS_Roundcost_Report
+                WHERE        (shipment_staff_1 + shipment_staff_2 + shipment_staff_3 LIKE '%${mess_code}%') AND (ClearingDate = '${moment(dlv_date).format("YYYY-MM-DD")}')
+                GROUP BY ClearingDate, Trip, ship_name, bill_count, car_type
+                ORDER BY Trip`)
+                break;
+        }
+        try {
+            var res_model = await select_query(dbConnectData_TransportApp, nameFN, nameTB, sql_query.join(" "))
             callback(res_model)
         } catch (error) {
 

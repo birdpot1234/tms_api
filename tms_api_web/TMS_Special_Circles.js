@@ -199,7 +199,7 @@ const model = {
             messenger_comment, task_detail, status_finish, customerID, customerName, Zone, address_shipment, detail_cn, status_clear, time_update, CASE WHEN CONVERT(varchar(2), create_date, 114) 
             > 16 THEN 2 ELSE 0 END AS day_task
             FROM            dbo.TMS_Special_Circles
-            WHERE          (CONVERT(VARCHAR(10), create_date, 120) = CONVERT(varchar(10), GETDATE(), 120)) AND (status = 0)
+            WHERE          (CONVERT(VARCHAR(10), create_date, 120) = CONVERT(varchar(10), GETDATE(), 120)) 
             ORDER BY create_date DESC `
             // console.log("sql_query",sql_query)
             req.query(sql_query).then((result) => {
@@ -229,7 +229,7 @@ const model = {
             ,messenger_name, car_type, shipment_staff_1, shipment_staff_2, shipment_staff_3, messenger_comment, task_detail, status_finish, customerID, customerName, Zone, address_shipment, detail_cn, status_clear \
             ,time_update,CASE WHEN CONVERT (varchar(2) , create_date , 114) > 16 THEN 2 ELSE 0 END AS day_task \
             FROM            dbo.TMS_Special_Circles \
-            WHERE       ( CONVERT(VARCHAR(10),create_date,120) BETWEEN '"+moment().subtract(60,"days").format("YYYY-MM-DD")+"' AND GETDATE() ) AND (CONVERT(VARCHAR(10), create_date, 120) < CONVERT(varchar(10), GETDATE(), 120)) AND (status <> 10)\
+            WHERE       ( CONVERT(VARCHAR(10),create_date,120) BETWEEN '"+moment().subtract(60,"days").format("YYYY-MM-DD")+"' AND GETDATE() ) AND (CONVERT(VARCHAR(10), create_date, 120) < CONVERT(varchar(10), GETDATE(), 120)) \
             ORDER BY create_date DESC "
 
             req.query(sql_query).then((result) => {
