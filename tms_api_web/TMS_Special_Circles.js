@@ -107,7 +107,7 @@ const model = {
         nameTB = "[TMS_Special_Circles]"
         this.gen_tsc_document(async (res_data) => {
             sql_insert = []
-            console.log("inData", inData)
+            // console.log("inData", inData)
             inData.forEach((val, i) => {
                 if (val.pictures.length > 0) {
                     val.pictures.forEach((valPic, iPic) => {

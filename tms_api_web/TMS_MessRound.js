@@ -122,7 +122,7 @@ const model = {
             ,'${val.bill_count}','${val.bill_cost}','${val.rate_cost}','${val.round_cost}','${val.oil_cost}'
             ,'${val.net_cost}','${val.car_type}')`
         });
-        sql_query=`IF EXISTS (SELECT id FROM TMS_RoundCost WHERE clear_date LIKE '${va}' )`
+        sql_query = `IF EXISTS (SELECT id FROM TMS_RoundCost WHERE clear_date LIKE '${va}' )`
         sql_query = "INSERT INTO [dbo].[TMS_RoundCost] \
         ([mess_code] \
         ,[mess_name] \
@@ -141,37 +141,196 @@ const model = {
     async get_round_report(stDate, enDate, mess_code, num_ship, callback) {
         name_function = "get_round_report"
         name_table = "ZTS_TMS_Roundcost_Report"
+        sql_query = []
+        var sql_select = []
         var mess1digit = mess_code.substring(0, 1)
         if (mess1digit == "M") {
-            sql_query = "SELECT        ClearingDate,Trip, MessengerID,car_type, ship_code, ship_name, bill_count, ship_cost, round_cost \
-        FROM            dbo.ZTS_TMS_Roundcost_Report \
-        WHERE        (ClearingDate BETWEEN '"+ stDate + "' AND '" + enDate + "') AND (MessengerID = '" + mess_code + "') AND (ship_type LIKE '" + mess_code.substring(1, 3) + "') \
-        GROUP BY ClearingDate, Trip, MessengerID, car_type, ship_code, ship_name, bill_count, ship_cost, round_cost \
-        ORDER BY ship_cost DESC,Trip"
+            sql_query.push(`MERGE INTO
+            TMS_RoundCost
+            USING
+            (SELECT TOP (100) PERCENT ClearingDate,Trip, MessengerID,car_type, ship_code, ship_name, bill_count, ship_cost, round_cost 
+            FROM dbo.ZTS_TMS_Roundcost_Report 
+            WHERE (ClearingDate BETWEEN '${stDate}' AND '${enDate}') AND (MessengerID = '${mess_code}') AND (ship_type LIKE '${mess_code.substring(1, 3)}') 
+            GROUP BY ClearingDate, Trip, MessengerID, car_type, ship_code, ship_name, bill_count, ship_cost, round_cost 
+            ORDER BY ship_cost DESC,Trip
+            )View_RoundCost
+            ON
+            TMS_RoundCost.clear_date=View_RoundCost.ClearingDate
+            AND TMS_RoundCost.mess_code=View_RoundCost.MessengerID
+            AND TMS_RoundCost.ship_code=View_RoundCost.ship_code
+            AND TMS_RoundCost.trip=View_RoundCost.Trip
+            AND TMS_RoundCost.car_type=View_RoundCost.car_type
+            when matched then
+            update set
+            TMS_RoundCost.create_date = GETDATE(),
+            TMS_RoundCost.bill_count = View_RoundCost.bill_count,
+            TMS_RoundCost.rate_cost = View_RoundCost.ship_cost,
+            TMS_RoundCost.round_cost = View_RoundCost.round_cost
+            when not matched then
+            insert
+            ([mess_code]
+            ,[clear_date]
+            ,[create_date]
+            ,[ship_code]
+            ,[ship_name]
+            ,[car_type]
+            ,[trip]
+            ,[bill_count]
+            ,[round_cost]
+            ,[rate_cost])
+            values
+            (View_RoundCost.MessengerID,
+            View_RoundCost.ClearingDate,
+            GETDATE(),
+            View_RoundCost.ship_code,
+            View_RoundCost.ship_name,
+            View_RoundCost.car_type,
+            View_RoundCost.Trip,
+            View_RoundCost.bill_count,
+            View_RoundCost.round_cost,
+            View_RoundCost.ship_cost);`)
+            sql_query.push(`MERGE INTO
+            TMS_RoundCost
+            USING
+            (SELECT TOP (100) PERCENT send_date AS ClearingDate, messenger_code AS MessengerID, Code_Zone AS ship_code, Zone AS ship_name, car_type, trip AS Trip, ship_cost, ship_cost/2 AS round_cost
+                FROM dbo.ZTSV_TMS_RoundCost_Special
+                WHERE (send_date BETWEEN '${stDate}' AND '${enDate}') AND (messenger_code = '${mess_code}')
+            )View_RoundCost
+            ON
+            TMS_RoundCost.clear_date=View_RoundCost.ClearingDate
+            AND TMS_RoundCost.mess_code=View_RoundCost.MessengerID
+            AND TMS_RoundCost.ship_code=View_RoundCost.ship_code
+            AND TMS_RoundCost.trip=View_RoundCost.Trip
+            AND TMS_RoundCost.car_type=View_RoundCost.car_type
+            when matched then
+            update set
+            TMS_RoundCost.create_date = GETDATE(),
+            TMS_RoundCost.rate_cost = View_RoundCost.ship_cost,
+            TMS_RoundCost.round_cost = View_RoundCost.round_cost
+            when not matched then
+            insert
+            ([mess_code]
+            ,[clear_date]
+            ,[create_date]
+            ,[ship_code]
+            ,[ship_name]
+            ,[car_type]
+            ,[trip]
+            ,[round_cost]
+            ,[rate_cost])
+            values
+            (View_RoundCost.MessengerID,
+            View_RoundCost.ClearingDate,
+            GETDATE(),
+            View_RoundCost.ship_code,
+            View_RoundCost.ship_name,
+            View_RoundCost.car_type,
+            View_RoundCost.Trip,
+            View_RoundCost.round_cost,
+            View_RoundCost.ship_cost);`)
         } else if (mess1digit == "S") {
-            if (num_ship === "Staff Ship1") {
-                sql_query = "SELECT        * \
-            FROM            dbo.ZTS_TMS_Roundcost_Report \
-            WHERE        (ClearingDate BETWEEN '"+ stDate + "' AND '" + enDate + "') AND (shipment_staff_1 = '" + mess_code + "') AND (ship_type LIKE '" + mess_code.substring(1, 3) + "') \
-            GROUP BY ClearingDate, Trip, MessengerID, car_type, ship_code, ship_name, bill_count, ship_cost, round_cost \
-            ORDER BY ship_cost DESC,Trip"
-            } else if (num_ship === "Staff Ship2") {
-                sql_query = "SELECT        * \
-            FROM            dbo.ZTS_TMS_Roundcost_Report \
-            WHERE        (ClearingDate BETWEEN '"+ stDate + "' AND '" + enDate + "') AND (shipment_staff_2 = '" + mess_code + "') AND (ship_type LIKE '" + mess_code.substring(1, 3) + "') \
-            GROUP BY ClearingDate, Trip, MessengerID, car_type, ship_code, ship_name, bill_count, ship_cost, round_cost \
-            ORDER BY ship_cost DESC,Trip"
-            } else if (num_ship === "Staff Ship3") {
-                sql_query = "SELECT        * \
-            FROM            dbo.ZTS_TMS_Roundcost_Report \
-            WHERE        (ClearingDate BETWEEN '"+ stDate + "' AND '" + enDate + "') AND (shipment_staff_3 = '" + mess_code + "') AND (ship_type LIKE '" + mess_code.substring(1, 3) + "') \
-            GROUP BY ClearingDate, Trip, MessengerID, car_type, ship_code, ship_name, bill_count, ship_cost, round_cost \
-            ORDER BY ship_cost DESC,Trip"
-            }
+            sql_query.push(`MERGE INTO
+            TMS_RoundCost
+            USING
+            (SELECT TOP (100) PERCENT ClearingDate,Trip, MessengerID,car_type, ship_code, ship_name, bill_count, ship_cost, round_cost 
+            FROM dbo.ZTS_TMS_Roundcost_Report 
+            WHERE (ClearingDate BETWEEN '${stDate}' AND '${enDate}') AND (ship_type LIKE '${mess_code.substring(1, 3)}') AND (shipment_staff_1 + shipment_staff_2 + shipment_staff_3 LIKE '%${mess_code}%')
+            GROUP BY ClearingDate, Trip, MessengerID, car_type, ship_code, ship_name, bill_count, ship_cost, round_cost 
+            ORDER BY ship_cost DESC,Trip
+            )View_RoundCost
+            ON
+            TMS_RoundCost.clear_date=View_RoundCost.ClearingDate
+            AND TMS_RoundCost.mess_code='${mess_code}'
+            AND TMS_RoundCost.ship_code=View_RoundCost.ship_code
+            AND TMS_RoundCost.trip=View_RoundCost.Trip
+            AND TMS_RoundCost.car_type=View_RoundCost.car_type
+            when matched then
+            update set
+            TMS_RoundCost.create_date = GETDATE(),
+            TMS_RoundCost.bill_count = View_RoundCost.bill_count,
+            TMS_RoundCost.rate_cost = View_RoundCost.ship_cost,
+            TMS_RoundCost.round_cost = View_RoundCost.round_cost
+            when not matched then
+            insert
+            ([mess_code]
+            ,[clear_date]
+            ,[create_date]
+            ,[ship_code]
+            ,[ship_name]
+            ,[car_type]
+            ,[trip]
+            ,[bill_count]
+            ,[round_cost]
+            ,[rate_cost])
+            values
+            ('${mess_code}',
+            View_RoundCost.ClearingDate,
+            GETDATE(),
+            View_RoundCost.ship_code,
+            View_RoundCost.ship_name,
+            View_RoundCost.car_type,
+            View_RoundCost.Trip,
+            View_RoundCost.bill_count,
+            View_RoundCost.round_cost,
+            View_RoundCost.ship_cost);`)
+            sql_query.push(`MERGE INTO
+            TMS_RoundCost
+            USING
+            (SELECT TOP (100) PERCENT send_date AS ClearingDate, messenger_code AS MessengerID, Code_Zone AS ship_code, Zone AS ship_name, car_type, trip AS Trip, ship_cost, ship_cost/2 AS round_cost
+            FROM dbo.ZTSV_TMS_RoundCost_Special
+            WHERE (send_date BETWEEN '${stDate}' AND '${enDate}') AND (shipment_staff_1 + shipment_staff_2 + shipment_staff_3 LIKE '%${mess_code}%')
+            )View_RoundCost
+            ON
+            TMS_RoundCost.clear_date=View_RoundCost.ClearingDate
+            AND TMS_RoundCost.mess_code='${mess_code}'
+            AND TMS_RoundCost.ship_code=View_RoundCost.ship_code
+            AND TMS_RoundCost.trip=View_RoundCost.Trip
+            AND TMS_RoundCost.car_type=View_RoundCost.car_type
+            when matched then
+            update set
+            TMS_RoundCost.create_date = GETDATE(),
+            TMS_RoundCost.rate_cost = View_RoundCost.ship_cost,
+            TMS_RoundCost.round_cost = View_RoundCost.round_cost
+            when not matched then
+            insert
+            ([mess_code]
+            ,[clear_date]
+            ,[create_date]
+            ,[ship_code]
+            ,[ship_name]
+            ,[car_type]
+            ,[trip]
+            ,[round_cost]
+            ,[rate_cost])
+            values
+            ('${mess_code}',
+            View_RoundCost.ClearingDate,
+            GETDATE(),
+            View_RoundCost.ship_code,
+            View_RoundCost.ship_name,
+            View_RoundCost.car_type,
+            View_RoundCost.Trip,
+            View_RoundCost.round_cost,
+            View_RoundCost.ship_cost);`)
         }
-        console.log("sql_query", sql_query);
-        res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
-        callback(res_data)
+        sql_select.push(`SELECT TOP (100) PERCENT dbo.TMS_RoundCost.mess_code, dbo.Messenger.MessName AS mess_name, CONVERT(varchar(10), dbo.TMS_RoundCost.clear_date, 120) AS clear_date, CONVERT(varchar(10), 
+                dbo.TMS_RoundCost.create_date, 120) AS create_date, dbo.TMS_RoundCost.car_type, dbo.TMS_RoundCost.trip AS Trip, dbo.TMS_RoundCost.bill_count, dbo.TMS_RoundCost.bill_cost, dbo.TMS_RoundCost.rate_cost, 
+                dbo.TMS_RoundCost.round_cost, dbo.TMS_RoundCost.oil_cost, dbo.TMS_RoundCost.ship_code, dbo.TMS_RoundCost.ship_name
+                FROM dbo.TMS_RoundCost INNER JOIN
+                                dbo.Messenger ON dbo.TMS_RoundCost.mess_code = dbo.Messenger.IDMess
+                WHERE (CONVERT(varchar(10), dbo.TMS_RoundCost.clear_date, 120) BETWEEN '${stDate}' AND '${enDate}' ) AND (dbo.TMS_RoundCost.mess_code = '${mess_code}')`)
+        try {
+            // console.log("sql",sql_query.join(" "));
+            res_data = await insert_query(dbConnectData_TransportApp, name_function, name_table, sql_query.join(" "))
+            if (res_data) {
+                res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_select.join(" "))
+                callback(res_data)
+            } else {
+                callback(res_data)
+            }
+        } catch (error) {
+            callback(error)
+        }
     }
 }
 
