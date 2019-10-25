@@ -144,6 +144,8 @@ const model = {
         sql_query = []
         var sql_select = []
         var mess1digit = mess_code.substring(0, 1)
+        sql_query.push(`DELETE FROM [dbo].[TMS_RoundCost]
+            WHERE (clear_date BETWEEN '${stDate}' AND '${enDate}') AND (mess_code = '${mess_code}')`)
         if (mess1digit == "M") {
             sql_query.push(`MERGE INTO
             TMS_RoundCost
@@ -192,9 +194,11 @@ const model = {
             sql_query.push(`MERGE INTO
             TMS_RoundCost
             USING
-            (SELECT TOP (100) PERCENT send_date AS ClearingDate, messenger_code AS MessengerID, Code_Zone AS ship_code, Zone AS ship_name, car_type, trip AS Trip, ship_cost, ship_cost/2 AS round_cost
-                FROM dbo.ZTSV_TMS_RoundCost_Special
-                WHERE (send_date BETWEEN '${stDate}' AND '${enDate}') AND (messenger_code = '${mess_code}')
+            (SELECT TOP (100) PERCENT send_date AS ClearingDate, messenger_code AS MessengerID, Code_Zone AS ship_code, Zone AS ship_name, car_type, trip AS Trip, ship_cost, ship_cost / 2 AS round_cost, COUNT(comment) 
+            AS bill_count
+            FROM dbo.ZTSV_TMS_RoundCost_Special
+            WHERE (send_date BETWEEN '${stDate}' AND '${enDate}') AND (messenger_code = '${mess_code}')
+            GROUP BY send_date, messenger_code, Code_Zone, Zone, car_type, trip, ship_cost, ship_cost / 2
             )View_RoundCost
             ON
             TMS_RoundCost.clear_date=View_RoundCost.ClearingDate
@@ -205,6 +209,7 @@ const model = {
             when matched then
             update set
             TMS_RoundCost.create_date = GETDATE(),
+            TMS_RoundCost.bill_count =TMS_RoundCost.bill_count+ View_RoundCost.bill_count,
             TMS_RoundCost.rate_cost = View_RoundCost.ship_cost,
             TMS_RoundCost.round_cost = View_RoundCost.round_cost
             when not matched then
@@ -276,9 +281,11 @@ const model = {
             sql_query.push(`MERGE INTO
             TMS_RoundCost
             USING
-            (SELECT TOP (100) PERCENT send_date AS ClearingDate, messenger_code AS MessengerID, Code_Zone AS ship_code, Zone AS ship_name, car_type, trip AS Trip, ship_cost, ship_cost/2 AS round_cost
+            (SELECT TOP (100) PERCENT send_date AS ClearingDate, messenger_code AS MessengerID, Code_Zone AS ship_code, Zone AS ship_name, car_type, trip AS Trip, ship_cost, ship_cost / 2 AS round_cost, COUNT(comment) 
+            AS bill_count
             FROM dbo.ZTSV_TMS_RoundCost_Special
             WHERE (send_date BETWEEN '${stDate}' AND '${enDate}') AND (shipment_staff_1 + shipment_staff_2 + shipment_staff_3 LIKE '%${mess_code}%')
+            GROUP BY send_date, messenger_code, Code_Zone, Zone, car_type, trip, ship_cost, ship_cost / 2
             )View_RoundCost
             ON
             TMS_RoundCost.clear_date=View_RoundCost.ClearingDate
@@ -289,6 +296,7 @@ const model = {
             when matched then
             update set
             TMS_RoundCost.create_date = GETDATE(),
+            TMS_RoundCost.bill_count =TMS_RoundCost.bill_count+ View_RoundCost.bill_count,
             TMS_RoundCost.rate_cost = View_RoundCost.ship_cost,
             TMS_RoundCost.round_cost = View_RoundCost.round_cost
             when not matched then
@@ -313,7 +321,7 @@ const model = {
             View_RoundCost.round_cost,
             View_RoundCost.ship_cost);`)
         }
-        sql_select.push(`SELECT TOP (100) PERCENT dbo.TMS_RoundCost.mess_code, dbo.Messenger.MessName AS mess_name, CONVERT(varchar(10), dbo.TMS_RoundCost.clear_date, 120) AS clear_date, CONVERT(varchar(10), 
+        sql_select.push(`SELECT TOP (100) PERCENT dbo.TMS_RoundCost.mess_code, dbo.Messenger.MessName AS mess_name, CONVERT(varchar(10), dbo.TMS_RoundCost.clear_date, 120) AS ClearingDate, CONVERT(varchar(10), 
                 dbo.TMS_RoundCost.create_date, 120) AS create_date, dbo.TMS_RoundCost.car_type, dbo.TMS_RoundCost.trip AS Trip, dbo.TMS_RoundCost.bill_count, dbo.TMS_RoundCost.bill_cost, dbo.TMS_RoundCost.rate_cost, 
                 dbo.TMS_RoundCost.round_cost, dbo.TMS_RoundCost.oil_cost, dbo.TMS_RoundCost.ship_code, dbo.TMS_RoundCost.ship_name
                 FROM dbo.TMS_RoundCost INNER JOIN
