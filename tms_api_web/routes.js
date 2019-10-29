@@ -482,6 +482,11 @@ router.get("/get-daily-costmess-MCV/:date&:id&:trip", (req, resp) => {
 router.get("/get-daily-costmess-MDL/:date&:id&:type&:trip", (req, resp) => {
     TMS_costRound.model.get_daily_costmess_MDL(req.params.date, req.params.id, req.params.type, req.params.trip, (res_data) => resp.json(res_data))
 })
+
+router.get("/get-specail-costmess-MDL/:date&:id&:type&:trip", (req, resp) => {
+    TMS_costRound.model.get_specail_costmess_MDL(req.params.date, req.params.id, req.params.type, req.params.trip, (res_data) => resp.json(res_data))
+})
+
 router.get("/get-ship-code/", (req, resp) => {
     TBL_Report.model.get_ship_code((res_data) => {
         resp.json(res_data)

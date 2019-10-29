@@ -64,6 +64,22 @@ const model = {
         res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
         callback(res_data)
     },
+    async get_specail_costmess_MDL(date, id, type, trip, callback) {
+        name_function = "get_specail_costmess_MDL"
+        name_table = "TMS_jar_daily_dealer"
+        if (trip === 'all') {
+            sql_query = " SELECT * " +
+            " FROM [Data_TransportApp].[dbo].[ZTSV_TMS_RoundCost_Special] " +
+            " where messenger_code = '" + id + "' and send_date = '" + date + "' and car_type like '" + type + "%'"
+        } else {
+            sql_query = " SELECT * " +
+            " FROM [Data_TransportApp].[dbo].[ZTSV_TMS_RoundCost_Special] " +
+            " where messenger_code = '" + id + "' and send_date = '" + date + "' and car_type like '" + type + "%' and trip = " + trip 
+        }
+        console.log("object", sql_query)
+        res_data = await select_query(dbConnectData_TransportApp, name_function, name_table, sql_query)
+        callback(res_data)
+    },
     async get_tms_plan(start_date, end_date, express, callback) {
         name_function = "get_tms_plan"
         name_table = "TMS_jar_TMSPlan"
